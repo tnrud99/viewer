@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Reaction Video Viewer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #ff5555;
+        }
+        .video-container {
+            position: relative;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .main-video-box {
+            width: 100%;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .main-video-box video {
+            width: 100%;
+            height: auto;
+            background-color: #000;
+        }
+        /* 반응 유튜브 컨테이너 스타일 개선 */
+        #reaction-youtube-container {
+            width: 100%;
+            min-height: 540px; /* 1.5배 높이 증가 (기본 360px의 1.5배) */
+            background-color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #reaction-youtube-container iframe {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 540px; /* iframe도 동일한 높이 적용 */
+            object-fit: contain; /* 비율 유지하면서 최대한 채우기 */
+        }
+        .video-title {
+            padding: 10px;
+            font-weight: bold;
+            background-color: #333;
+        }
+        /* Overlay styles */
+        #youtube-container {
+            position: absolute;
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 10;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            width: 50%; /* Default value - Changed from 20% to 50% */
+            transition: all 0.3s ease;
+            /* Maintain aspect ratio */
+            aspect-ratio: 16 / 9;
+        }
+        #youtube-container iframe {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        #youtube-container.overlay-top-right {
+            top: 20px;
+            right: 20px;
+        }
+        #youtube-container.overlay-top-left {
+            top: 20px;
+            left: 20px;
+        }
+        #youtube-container.overlay-bottom-right {
+            bottom: 20px;
+            right: 20px;
+        }
+        #youtube-container.overlay-bottom-left {
+            bottom: 20px;
+            left: 20px;
+        }
+        .controls {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-group input[type="text"],
+        .input-group input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            background-color: #333;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 4px;
+        }
+        .source-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .source-selector label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .source-selector input[type="radio"] {
+            margin-right: 5px;
+        }
+        .source-container {
+            margin-bottom: 15px;
+        }
+        /* 초기 상태 변경: 파일 컨테이너 숨기고 유튜브 컨테이너 표시 */
+        #file-source-container {
+            display: none;
+        }
+        #youtube-source-container {
+            display: block;
+        }
+        .overlay-controls {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .overlay-controls h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .overlay-group {
+            margin-bottom: 15px;
+        }
+        .overlay-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .overlay-group select {
+            width: 100%;
+            padding: 8px;
+            background-color: #333;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 4px;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .slider-container input[type="range"] {
+            flex-grow: 1;
+        }
+        .slider-value {
+            min-width: 40px;
+            text-align: right;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #5a5a5a;
+        }
+        button:disabled {
+            background-color: #3a3a3a;
+            cursor: not-allowed;
+        }
+        button.primary {
+            background-color: #ff5555;
+        }
+        button.primary:hover {
+            background-color: #ff7777;
+        }
+        button.secondary {
+            background-color: #5555ff;
+        }
+        button.secondary:hover {
+            background-color: #7777ff;
+        }
+        .status {
+            margin-top: 15px;
+            font-style: italic;
+        }
+        .message {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .message.error {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #ff5555;
+            display: block;
+        }
+        .message.success {
+            background-color: rgba(0, 255, 0, 0.2);
+            color: #55ff55;
+            display: block;
+        }
+        .playback-controls {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .volume-controls {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .volume-controls h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .debug-info {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #3a3a3a;
+            font-size: 0.9em;
+            color: #888;
+        }
+        @media (max-width: 768px) {
+            .button-group {
+                flex-wrap: wrap;
+            }
+            /* 모바일 환경에서도 반응 유튜브 컨테이너 높이 유지 */
+            #reaction-youtube-container, 
+            #reaction-youtube-container iframe {
+                min-height: 400px; /* 모바일에서는 약간 줄이기 */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>YouTube Reaction Video Viewer</h1>
+            <p>Watch synchronized reaction videos and YouTube videos without copyright issues</p>
+        </header>
+
+        <div class="controls">
+            <div class="input-group">
+                <label for="timestamp-url">Timestamp File URL:</label>
+                <input type="text" id="timestamp-url" value="https://virtuedit.com/wp-content/uploads/2025/07/testtimestamp.json" placeholder="https://example.com/timestamp.json">
+            </div>
+            
+            <div class="source-selector">
+                <label>
+                    <input type="radio" name="reaction-source" value="file"> Local File
+                </label>
+                <label>
+                    <input type="radio" name="reaction-source" value="youtube" checked> YouTube URL
+                </label>
+            </div>
+            
+            <div id="file-source-container" class="source-container">
+                <div class="input-group">
+                    <label for="reaction-video">Select Reaction Video:</label>
+                    <input type="file" id="reaction-video" accept="video/*">
+                </div>
+            </div>
+            
+            <div id="youtube-source-container" class="source-container">
+                <div class="input-group">
+                    <label for="reaction-url">Reaction Video YouTube URL:</label>
+                    <input type="text" id="reaction-url" value="https://www.youtube.com/watch?v=niYgb0IfP4U" placeholder="https://www.youtube.com/watch?v=...">
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="youtube-url">Original YouTube URL:</label>
+                <input type="text" id="youtube-url" value="https://www.youtube.com/watch?v=AbZH7XWDW_k" placeholder="https://www.youtube.com/watch?v=...">
+            </div>
+            
+            <div class="button-group">
+                <button id="load-btn" class="primary">Load</button>
+            </div>
+        </div>
+
+        <div class="overlay-controls">
+            <h3>Overlay Settings</h3>
+            <div class="overlay-group">
+                <label for="overlay-position">Overlay Position:</label>
+                <select id="overlay-position">
+                    <option value="top-right">Top Right</option>
+                    <option value="top-left">Top Left</option>
+                    <option value="bottom-right">Bottom Right</option>
+                    <option value="bottom-left">Bottom Left</option>
+                </select>
+            </div>
+            <div class="overlay-group">
+                <label for="overlay-size">Overlay Size:</label>
+                <div class="slider-container">
+                    <input type="range" id="overlay-size" min="10" max="50" value="50">
+                    <span id="overlay-size-value" class="slider-value">50%</span>
+                </div>
+            </div>
+            <div class="button-group">
+                <button id="toggle-overlay" class="secondary" disabled>Hide Overlay</button>
+            </div>
+        </div>
+
+        <div class="video-container">
+            <div class="main-video-box">
+                <div class="video-title">Reaction Video</div>
+                <video id="reaction-player" controls style="display: none;"></video>
+                <div id="reaction-youtube-container" style="display: block;"></div>
+            </div>
+            
+            <div id="youtube-container" class="overlay-top-right">
+                <div id="youtube-player"></div>
+            </div>
+        </div>
+
+        <div class="playback-controls">
+            <div class="button-group">
+                <button id="play-btn" disabled>Play</button>
+                <button id="pause-btn" disabled>Pause</button>
+                <button id="stop-btn" disabled>Stop</button>
+                <button id="restart-btn" disabled>Restart</button>
+            </div>
+            <div class="status" id="status">Status: Waiting</div>
+            <div class="message" id="message"></div>
+        </div>
+
+        <div class="volume-controls">
+            <h3>Volume Settings</h3>
+            <div class="overlay-group">
+                <label for="youtube-volume">Original Video Volume:</label>
+                <div class="slider-container">
+                    <input type="range" id="youtube-volume" min="0" max="100" value="100">
+                    <span id="youtube-volume-value" class="slider-value">100%</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="debug-info">
+            <h3>Debug Information</h3>
+            <div id="debug-content">No debug information available yet.</div>
+        </div>
+
+        <footer>
+            <p>This application is designed to watch reaction videos without copyright infringement.</p>
+            <p>Enhanced Version - Improved YouTube-YouTube synchronization with 50% overlay size and 1.5x reaction video height</p>
+        </footer>
+    </div>
+
+    <!-- YouTube API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+    // YouTube Reaction Video Viewer - WordPress Compatible Version
+    // Fixed version with proper loading functionality
+
+    // Global variables
+    let youtubePlayer = null;
+    let reactionPlayer = null;
+    let timestampData = null;
+    let syncInterval = null;
+    let isPlaying = false;
+    let youtubeReady = false;
+    let overlayPosition = 'top-right';
+    let overlaySize = 50;
+    let reactionSource = 'youtube';
+    let reactionYoutubePlayer = null;
+    let isOverlayVisible = true;
+    let youtubeVolume = 100;
+
+    // Critical timestamp variables
+    let youtubeStarted = false;
+    let firstSyncPoint = null;
+    let waitingForFirstSync = false;
+    let youtubePlayerCreated = false;
+    let youtubeVideoId = null;
+    let youtubeFirstPlayTime = null;
+    let lastProcessedPauseTime = -1;
+    let lastProcessedPlayTime = -1;
+    let youtubePaused = false;
+    let lastSyncTime = 0;
+    let debugInfo = [];
+
+    // Synchronization variables
+    let pauseEvents = [];
+    let playEvents = [];
+    let currentSyncPoint = null;
+    let nextPauseTime = null;
+    let nextPlayTime = null;
+    let syncMode = 'precise';
+    let missedEventCheckEnabled = true;
+    let eventDetectionWindow = 0.5;
+    let lastReactionTime = 0;
+
+    // YouTube-YouTube synchronization variables
+    let youtubeYoutubeMode = true;
+    let reactionYoutubeReady = false;
+    let reactionYoutubeCurrentTime = 0;
+    let lastReactionYoutubeTime = 0;
+    let youtubeYoutubeSyncInterval = null;
+    let reactionYoutubeStateChangeTime = 0;
+    let youtubeYoutubeSyncEnabled = true;
+    let youtubeYoutubeSyncFrequency = 200;
+    let youtubeYoutubeSyncThreshold = 0.3;
+    let reactionYoutubeState = -1;
+
+    // YouTube API callback
+    function onYouTubeIframeAPIReady() {
+        youtubeReady = true;
+        document.getElementById('status').textContent = 'Status: YouTube API Ready';
+        console.log("YouTube API is ready");
+        
+        // Auto load content when API is ready
+        setTimeout(autoLoadContent, 1000);
+    }
+
+    // Auto load function
+    async function autoLoadContent() {
+        try {
+            // Load timestamp data
+            const timestampUrl = document.getElementById('timestamp-url').value;
+            if (timestampUrl) {
+                await loadTimestampFromUrl(timestampUrl);
+            }
+            
+            // Load videos
+            loadVideos();
+            
+            showMessage('Content loaded successfully!', 'success');
+        } catch (error) {
+            console.error('Auto load failed:', error);
+            showMessage('Auto load failed. Please load manually.', 'error');
+        }
+    }
+
+    // Load timestamp from URL
+    async function loadTimestampFromUrl(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            
+            timestampData = data;
+            
+            // Pre-process events
+            if (timestampData.sync_points && timestampData.sync_points.length > 0) {
+                pauseEvents = [];
+                playEvents = [];
+                debugInfo = [];
+                
+                timestampData.sync_points.forEach(point => {
+                    if (point.action === 'pause') {
+                        pauseEvents.push(point);
+                    } else if (point.action === 'play') {
+                        playEvents.push(point);
+                    }
+                });
+                
+                // Sort by time
+                pauseEvents.sort((a, b) => a.reaction_time - b.reaction_time);
+                playEvents.sort((a, b) => a.reaction_time - b.reaction_time);
+                
+                firstSyncPoint = timestampData.sync_points.find(point => point.action === 'play');
+                
+                console.log(`Loaded ${timestampData.sync_points.length} sync points`);
+                console.log(`Pause events: ${pauseEvents.length}, Play events: ${playEvents.length}`);
+                
+                updateDebugInfo(`Timestamp loaded: ${timestampData.sync_points.length} sync points`);
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Failed to load timestamp from URL:', error);
+            throw error;
+        }
+    }
+
+    // DOM loaded event
+    document.addEventListener('DOMContentLoaded', function() {
+        // Element references
+        const timestampUrlInput = document.getElementById('timestamp-url');
+        const reactionVideoInput = document.getElementById('reaction-video');
+        const reactionUrlInput = document.getElementById('reaction-url');
+        const youtubeUrlInput = document.getElementById('youtube-url');
+        const loadBtn = document.getElementById('load-btn');
+        const playBtn = document.getElementById('play-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const statusElement = document.getElementById('status');
+        const messageElement = document.getElementById('message');
+        const overlayPositionSelect = document.getElementById('overlay-position');
+        const overlaySizeSlider = document.getElementById('overlay-size');
+        const overlaySizeValue = document.getElementById('overlay-size-value');
+        const sourceTypeRadios = document.querySelectorAll('input[name="reaction-source"]');
+        const toggleOverlayBtn = document.getElementById('toggle-overlay');
+        const youtubeVolumeSlider = document.getElementById('youtube-volume');
+        const youtubeVolumeValue = document.getElementById('youtube-volume-value');
+        const debugContentElement = document.getElementById('debug-content');
+        
+        reactionPlayer = document.getElementById('reaction-player');
+        const reactionYoutubeContainer = document.getElementById('reaction-youtube-container');
+        const youtubeContainer = document.getElementById('youtube-container');
+        
+        // Initially hide YouTube container until first sync point
+        youtubeContainer.style.display = 'none';
+
+        // Source type change event
+        sourceTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                reactionSource = this.value;
+                if (reactionSource === 'file') {
+                    document.getElementById('file-source-container').style.display = 'block';
+                    document.getElementById('youtube-source-container').style.display = 'none';
+                    reactionPlayer.style.display = 'block';
+                    reactionYoutubeContainer.style.display = 'none';
+                    youtubeYoutubeMode = false;
+                } else {
+                    document.getElementById('file-source-container').style.display = 'none';
+                    document.getElementById('youtube-source-container').style.display = 'block';
+                    reactionPlayer.style.display = 'none';
+                    reactionYoutubeContainer.style.display = 'block';
+                    youtubeYoutubeMode = true;
+                }
+            });
+        });
+
+        // Overlay position change event
+        overlayPositionSelect.addEventListener('change', function() {
+            overlayPosition = this.value;
+            updateOverlayPosition();
+        });
+
+        // Overlay size change event
+        overlaySizeSlider.addEventListener('input', function() {
+            overlaySize = parseInt(this.value);
+            overlaySizeValue.textContent = overlaySize + '%';
+            updateOverlaySize();
+        });
+        
+        // Overlay toggle button event
+        toggleOverlayBtn.addEventListener('click', function() {
+            isOverlayVisible = !isOverlayVisible;
+            updateOverlayVisibility();
+            this.textContent = isOverlayVisible ? 'Hide Overlay' : 'Show Overlay';
+        });
+        
+        // YouTube volume control event
+        youtubeVolumeSlider.addEventListener('input', function() {
+            youtubeVolume = parseInt(this.value);
+            youtubeVolumeValue.textContent = youtubeVolume + '%';
+            updateYoutubeVolume();
+        });
+
+        // Reaction player setup (HTML5 video)
+        reactionPlayer.addEventListener('loadedmetadata', function() {
+            statusElement.textContent = 'Status: Reaction Video Loaded';
+        });
+        
+        // Reaction video ended event (HTML5 video)
+        reactionPlayer.addEventListener('ended', function() {
+            stopSynchronizedPlayback();
+        });
+        
+        // Reaction video timeupdate event (HTML5 video) - ONLY for file mode sync
+        reactionPlayer.addEventListener('timeupdate', function() {
+            if (!youtubeYoutubeMode) {
+                const currentTime = reactionPlayer.currentTime;
+                handleSynchronization(currentTime);
+            }
+        });
+
+        // Load button event
+        loadBtn.addEventListener('click', async function() {
+            try {
+                // First load timestamp
+                const timestampUrl = document.getElementById('timestamp-url').value;
+                if (timestampUrl) {
+                    await loadTimestampFromUrl(timestampUrl);
+                }
+                
+                // Then load videos
+                loadVideos();
+            } catch (error) {
+                console.error('Load failed:', error);
+                showMessage('Failed to load content. Please check the URLs.', 'error');
+            }
+        });
+
+        // Playback control events
+        playBtn.addEventListener('click', startSynchronizedPlayback);
+        pauseBtn.addEventListener('click', pauseSynchronizedPlayback);
+        stopBtn.addEventListener('click', stopSynchronizedPlayback);
+        restartBtn.addEventListener('click', restartSynchronizedPlayback);
+    });
+
+    // Load videos function
+    function loadVideos() {
+        if (!youtubeReady) {
+            showMessage('YouTube API is not ready yet. Please try again in a moment.', 'error');
+            return;
+        }
+
+        if (!timestampData) {
+            showMessage('Please load timestamp file first.', 'error');
+            return;
+        }
+
+        const reactionUrl = document.getElementById('reaction-url').value;
+        const youtubeUrl = document.getElementById('youtube-url').value;
+
+        if (reactionSource === 'youtube' && !reactionUrl) {
+            showMessage('Please enter reaction video YouTube URL.', 'error');
+            return;
+        }
+
+        if (!youtubeUrl) {
+            showMessage('Please enter original YouTube URL.', 'error');
+            return;
+        }
+
+        // Load reaction video
+        if (reactionSource === 'youtube') {
+            loadReactionYouTube(reactionUrl);
+        }
+
+        // Load original YouTube video
+        loadOriginalYouTube(youtubeUrl);
+
+        showMessage('Loading videos...', 'success');
+    }
+
+    // Load reaction YouTube video
+    function loadReactionYouTube(url) {
+        const videoId = extractYouTubeVideoId(url);
+        if (!videoId) {
+            showMessage('Invalid YouTube URL.', 'error');
+            return;
+        }
+
+        // Destroy existing player
+        if (reactionYoutubePlayer) {
+            reactionYoutubePlayer.destroy();
+        }
+
+        reactionYoutubePlayer = new YT.Player('reaction-youtube-container', {
+            height: '540',
+            width: '100%',
+            videoId: videoId,
+            playerVars: {
+                'autoplay': 0,
+                'controls': 1,
+                'rel': 0,
+                'modestbranding': 1,
+                'fs': 1,
+                'cc_load_policy': 0,
+                'iv_load_policy': 3,
+                'autohide': 0
+            },
+            events: {
+                'onReady': onReactionYouTubePlayerReady,
+                'onStateChange': onReactionYouTubePlayerStateChange
+            }
+        });
+    }
+
+    // Load original YouTube video
+    function loadOriginalYouTube(url) {
+        youtubeVideoId = extractYouTubeVideoId(url);
+        if (!youtubeVideoId) {
+            showMessage('Invalid YouTube URL.', 'error');
+            return;
+        }
+
+        // Don't create the player immediately - wait for first sync point
+        youtubePlayerCreated = false;
+        console.log("YouTube video ID stored for delayed creation:", youtubeVideoId);
+    }
+
+    // Reaction YouTube player ready
+    function onReactionYouTubePlayerReady(event) {
+        reactionYoutubeReady = true;
+        console.log("Reaction YouTube player is ready");
+        
+        if (youtubeYoutubeMode) {
+            enableControls(true);
+            document.getElementById('status').textContent = 'Status: Ready - Press play to start';
+        }
+    }
+
+    // Reaction YouTube player state change
+    function onReactionYouTubePlayerStateChange(event) {
+        reactionYoutubeState = event.data;
+        reactionYoutubeStateChangeTime = Date.now();
+        
+        console.log("Reaction YouTube state changed:", event.data);
+        
+        if (youtubeYoutubeMode && reactionYoutubeReady) {
+            if (event.data === YT.PlayerState.PLAYING) {
+                if (!youtubeYoutubeSyncInterval) {
+                    startYouTubeYouTubeSynchronization();
+                }
+                updateButtonStates(true);
+            } else if (event.data === YT.PlayerState.PAUSED) {
+                updateButtonStates(false);
+            } else if (event.data === YT.PlayerState.ENDED) {
+                stopSynchronizedPlayback();
+            }
+        }
+    }
+
+    // Start YouTube-YouTube synchronization
+    function startYouTubeYouTubeSynchronization() {
+        if (youtubeYoutubeSyncInterval) {
+            clearInterval(youtubeYoutubeSyncInterval);
+        }
+        
+        youtubeYoutubeSyncInterval = setInterval(function() {
+            if (reactionYoutubePlayer && reactionYoutubeReady && 
+                reactionYoutubePlayer.getPlayerState() === YT.PlayerState.PLAYING) {
+                
+                const currentTime = reactionYoutubePlayer.getCurrentTime();
+                handleSynchronization(currentTime);
+            }
+        }, youtubeYoutubeSyncFrequency);
+        
+        console.log("YouTube-YouTube synchronization started");
+    }
+
+    // Handle synchronization
+    function handleSynchronization(reactionTime) {
+        if (!timestampData || !timestampData.sync_points) return;
+        
+        // Check for pause events
+        const pauseEvent = pauseEvents.find(event => 
+            Math.abs(event.reaction_time - reactionTime) <= eventDetectionWindow &&
+            event.reaction_time > lastProcessedPauseTime
+        );
+        
+        if (pauseEvent) {
+            lastProcessedPauseTime = pauseEvent.reaction_time;
+            
+            if (!youtubePlayerCreated && firstSyncPoint && pauseEvent === firstSyncPoint) {
+                createYouTubePlayer();
+            }
+            
+            if (youtubePlayer && youtubePlayerCreated) {
+                youtubePlayer.seekTo(pauseEvent.youtube_time, true);
+                youtubePlayer.pauseVideo();
+                youtubePaused = true;
+                
+                updateDebugInfo(`Pause: reaction ${pauseEvent.reaction_time.toFixed(2)}s → YouTube ${pauseEvent.youtube_time.toFixed(2)}s`);
+            }
+        }
+        
+        // Check for play events
+        const playEvent = playEvents.find(event => 
+            Math.abs(event.reaction_time - reactionTime) <= eventDetectionWindow &&
+            event.reaction_time > lastProcessedPlayTime
+        );
+        
+        if (playEvent) {
+            lastProcessedPlayTime = playEvent.reaction_time;
+            
+            if (!youtubePlayerCreated && playEvent === firstSyncPoint) {
+                createYouTubePlayer();
+            }
+            
+            if (youtubePlayer && youtubePlayerCreated) {
+                youtubePlayer.seekTo(playEvent.youtube_time, true);
+                youtubePlayer.playVideo();
+                youtubePaused = false;
+                
+                updateDebugInfo(`Play: reaction ${playEvent.reaction_time.toFixed(2)}s → YouTube ${playEvent.youtube_time.toFixed(2)}s`);
+            }
+        }
+    }
+
+    // Create YouTube player (delayed creation)
+    function createYouTubePlayer() {
+        if (youtubePlayerCreated || !youtubeVideoId) return;
+        
+        console.log("Creating YouTube player with video ID:", youtubeVideoId);
+        
+        youtubePlayer = new YT.Player('youtube-player', {
+            height: '100%',
+            width: '100%',
+            videoId: youtubeVideoId,
+            playerVars: {
+                'autoplay': 0,
+                'controls': 1,
+                'rel': 0,
+                'modestbranding': 1,
+                'fs': 0,
+                'cc_load_policy': 0,
+                'iv_load_policy': 3,
+                'autohide': 0
+            },
+            events: {
+                'onReady': onYouTubePlayerReady,
+                'onStateChange': onYouTubePlayerStateChange
+            }
+        });
+        
+        youtubePlayerCreated = true;
+        document.getElementById('youtube-container').style.display = 'block';
+    }
+
+    // YouTube player ready
+    function onYouTubePlayerReady(event) {
+        console.log("YouTube player is ready");
+        updateYoutubeVolume();
+        updateOverlayPosition();
+        updateOverlaySize();
+    }
+
+    // YouTube player state change
+    function onYouTubePlayerStateChange(event) {
+        console.log("YouTube state changed:", event.data);
+    }
+
+    // Playback control functions
+    function startSynchronizedPlayback() {
+        if (youtubeYoutubeMode && reactionYoutubePlayer && reactionYoutubeReady) {
+            reactionYoutubePlayer.playVideo();
+            isPlaying = true;
+            document.getElementById('status').textContent = 'Status: Playing';
+        } else if (!youtubeYoutubeMode && reactionPlayer) {
+            reactionPlayer.play();
+            isPlaying = true;
+            document.getElementById('status').textContent = 'Status: Playing';
+        }
+    }
+
+    function pauseSynchronizedPlayback() {
+        if (youtubeYoutubeMode && reactionYoutubePlayer && reactionYoutubeReady) {
+            reactionYoutubePlayer.pauseVideo();
+        } else if (!youtubeYoutubeMode && reactionPlayer) {
+            reactionPlayer.pause();
+        }
+        
+        if (youtubePlayer && youtubePlayerCreated) {
+            youtubePlayer.pauseVideo();
+        }
+        
+        isPlaying = false;
+        updateButtonStates(false);
+        document.getElementById('status').textContent = 'Status: Paused';
+    }
+
+    function stopSynchronizedPlayback() {
+        if (youtubeYoutubeMode && reactionYoutubePlayer && reactionYoutubeReady) {
+            reactionYoutubePlayer.stopVideo();
+        } else if (!youtubeYoutubeMode && reactionPlayer) {
+            reactionPlayer.pause();
+            reactionPlayer.currentTime = 0;
+        }
+        
+        if (youtubePlayer && youtubePlayerCreated) {
+            youtubePlayer.stopVideo();
+        }
+        
+        if (youtubeYoutubeSyncInterval) {
+            clearInterval(youtubeYoutubeSyncInterval);
+            youtubeYoutubeSyncInterval = null;
+        }
+        
+        isPlaying = false;
+        updateButtonStates(false);
+        document.getElementById('status').textContent = 'Status: Stopped';
+        
+        // Reset sync variables
+        lastProcessedPauseTime = -1;
+        lastProcessedPlayTime = -1;
+        youtubeStarted = false;
+        waitingForFirstSync = false;
+    }
+
+    function restartSynchronizedPlayback() {
+        stopSynchronizedPlayback();
+        setTimeout(startSynchronizedPlayback, 500);
+    }
+
+    // Update overlay position
+    function updateOverlayPosition() {
+        const youtubeContainer = document.getElementById('youtube-container');
+        youtubeContainer.className = 'overlay-' + overlayPosition;
+    }
+
+    // Update overlay size
+    function updateOverlaySize() {
+        const youtubeContainer = document.getElementById('youtube-container');
+        youtubeContainer.style.width = overlaySize + '%';
+    }
+
+    // Update overlay visibility
+    function updateOverlayVisibility() {
+        const youtubeContainer = document.getElementById('youtube-container');
+        youtubeContainer.style.display = isOverlayVisible ? 'block' : 'none';
+    }
+
+    // Update YouTube volume
+    function updateYoutubeVolume() {
+        if (youtubePlayer) {
+            youtubePlayer.setVolume(youtubeVolume);
+        }
+    }
+
+    // Extract YouTube video ID from URL
+    function extractYouTubeVideoId(url) {
+        const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[7].length === 11) ? match[7] : null;
+    }
+
+    // Enable/disable controls
+    function enableControls(enabled) {
+        document.getElementById('play-btn').disabled = !enabled;
+        document.getElementById('pause-btn').disabled = !enabled;
+        document.getElementById('stop-btn').disabled = !enabled;
+        document.getElementById('restart-btn').disabled = !enabled;
+        document.getElementById('toggle-overlay').disabled = !enabled;
+    }
+
+    // Update button states
+    function updateButtonStates(playing) {
+        document.getElementById('play-btn').disabled = playing;
+        document.getElementById('pause-btn').disabled = !playing;
+        document.getElementById('stop-btn').disabled = !playing;
+        document.getElementById('restart-btn').disabled = !playing;
+    }
+
+    // Show message
+    function showMessage(text, type) {
+        const messageElement = document.getElementById('message');
+        messageElement.textContent = text;
+        messageElement.className = 'message ' + type;
+        
+        // Auto-hide success messages after 5 seconds
+        if (type === 'success') {
+            setTimeout(function() {
+                if (messageElement.textContent === text) {
+                     messageElement.className = 'message';
+                     messageElement.textContent = '';
+                }
+            }, 5000);
+        }
+    }
+
+    // Update debug info
+    function updateDebugInfo(info) {
+        debugInfo.push(`[${new Date().toLocaleTimeString()}] ${info}`);
+        if (debugInfo.length > 20) {
+            debugInfo.shift();
+        }
+        document.getElementById('debug-content').innerHTML = debugInfo.join('<br>');
+    }
+    </script>
+</body>
+</html>
+
