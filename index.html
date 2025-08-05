@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Reaction Video Maker</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            padding: 40px;
+            border-radius: 12px;
+            background-color: #2a2a2a;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            color: #ff5555;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            color: #cccccc;
+        }
+        .button-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        .button {
+            display: inline-block;
+            padding: 15px 30px;
+            font-size: 1em;
+            font-weight: bold;
+            color: white;
+            background-color: #ff5555;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .button:hover {
+            background-color: #ff7777;
+            transform: translateY(-2px);
+        }
+        .button.secondary {
+            background-color: #5555ff;
+        }
+        .button.secondary:hover {
+            background-color: #7777ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>YouTube Reaction Video Maker</h1>
+        <p>Record your reaction or watch a previously created one.</p>
+        <div class="button-group">
+            <a href="/recorder.html" class="button">Record a Reaction</a>
+            <a href="/viewer.html" class="button secondary">Watch a Reaction</a>
+        </div>
+    </div>
+</body>
+</html>
