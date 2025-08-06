@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VE URL Creator - Enhanced Version</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(255, 85, 85, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 85, 85, 0.3);
+        }
+        h1 {
+            color: #ff5555;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            color: #888;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        .form-section {
+            background: rgba(42, 42, 42, 0.8);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        .form-section h3 {
+            margin-top: 0;
+            color: #ff5555;
+            border-bottom: 2px solid #444;
+            padding-bottom: 15px;
+            font-size: 1.4em;
+        }
+        .input-group {
+            margin-bottom: 25px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ddd;
+            font-size: 1.1em;
+        }
+        .input-group input[type="text"],
+        .input-group input[type="password"],
+        .input-group input[type="email"],
+        .input-group input[type="file"],
+        .input-group select {
+            width: 100%;
+            padding: 15px;
+            box-sizing: border-box;
+            background-color: rgba(51, 51, 51, 0.8);
+            color: white;
+            border: 2px solid #444;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .input-group input[type="text"]:focus,
+        .input-group input[type="password"]:focus,
+        .input-group input[type="email"]:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #ff5555;
+            box-shadow: 0 0 0 3px rgba(255, 85, 85, 0.2);
+            background-color: rgba(51, 51, 51, 1);
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .slider-container input[type="range"] {
+            flex-grow: 1;
+            height: 8px;
+            background: #444;
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #ff5555;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .slider-value {
+            min-width: 60px;
+            text-align: center;
+            font-weight: bold;
+            color: #ff5555;
+            font-size: 1.1em;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+        button {
+            background: linear-gradient(135deg, #ff5555 0%, #ff7777 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: bold;
+            min-width: 120px;
+            box-shadow: 0 4px 8px rgba(255, 85, 85, 0.3);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 85, 85, 0.4);
+        }
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        button.secondary {
+            background: linear-gradient(135deg, #5555ff 0%, #7777ff 100%);
+            box-shadow: 0 4px 8px rgba(85, 85, 255, 0.3);
+        }
+        button.secondary:hover {
+            box-shadow: 0 6px 12px rgba(85, 85, 255, 0.4);
+        }
+        .message {
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            font-weight: bold;
+        }
+        .message.error {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #ff5555;
+            display: block;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+        .message.success {
+            background-color: rgba(0, 255, 0, 0.2);
+            color: #55ff55;
+            display: block;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+        .link-section {
+            background: rgba(42, 42, 42, 0.8);
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 25px;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        .link-section h3 {
+            margin-top: 0;
+            color: #55ff55;
+            text-align: center;
+        }
+        .generated-link {
+            background-color: rgba(51, 51, 51, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+            color: #55ff55;
+            border: 1px solid #444;
+            text-align: center;
+        }
+        .copy-button {
+            background: linear-gradient(135deg, #5555ff 0%, #7777ff 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 10px auto;
+            display: block;
+            transition: all 0.3s ease;
+        }
+        .copy-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(85, 85, 255, 0.3);
+        }
+        .user-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .help-text {
+            font-size: 13px;
+            color: #888;
+            margin-top: 8px;
+            font-style: italic;
+        }
+        .required {
+            color: #ff5555;
+        }
+        .optional {
+            color: #888;
+            font-size: 0.9em;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .button-group {
+                flex-direction: column;
+            }
+            .user-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 VE URL Creator</h1>
+            <p class="subtitle">Create and share synchronized reaction video experiences</p>
+        </header>
+
+        <!-- User Information Section -->
+        <div class="form-section">
+            <h3>👤 User Information</h3>
+            
+            <div class="user-info">
+                <div class="input-group">
+                    <label for="username">Nickname <span class="required">*</span></label>
+                    <input type="text" id="username" placeholder="Enter your nickname">
+                    <div class="help-text">This will be displayed in your profile</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="password">Password <span class="required">*</span></label>
+                    <input type="password" id="password" placeholder="Enter your password">
+                    <div class="help-text">Minimum 8 characters required</div>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="email">Email <span class="optional">(Optional)</span></label>
+                <input type="email" id="email" placeholder="Enter your email (optional)">
+                <div class="help-text">Only for users who want to manage their content later</div>
+            </div>
+        </div>
+
+        <!-- Video Information Section -->
+        <div class="form-section">
+            <h3>📹 Video Information</h3>
+            
+            <div class="input-group">
+                <label for="reaction-url">Reaction YouTube Video URL <span class="required">*</span></label>
+                <input type="text" id="reaction-url" placeholder="https://www.youtube.com/watch?v=..." value="https://www.youtube.com/watch?v=niYgb0IfP4U">
+                <div class="help-text">Enter the YouTube link for the reaction video</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="original-url">Original YouTube Video URL <span class="required">*</span></label>
+                <input type="text" id="original-url" placeholder="https://www.youtube.com/watch?v=..." value="https://www.youtube.com/watch?v=AbZH7XWDW_k">
+                <div class="help-text">Enter the YouTube link for the original video</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="timestamp-file">Timestamp File <span class="required">*</span></label>
+                <input type="file" id="timestamp-file" accept=".json">
+                <div class="help-text">Select a JSON file containing synchronization information</div>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="form-section">
+            <h3>⚙️ Viewer Settings</h3>
+            
+            <div class="input-group">
+                <label for="overlay-position">Overlay Position</label>
+                <select id="overlay-position">
+                    <option value="top-right">Top Right</option>
+                    <option value="top-left">Top Left</option>
+                    <option value="bottom-right">Bottom Right</option>
+                    <option value="bottom-left">Bottom Left</option>
+                </select>
+                <div class="help-text">Select where the original video will be displayed</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="overlay-size">Overlay Size</label>
+                <div class="slider-container">
+                    <input type="range" id="overlay-size" min="10" max="60" value="50">
+                    <span id="overlay-size-value" class="slider-value">50%</span>
+                </div>
+                <div class="help-text">Adjust the size of the original video (10% - 60%)</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="youtube-volume">Original Video Volume</label>
+                <div class="slider-container">
+                    <input type="range" id="youtube-volume" min="0" max="100" value="100">
+                    <span id="youtube-volume-value" class="slider-value">100%</span>
+                </div>
+                <div class="help-text">Adjust the volume of the original video (0% - 100%)</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="access-control">Access Control</label>
+                <select id="access-control">
+                    <option value="public">Public (Anyone can access)</option>
+                    <option value="private">Private (Password required)</option>
+                </select>
+                <div class="help-text">Set access permissions for the generated link</div>
+            </div>
+            
+            <div class="input-group" id="password-control" style="display: none;">
+                <label for="access-password">Access Password</label>
+                <input type="password" id="access-password" placeholder="Password for link access">
+                <div class="help-text">Password required for private link access</div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="preview-btn" class="secondary">Preview</button>
+            <button id="create-btn" class="primary">Create VE URL</button>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div id="link-section" class="link-section">
+            <h3>✅ VE URL Created Successfully!</h3>
+            <p style="text-align: center; margin-bottom: 20px;">Copy the link below to share with others:</p>
+            <div id="generated-link" class="generated-link"></div>
+            <button id="copy-link-btn" class="copy-button">Copy Link</button>
+            <div id="data-size-info" style="margin-top: 15px; text-align: center; font-size: 14px; color: #888;"></div>
+            <div style="margin-top: 25px; text-align: center;">
+                <p><strong>How to use:</strong></p>
+                <ul style="text-align: left; display: inline-block;">
+                    <li>Click the link to open the synchronized viewer</li>
+                    <li>Reaction video and original video will be automatically synchronized</li>
+                    <li>Use play/pause buttons in the viewer to control playback</li>
+                    <li>Anyone can watch online without additional setup</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const usernameInput = document.getElementById('username');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+        const reactionUrlInput = document.getElementById('reaction-url');
+        const originalUrlInput = document.getElementById('original-url');
+        const timestampFileInput = document.getElementById('timestamp-file');
+        const overlayPositionSelect = document.getElementById('overlay-position');
+        const overlaySizeSlider = document.getElementById('overlay-size');
+        const overlaySizeValue = document.getElementById('overlay-size-value');
+        const youtubeVolumeSlider = document.getElementById('youtube-volume');
+        const youtubeVolumeValue = document.getElementById('youtube-volume-value');
+        const accessControlSelect = document.getElementById('access-control');
+        const passwordControl = document.getElementById('password-control');
+        const accessPasswordInput = document.getElementById('access-password');
+        const previewBtn = document.getElementById('preview-btn');
+        const createBtn = document.getElementById('create-btn');
+        const messageElement = document.getElementById('message');
+        const linkSection = document.getElementById('link-section');
+        const generatedLinkElement = document.getElementById('generated-link');
+        const copyLinkBtn = document.getElementById('copy-link-btn');
+        const dataSizeInfoElement = document.getElementById('data-size-info');
+
+        // Slider event listeners
+        overlaySizeSlider.addEventListener('input', function() {
+            overlaySizeValue.textContent = this.value + '%';
+        });
+
+        youtubeVolumeSlider.addEventListener('input', function() {
+            youtubeVolumeValue.textContent = this.value + '%';
+        });
+
+        // Access control change event
+        accessControlSelect.addEventListener('change', function() {
+            if (this.value === 'private') {
+                passwordControl.style.display = 'block';
+            } else {
+                passwordControl.style.display = 'none';
+            }
+        });
+
+        // YouTube URL validation function
+        function extractYouTubeVideoId(url) {
+            if (!url) return null;
+            const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[7].length === 11) ? match[7] : null;
+        }
+
+        // UTF-8 safe Base64 encoding function
+        function safeBase64Encode(str) {
+            try {
+                return btoa(unescape(encodeURIComponent(str)));
+            } catch (error) {
+                console.error('Base64 encoding error:', error);
+                return btoa(str.replace(/[^\x00-\xFF]/g, '?'));
+            }
+        }
+
+        // Data compression and safe URL encoding
+        function encodeVEUrlData(data) {
+            try {
+                const optimizedData = {
+                    reactionUrl: data.reactionUrl,
+                    originalUrl: data.originalUrl,
+                    timestampData: {
+                        sync_points: data.timestampData.sync_points.map(point => ({
+                            rt: point.reaction_time,
+                            yt: point.youtube_time,
+                            ryt: point.relative_youtube_time,
+                            e: point.event,
+                            yfpt: point.youtube_first_play_time
+                        })),
+                        metadata: data.timestampData.metadata || {}
+                    },
+                    settings: data.settings,
+                    metadata: data.metadata,
+                    userInfo: data.userInfo
+                };
+                
+                const jsonString = JSON.stringify(optimizedData);
+                
+                if (dataSizeInfoElement) {
+                    dataSizeInfoElement.textContent = `Data size: ${jsonString.length} characters (${Math.round(jsonString.length / 1024 * 100) / 100} KB)`;
+                }
+                
+                if (jsonString.length > 15000) {
+                    console.warn('VE URL data is large');
+                    if (dataSizeInfoElement) {
+                        dataSizeInfoElement.style.color = '#ffaa55';
+                    }
+                } else if (dataSizeInfoElement) {
+                    dataSizeInfoElement.style.color = '#888';
+                }
+                
+                const encoded = safeBase64Encode(jsonString);
+                
+                if (encoded.length > 8000) {
+                    throw new Error('VE URL data is too large. Please reduce timestamps or metadata.');
+                }
+                
+                return encoded;
+            } catch (error) {
+                console.error('VE URL data encoding error:', error);
+                throw error;
+            }
+        }
+
+        // Required field validation
+        function validateRequiredFields() {
+            if (!usernameInput.value.trim()) {
+                showMessage('Please enter your nickname.', 'error');
+                return false;
+            }
+            if (!passwordInput.value.trim()) {
+                showMessage('Please enter your password.', 'error');
+                return false;
+            }
+            if (passwordInput.value.length < 8) {
+                showMessage('Password must be at least 8 characters long.', 'error');
+                return false;
+            }
+
+            const reactionUrl = reactionUrlInput.value.trim();
+            if (!reactionUrl) {
+                showMessage('Please enter the reaction video URL.', 'error');
+                return false;
+            }
+            if (!extractYouTubeVideoId(reactionUrl)) {
+                showMessage('Please enter a valid reaction video YouTube URL.', 'error');
+                return false;
+            }
+
+            const originalUrl = originalUrlInput.value.trim();
+            if (!originalUrl) {
+                showMessage('Please enter the original video URL.', 'error');
+                return false;
+            }
+            if (!extractYouTubeVideoId(originalUrl)) {
+                showMessage('Please enter a valid original video YouTube URL.', 'error');
+                return false;
+            }
+
+            if (!timestampFileInput.files[0]) {
+                showMessage('Please select a timestamp file.', 'error');
+                return false;
+            }
+
+            if (accessControlSelect.value === 'private' && !accessPasswordInput.value.trim()) {
+                showMessage('Please enter an access password for private links.', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Message display function
+        function showMessage(text, type) {
+            messageElement.textContent = text;
+            messageElement.className = 'message ' + type;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (messageElement.textContent === text) {
+                        messageElement.className = 'message';
+                        messageElement.textContent = '';
+                    }
+                }, 5000);
+            }
+        }
+
+        // VE URL creation function
+        async function createVEUrl() {
+            if (!validateRequiredFields()) {
+                return;
+            }
+
+            const timestampFile = timestampFileInput.files[0];
+            
+            // Read timestamp file
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const timestampData = JSON.parse(e.target.result);
+                    
+                    // VE URL data structure
+                    const veUrlData = {
+                        reactionUrl: reactionUrlInput.value.trim(),
+                        originalUrl: originalUrlInput.value.trim(),
+                        timestampData: timestampData,
+                        settings: {
+                            overlayPosition: overlayPositionSelect.value,
+                            overlaySize: parseInt(overlaySizeSlider.value),
+                            youtubeVolume: parseInt(youtubeVolumeSlider.value)
+                        },
+                        metadata: {
+                            title: 'Synchronized Reaction Video',
+                            description: 'Reaction video synchronized with original video',
+                            createdAt: new Date().toISOString()
+                        },
+                        userInfo: {
+                            username: usernameInput.value.trim(),
+                            email: emailInput.value.trim() || null
+                        },
+                        accessControl: {
+                            isPublic: accessControlSelect.value === 'public',
+                            password: accessControlSelect.value === 'private' ? accessPasswordInput.value.trim() : null
+                        }
+                    };
+
+                    // Show debug info
+                    console.log('📤 Sending data to server:', veUrlData);
+                    showMessage('🔄 Uploading data to server...', 'success');
+
+                    // Try server upload
+                    try {
+                        const response = await fetch('/api/ve-urls/create', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(veUrlData)
+                        });
+
+                        console.log('📥 Server response status:', response.status);
+                        console.log('📥 Server response headers:', response.headers);
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            console.log('✅ Server response data:', result);
+                            
+                            const veUrl = result.ve_url.full_url;
+                            generatedLinkElement.textContent = veUrl;
+                            linkSection.style.display = 'block';
+                            showMessage('✅ VE URL created successfully on server!', 'success');
+                            
+                            // Show server info
+                            dataSizeInfoElement.innerHTML = `
+                                <div style="margin-top: 10px; padding: 10px; background: rgba(0,255,0,0.1); border-radius: 5px;">
+                                    <strong>✅ Server Upload Successful!</strong><br>
+                                    • User: ${veUrlData.userInfo.username}<br>
+                                    • Email: ${veUrlData.userInfo.email || 'Not provided'}<br>
+                                    • Reaction URL: ${veUrlData.reactionUrl.substring(0, 50)}...<br>
+                                    • Original URL: ${veUrlData.originalUrl.substring(0, 50)}...<br>
+                                    • Timestamp points: ${veUrlData.timestampData.sync_points.length}<br>
+                                    • Server ID: ${result.ve_url.ve_id}<br>
+                                    • Created at: ${new Date().toLocaleString()}
+                                </div>
+                            `;
+                        } else {
+                            const errorText = await response.text();
+                            console.error('❌ Server error response:', errorText);
+                            throw new Error(`Server error: ${response.status} - ${errorText}`);
+                        }
+                    } catch (error) {
+                        console.error('❌ Server upload error:', error);
+                        showMessage('⚠️ Server upload failed, using local mode...', 'error');
+                        // Fallback to local mode
+                        createLocalVEUrl(veUrlData);
+                    }
+                } catch (error) {
+                    showMessage('Error reading timestamp file: ' + error.message, 'error');
+                }
+            };
+            reader.onerror = function() {
+                showMessage('Error reading file.', 'error');
+            };
+            reader.readAsText(timestampFile);
+        }
+
+        // Local VE URL creation
+        function createLocalVEUrl(veUrlData) {
+            try {
+                const encodedData = encodeVEUrlData(veUrlData);
+                const veUrl = `${window.location.origin}/viewer.html?ve=${encodedData}`;
+                
+                generatedLinkElement.textContent = veUrl;
+                linkSection.style.display = 'block';
+                
+                showMessage('🔄 VE URL created in local mode!', 'success');
+                
+                // Show local mode info
+                dataSizeInfoElement.innerHTML = `
+                    <div style="margin-top: 10px; padding: 10px; background: rgba(255,165,0,0.1); border-radius: 5px;">
+                        <strong>🔄 Local Mode (Server Unavailable)</strong><br>
+                        • User: ${veUrlData.userInfo.username}<br>
+                        • Email: ${veUrlData.userInfo.email || 'Not provided'}<br>
+                        • Data encoded in URL parameter<br>
+                        • Works offline but not shareable<br>
+                        • Data size: ${encodedData.length} characters
+                    </div>
+                `;
+            } catch (error) {
+                if (error.message.includes('too large')) {
+                    showMessage('Timestamp data is too large. Please reduce timestamps or metadata.', 'error');
+                } else {
+                    showMessage('VE URL creation error: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // Event listeners
+        createBtn.addEventListener('click', createVEUrl);
+
+        // Copy link button
+        copyLinkBtn.addEventListener('click', function() {
+            const linkText = generatedLinkElement.textContent;
+            navigator.clipboard.writeText(linkText).then(() => {
+                showMessage('Link copied to clipboard!', 'success');
+            }).catch(() => {
+                showMessage('Failed to copy link. Please copy manually.', 'error');
+            });
+        });
+
+        // Preview button (placeholder for future feature)
+        previewBtn.addEventListener('click', function() {
+            showMessage('Preview feature is under development.', 'error');
+        });
+    </script>
+</body>
+</html> 

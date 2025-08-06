@@ -8,32 +8,66 @@
       "youtube_first_play_time": 0.0
     },
     {
-      "reaction_time": 10.5,
-      "youtube_time": 10.5,
-      "relative_youtube_time": 10.5,
+      "reaction_time": 5.2,
+      "youtube_time": 5.2,
+      "relative_youtube_time": 5.2,
       "event": "youtube_pause"
     },
     {
-      "reaction_time": 15.2,
-      "youtube_time": 15.2,
-      "relative_youtube_time": 15.2,
+      "reaction_time": 8.7,
+      "youtube_time": 8.7,
+      "relative_youtube_time": 8.7,
       "event": "youtube_play"
     },
     {
-      "reaction_time": 30.0,
-      "youtube_time": 30.0,
-      "relative_youtube_time": 30.0,
+      "reaction_time": 15.3,
+      "youtube_time": 15.3,
+      "relative_youtube_time": 15.3,
       "event": "youtube_pause"
     },
     {
-      "reaction_time": 35.5,
-      "youtube_time": 35.5,
-      "relative_youtube_time": 35.5,
+      "reaction_time": 22.1,
+      "youtube_time": 22.1,
+      "relative_youtube_time": 22.1,
       "event": "youtube_play"
+    },
+    {
+      "reaction_time": 30.5,
+      "youtube_time": 30.5,
+      "relative_youtube_time": 30.5,
+      "event": "youtube_pause"
+    },
+    {
+      "reaction_time": 35.8,
+      "youtube_time": 35.8,
+      "relative_youtube_time": 35.8,
+      "event": "youtube_play"
+    },
+    {
+      "reaction_time": 45.2,
+      "youtube_time": 45.2,
+      "relative_youtube_time": 45.2,
+      "event": "youtube_pause"
+    },
+    {
+      "reaction_time": 50.7,
+      "youtube_time": 50.7,
+      "relative_youtube_time": 50.7,
+      "event": "youtube_play"
+    },
+    {
+      "reaction_time": 60.0,
+      "youtube_time": 60.0,
+      "relative_youtube_time": 60.0,
+      "event": "youtube_pause"
     }
   ],
   "metadata": {
     "created_at": "2024-01-01T00:00:00Z",
-    "description": "Sample timestamp file for VE URL testing"
+    "description": "샘플 타임스탬프 파일 - VE URL 테스트용",
+    "total_duration": 60.0,
+    "sync_points_count": 10,
+    "creator": "VE System",
+    "version": "1.0"
   }
 } 
