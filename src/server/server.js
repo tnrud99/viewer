@@ -16,14 +16,46 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // MongoDB 연결
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/ve_url_system', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
-    console.log('Connected to MongoDB');
-}).catch((error) => {
-    console.error('MongoDB connection error:', error);
+const connectToMongoDB = async () => {
+    try {
+        const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ve_url_system';
+        console.log('Attempting to connect to MongoDB...');
+        console.log('MongoDB URI exists:', !!process.env.MONGODB_URI);
+        
+        await mongoose.connect(mongoUri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+        });
+        
+        console.log('✅ Successfully connected to MongoDB');
+        console.log('Database:', mongoose.connection.name);
+        console.log('Host:', mongoose.connection.host);
+        console.log('Port:', mongoose.connection.port);
+        
+    } catch (error) {
+        console.error('❌ MongoDB connection error:', error.message);
+        console.error('Error details:', error);
+        throw error;
+    }
+};
+
+// MongoDB 연결 이벤트 리스너
+mongoose.connection.on('connected', () => {
+    console.log('Mongoose connected to MongoDB');
 });
+
+mongoose.connection.on('error', (err) => {
+    console.error('Mongoose connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+    console.log('Mongoose disconnected from MongoDB');
+});
+
+// MongoDB 연결 시도
+connectToMongoDB().catch(console.error);
 
 // 데이터베이스 스키마
 const userSchema = new mongoose.Schema({
@@ -357,7 +389,42 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// MongoDB 연결 테스트
+app.get('/api/test-mongodb', async (req, res) => {
+    try {
+        // MongoDB 연결 상태 확인
+        const dbState = mongoose.connection.readyState;
+        const states = {
+            0: 'disconnected',
+            1: 'connected',
+            2: 'connecting',
+            3: 'disconnecting'
+        };
+        
+        res.json({
+            status: 'MongoDB Test',
+            connection_state: states[dbState],
+            ready_state: dbState,
+            timestamp: new Date().toISOString(),
+            mongodb_uri_set: !!process.env.MONGODB_URI,
+            node_env: process.env.NODE_ENV || 'development'
+        });
+    } catch (error) {
+        res.status(500).json({
+            error: 'MongoDB Test Failed',
+            message: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
 // 서버 시작
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-}); 
+// Vercel에서는 serverless 함수로 실행되므로 listen이 필요하지 않을 수 있음
+if (process.env.NODE_ENV !== 'production' || process.env.VERCEL !== '1') {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+// Vercel serverless 함수 export
+module.exports = app; 

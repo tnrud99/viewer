@@ -1,142 +1,119 @@
-# YouTube Reaction Video Suite
+# VE Viewer
 
-A web application for recording, editing, watching, and sharing synchronized reaction videos.
+Virtual Environment 뷰어 및 관련 도구들을 제공하는 웹 기반 플랫폼입니다.
 
-## 🚀 Main Features
-
-### 1. **Record a Reaction** (`recorder.html`)
-- Record reaction videos synchronized with original YouTube videos
-- Automatic timestamp generation
-- Real-time synchronization information storage
-
-### 2. **Watch a Reaction** (`viewer.html`)
-- Watch synchronized reaction videos with original videos
-- Adjustable overlay position and size
-- Volume control
-- YouTube-YouTube mode support
-
-### 3. **Edit Timestamps** (`editor/`)
-- Edit timestamp files
-- Drag and drop interface
-- Real-time preview
-
-### 4. **Create VE URL** (`create-ve-url.html`, `create-ve-url-storage.html`) 🆕
-- Create shareable synchronized video experiences
-- Multiple sharing methods:
-  - **URL Method**: All data embedded in URL (limited by URL length)
-  - **Local Storage Method**: Data stored in browser, URL contains reference ID
-  - **Server Method**: Data uploaded to server, URL contains server reference
-- Input reaction video URL and timestamp file
-- Viewer settings (overlay position, size, volume)
-- Share generated links with others
-
-## 📁 File Structure
+## 📁 프로젝트 구조
 
 ```
 viewer/
-├── index.html              # Main page
-├── recorder.html           # Reaction recording page
-├── viewer.html             # Viewer page
-├── create-ve-url.html      # VE URL creation page (URL method) 🆕
-├── create-ve-url-storage.html # VE URL creation page (storage methods) 🆕
-├── recorder.js             # Recording functionality script
-├── sample_ve_timestamp.json # Sample file for VE URL testing 🆕
-└── editor/                 # Timestamp editor
-    ├── index.html
-    ├── css/
-    ├── js/
-    └── sample_timestamp.json
+├── index.html                 # 메인 페이지
+├── README.md                  # 프로젝트 설명서
+├── src/                       # 소스 코드
+│   ├── viewer/               # VE 뷰어 관련 파일들
+│   │   ├── viewer.html
+│   │   ├── index.html
+│   │   ├── create-ve-url.html
+│   │   ├── create-ve-url-server.html
+│   │   └── create-ve-url-storage.html
+│   ├── editor/               # VE 에디터 관련 파일들
+│   │   ├── index.html
+│   │   ├── js/
+│   │   └── css/
+│   ├── recorder/             # VE 레코더 관련 파일들
+│   │   ├── recorder.html
+│   │   └── recorder.js
+│   └── server/               # 서버 관련 파일들
+│       ├── server.js
+│       ├── package.json
+│       ├── public/
+│       └── ...
+├── assets/                    # 정적 자원들
+│   ├── samples/              # 샘플 데이터 파일들
+│   │   ├── sample_ve_timestamp.json
+│   │   ├── sample_timestamp.json
+│   │   └── test_data.json
+│   └── config/               # 설정 파일들
+│       └── vercel.json
+└── docs/                      # 문서들
+    ├── deployment-guide.md
+    └── server-architecture.md
 ```
 
-## 🎯 How to Use
+## 🚀 주요 기능
 
-### 1. Record a Reaction
-1. Click "Record a Reaction" on the main page
-2. Enter original YouTube URL
-3. Start recording
-4. Watch with reaction video while automatically generating synchronization information
+### 1. VE 뷰어 (Viewer)
+- Virtual Environment 데이터를 시각화
+- 3D 환경에서 객체 탐색
+- 실시간 데이터 업데이트
 
-### 2. Watch a Reaction
-1. Click "Watch a Reaction" on the main page
-2. Upload timestamp file
-3. Enter reaction video URL (YouTube or local file)
-4. Enter original YouTube URL
-5. Adjust viewer settings
-6. Use play button for synchronized viewing
+### 2. VE 에디터 (Editor)
+- Virtual Environment 데이터 편집
+- 타임라인 기반 편집 기능
+- 드래그 앤 드롭 인터페이스
 
-### 3. Create and Share VE URL 🆕
-1. Click "Create VE URL" on the main page
-2. Choose your preferred sharing method:
-   - **URL Method**: All data in URL (limited size)
-   - **Local Storage**: Data stored in browser (larger files)
-   - **Server Method**: Data uploaded to server (requires backend)
-3. Enter reaction video YouTube URL
-4. Enter original video YouTube URL
-5. Upload timestamp file
-6. Adjust viewer settings (overlay position, size, volume)
-7. Click "Create VE URL" button
-8. Copy the generated link to share
+### 3. VE 레코더 (Recorder)
+- Virtual Environment 데이터 녹화
+- 실시간 데이터 캡처
+- 다양한 포맷 지원
 
-### 4. Watch with VE URL
-1. Click the shared VE URL
-2. Viewer opens with settings automatically applied
-3. Watch synchronized videos
+### 4. VE URL 생성기
+- Virtual Environment URL 생성
+- 서버 및 스토리지 연동
+- URL 관리 기능
 
-## 🔧 Technology Stack
+## 🛠️ 사용 방법
 
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Video APIs**: YouTube IFrame API, MediaRecorder API
-- **File Handling**: FileReader API, Blob API
-- **URL Encoding**: Base64 encoding for VE URL parameters
+1. **메인 페이지 접속**: `index.html`을 웹 브라우저에서 열기
+2. **기능 선택**: 원하는 기능을 클릭하여 해당 페이지로 이동
+3. **데이터 로드**: 샘플 데이터 또는 사용자 데이터를 로드
+4. **기능 사용**: 각 도구의 기능을 활용하여 VE 데이터 작업
 
-## 🌟 New Feature: VE URL
+## 📋 요구사항
 
-The VE URL (Video Experience URL) feature allows creators to easily share completed synchronized video experiences.
+- 최신 웹 브라우저 (Chrome, Firefox, Safari, Edge)
+- JavaScript 활성화
+- 인터넷 연결 (일부 기능)
 
-### VE URL Sharing Methods:
+## 🔧 개발 환경 설정
 
-#### 1. **URL Method** (Default)
-- **Pros**: No server required, works immediately
-- **Cons**: Limited by URL length (8KB max)
-- **Best for**: Small timestamp files, quick sharing
+### 로컬 개발 서버 실행
+```bash
+# 서버 디렉토리로 이동
+cd src/server
 
-#### 2. **Local Storage Method**
-- **Pros**: No size limit, works offline
-- **Cons**: Data stored in creator's browser only
-- **Best for**: Large timestamp files, personal sharing
+# 의존성 설치
+npm install
 
-#### 3. **Server Method** (Future)
-- **Pros**: No size limit, works across devices
-- **Cons**: Requires backend server
-- **Best for**: Professional sharing, large-scale use
+# 개발 서버 실행
+npm start
+```
 
-### VE URL Benefits:
-- **Easy Sharing**: Share with just one link without complex settings
-- **Auto Settings**: Creator's overlay, volume, and other settings are automatically applied
-- **Instant Viewing**: Watch synchronized videos with just one click
-- **Mobile Friendly**: Same experience across all devices
+### 정적 파일 서빙
+```bash
+# Python을 사용한 간단한 서버
+python -m http.server 8000
 
-### VE URL Creation Process:
-1. Choose sharing method based on your needs
-2. Creator inputs reaction video and original video URLs
-3. Upload timestamp file
-4. Adjust viewer settings (overlay position, size, volume)
-5. Generate VE URL
-6. Share the link
+# 또는 Node.js http-server 사용
+npx http-server
+```
 
-### VE URL Usage Process:
-1. Click the shared link
-2. Viewer opens with settings automatically applied
-3. Watch synchronized videos
+## 📚 문서
 
-## 📝 License
+- [배포 가이드](docs/deployment-guide.md)
+- [서버 아키텍처](docs/server-architecture.md)
 
-This project is created for educational and personal use purposes.
+## 🤝 기여하기
 
-## 🤝 Contributing
+1. 이 저장소를 포크합니다
+2. 새로운 기능 브랜치를 생성합니다 (`git checkout -b feature/amazing-feature`)
+3. 변경사항을 커밋합니다 (`git commit -m 'Add some amazing feature'`)
+4. 브랜치에 푸시합니다 (`git push origin feature/amazing-feature`)
+5. Pull Request를 생성합니다
 
-Please report bugs or suggest features through issues.
+## 📄 라이선스
 
----
+이 프로젝트는 MIT 라이선스 하에 배포됩니다.
 
-**YouTube Reaction Video Suite** - Create synchronized reaction video experiences! 🎬 
+## 📞 문의
+
+프로젝트에 대한 문의사항이 있으시면 이슈를 생성해 주세요. 
