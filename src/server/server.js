@@ -235,7 +235,13 @@ app.post('/api/ve-urls/create', async (req, res) => {
         if (userInfo && userInfo.email) {
             try {
                 // 기존 사용자 확인 또는 새 사용자 생성
-                let user = await User.findOne({ email: userInfo.email }).maxTimeMS(5000);
+                const userPromise = User.findOne({ email: userInfo.email });
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('User lookup timeout')), 5000)
+                );
+                
+                let user = await Promise.race([userPromise, timeoutPromise]);
+                
                 if (!user) {
                     // 새 사용자 생성 (임시)
                     const password_hash = await bcrypt.hash(userInfo.password || 'temp123', 10);
@@ -244,7 +250,13 @@ app.post('/api/ve-urls/create', async (req, res) => {
                         email: userInfo.email,
                         password_hash
                     });
-                    await user.save().maxTimeMS(5000);
+                    
+                    const savePromise = user.save();
+                    const saveTimeoutPromise = new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('User save timeout')), 5000)
+                    );
+                    
+                    await Promise.race([savePromise, saveTimeoutPromise]);
                 }
                 creator_id = user._id;
             } catch (userError) {
@@ -280,16 +292,26 @@ app.post('/api/ve-urls/create', async (req, res) => {
         });
 
         // 타임아웃과 함께 저장
-        await veUrl.save().maxTimeMS(10000);
+        const savePromise = veUrl.save();
+        const saveTimeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('VE URL save timeout')), 10000)
+        );
+        
+        await Promise.race([savePromise, saveTimeoutPromise]);
         console.log('✅ VE URL saved to database:', veUrl.ve_id);
 
         // 사용자가 있는 경우 ve_urls 배열에 추가 (선택적)
         if (creator_id) {
             try {
-                await User.findByIdAndUpdate(
+                const updatePromise = User.findByIdAndUpdate(
                     creator_id,
                     { $push: { ve_urls: veUrl._id } }
-                ).maxTimeMS(5000);
+                );
+                const updateTimeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('User update timeout')), 5000)
+                );
+                
+                await Promise.race([updatePromise, updateTimeoutPromise]);
             } catch (updateError) {
                 console.error('User update error:', updateError);
                 // 사용자 업데이트 실패해도 VE URL 생성은 성공
