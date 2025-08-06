@@ -73,7 +73,7 @@ const userSchema = new mongoose.Schema({
 
 const veUrlSchema = new mongoose.Schema({
     ve_id: { type: String, required: true, unique: true },
-    creator_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    creator_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
     title: { type: String, required: true },
     description: { type: String },
     reaction_url: { type: String, required: true },
@@ -349,7 +349,7 @@ app.put('/api/ve-urls/:id', authenticateToken, async (req, res) => {
         }
 
         // 권한 확인
-        if (veUrl.creator_id.toString() !== req.user.userId) {
+        if (veUrl.creator_id && veUrl.creator_id.toString() !== req.user.userId) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
@@ -381,7 +381,7 @@ app.delete('/api/ve-urls/:id', authenticateToken, async (req, res) => {
         }
 
         // 권한 확인
-        if (veUrl.creator_id.toString() !== req.user.userId) {
+        if (veUrl.creator_id && veUrl.creator_id.toString() !== req.user.userId) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
