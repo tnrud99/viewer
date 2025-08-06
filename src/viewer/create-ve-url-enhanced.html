@@ -423,65 +423,6 @@
             return (match && match[7].length === 11) ? match[7] : null;
         }
 
-        // UTF-8 safe Base64 encoding function
-        function safeBase64Encode(str) {
-            try {
-                return btoa(unescape(encodeURIComponent(str)));
-            } catch (error) {
-                console.error('Base64 encoding error:', error);
-                return btoa(str.replace(/[^\x00-\xFF]/g, '?'));
-            }
-        }
-
-        // Data compression and safe URL encoding
-        function encodeVEUrlData(data) {
-            try {
-                const optimizedData = {
-                    reactionUrl: data.reactionUrl,
-                    originalUrl: data.originalUrl,
-                    timestampData: {
-                        sync_points: data.timestampData.sync_points.map(point => ({
-                            rt: point.reaction_time,
-                            yt: point.youtube_time,
-                            ryt: point.relative_youtube_time,
-                            e: point.event,
-                            yfpt: point.youtube_first_play_time
-                        })),
-                        metadata: data.timestampData.metadata || {}
-                    },
-                    settings: data.settings,
-                    metadata: data.metadata,
-                    userInfo: data.userInfo
-                };
-                
-                const jsonString = JSON.stringify(optimizedData);
-                
-                if (dataSizeInfoElement) {
-                    dataSizeInfoElement.textContent = `Data size: ${jsonString.length} characters (${Math.round(jsonString.length / 1024 * 100) / 100} KB)`;
-                }
-                
-                if (jsonString.length > 15000) {
-                    console.warn('VE URL data is large');
-                    if (dataSizeInfoElement) {
-                        dataSizeInfoElement.style.color = '#ffaa55';
-                    }
-                } else if (dataSizeInfoElement) {
-                    dataSizeInfoElement.style.color = '#888';
-                }
-                
-                const encoded = safeBase64Encode(jsonString);
-                
-                if (encoded.length > 8000) {
-                    throw new Error('VE URL data is too large. Please reduce timestamps or metadata.');
-                }
-                
-                return encoded;
-            } catch (error) {
-                console.error('VE URL data encoding error:', error);
-                throw error;
-            }
-        }
-
         // Required field validation
         function validateRequiredFields() {
             if (!usernameInput.value.trim()) {
@@ -588,7 +529,7 @@
                     console.log('📤 Sending data to server:', veUrlData);
                     showMessage('🔄 Uploading data to server...', 'success');
 
-                    // Try server upload
+                    // Server upload
                     try {
                         const response = await fetch('/api/ve-urls/create', {
                             method: 'POST',
@@ -626,13 +567,11 @@
                         } else {
                             const errorText = await response.text();
                             console.error('❌ Server error response:', errorText);
-                            throw new Error(`Server error: ${response.status} - ${errorText}`);
+                            showMessage(`❌ Server error: ${response.status} - ${errorText}`, 'error');
                         }
                     } catch (error) {
                         console.error('❌ Server upload error:', error);
-                        showMessage('⚠️ Server upload failed, using local mode...', 'error');
-                        // Fallback to local mode
-                        createLocalVEUrl(veUrlData);
+                        showMessage('❌ Server connection failed. Please check your internet connection and try again.', 'error');
                     }
                 } catch (error) {
                     showMessage('Error reading timestamp file: ' + error.message, 'error');
@@ -642,37 +581,6 @@
                 showMessage('Error reading file.', 'error');
             };
             reader.readAsText(timestampFile);
-        }
-
-        // Local VE URL creation
-        function createLocalVEUrl(veUrlData) {
-            try {
-                const encodedData = encodeVEUrlData(veUrlData);
-                const veUrl = `${window.location.origin}/viewer.html?ve=${encodedData}`;
-                
-                generatedLinkElement.textContent = veUrl;
-                linkSection.style.display = 'block';
-                
-                showMessage('🔄 VE URL created in local mode!', 'success');
-                
-                // Show local mode info
-                dataSizeInfoElement.innerHTML = `
-                    <div style="margin-top: 10px; padding: 10px; background: rgba(255,165,0,0.1); border-radius: 5px;">
-                        <strong>🔄 Local Mode (Server Unavailable)</strong><br>
-                        • User: ${veUrlData.userInfo.username}<br>
-                        • Email: ${veUrlData.userInfo.email || 'Not provided'}<br>
-                        • Data encoded in URL parameter<br>
-                        • Works offline but not shareable<br>
-                        • Data size: ${encodedData.length} characters
-                    </div>
-                `;
-            } catch (error) {
-                if (error.message.includes('too large')) {
-                    showMessage('Timestamp data is too large. Please reduce timestamps or metadata.', 'error');
-                } else {
-                    showMessage('VE URL creation error: ' + error.message, 'error');
-                }
-            }
         }
 
         // Event listeners

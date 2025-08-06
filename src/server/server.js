@@ -202,16 +202,24 @@ app.post('/api/auth/login', async (req, res) => {
 // VE URL 라우트 - 인증 없이도 작동하도록 수정
 app.post('/api/ve-urls/create', async (req, res) => {
     try {
+        console.log('📥 Received VE URL creation request:', req.body);
+        
         const {
-            title,
-            description,
-            reaction_url,
-            original_url,
-            timestamp_data,
+            reactionUrl,
+            originalUrl,
+            timestampData,
             settings,
-            access_control,
-            userInfo
+            metadata,
+            userInfo,
+            accessControl
         } = req.body;
+
+        // 필수 필드 검증
+        if (!reactionUrl || !originalUrl || !timestampData || !userInfo) {
+            return res.status(400).json({ 
+                error: 'Missing required fields: reactionUrl, originalUrl, timestampData, userInfo' 
+            });
+        }
 
         // 고유 VE ID 생성
         const ve_id = 've_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -237,24 +245,31 @@ app.post('/api/ve-urls/create', async (req, res) => {
         const veUrl = new VEUrl({
             ve_id,
             creator_id: creator_id,
-            title: title || '동기화된 리액션 비디오',
-            description: description || '리액션 비디오와 원본 비디오가 동기화된 경험',
-            reaction_url,
-            original_url,
-            timestamp_data,
+            title: metadata?.title || 'Synchronized Reaction Video',
+            description: metadata?.description || 'Reaction video synchronized with original video',
+            reaction_url: reactionUrl,
+            original_url: originalUrl,
+            timestamp_data: timestampData,
             settings: settings || {
                 overlay_position: 'top-right',
                 overlay_size: 50,
                 youtube_volume: 100
             },
-            access_control: access_control || {
+            access_control: accessControl || {
                 is_public: true,
                 allowed_users: [],
                 password: null
+            },
+            metadata: {
+                created_at: new Date(),
+                updated_at: new Date(),
+                view_count: 0,
+                is_public: true
             }
         });
 
         await veUrl.save();
+        console.log('✅ VE URL saved to database:', veUrl.ve_id);
 
         // 사용자가 있는 경우 ve_urls 배열에 추가
         if (creator_id) {
@@ -264,6 +279,8 @@ app.post('/api/ve-urls/create', async (req, res) => {
             );
         }
 
+        const fullUrl = `${req.protocol}://${req.get('host')}/viewer.html?ve_server=${veUrl.ve_id}`;
+        
         res.status(201).json({
             message: 'VE URL created successfully',
             ve_url: {
@@ -271,11 +288,11 @@ app.post('/api/ve-urls/create', async (req, res) => {
                 ve_id: veUrl.ve_id,
                 title: veUrl.title,
                 share_url: `${req.protocol}://${req.get('host')}/ve/${veUrl.ve_id}`,
-                full_url: `${req.protocol}://${req.get('host')}/viewer.html?ve_server=${veUrl.ve_id}`
+                full_url: fullUrl
             }
         });
     } catch (error) {
-        console.error('VE URL creation error:', error);
+        console.error('❌ VE URL creation error:', error);
         res.status(500).json({ error: 'Server error: ' + error.message });
     }
 });
