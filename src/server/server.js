@@ -403,6 +403,16 @@ app.get('/create-ve-url-server.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'create-ve-url-server.html'));
 });
 
+// Enhanced VE URL creator
+app.get('/create-ve-url-enhanced.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'create-ve-url-enhanced.html'));
+});
+
+// Server status page
+app.get('/server-status.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'server-status.html'));
+});
+
 // src/viewer/ 경로의 파일들 서빙
 app.get('/src/viewer/create-ve-url-enhanced.html', (req, res) => {
     const filePath = path.join(__dirname, '..', 'viewer', 'create-ve-url-enhanced.html');
