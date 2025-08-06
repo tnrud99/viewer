@@ -403,6 +403,70 @@ app.get('/create-ve-url-server.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'create-ve-url-server.html'));
 });
 
+// src/viewer/ 경로의 파일들 서빙
+app.get('/src/viewer/create-ve-url-enhanced.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'viewer', 'create-ve-url-enhanced.html'));
+});
+
+app.get('/src/viewer/viewer.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'viewer', 'viewer.html'));
+});
+
+app.get('/src/viewer/server-status.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'viewer', 'server-status.html'));
+});
+
+app.get('/src/viewer/index.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'viewer', 'index.html'));
+});
+
+// src/recorder/ 경로의 파일들 서빙
+app.get('/src/recorder/recorder.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'recorder', 'recorder.html'));
+});
+
+app.get('/src/recorder/recorder.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'recorder', 'recorder.js'));
+});
+
+// src/editor/ 경로의 파일들 서빙
+app.get('/src/editor/index.html', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'index.html'));
+});
+
+app.get('/src/editor/css/style.css', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'css', 'style.css'));
+});
+
+app.get('/src/editor/js/app.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'js', 'app.js'));
+});
+
+app.get('/src/editor/js/advanced-editing.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'js', 'advanced-editing.js'));
+});
+
+app.get('/src/editor/js/drag-drop.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'js', 'drag-drop.js'));
+});
+
+app.get('/src/editor/js/timeline-controls.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'js', 'timeline-controls.js'));
+});
+
+// assets/ 경로의 파일들 서빙
+app.get('/assets/samples/sample_timestamp.json', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', '..', 'assets', 'samples', 'sample_timestamp.json'));
+});
+
+app.get('/assets/samples/sample_ve_timestamp.json', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', '..', 'assets', 'samples', 'sample_ve_timestamp.json'));
+});
+
+app.get('/assets/samples/test_data.json', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', '..', 'assets', 'samples', 'test_data.json'));
+});
+
 // 짧은 URL 라우트 추가
 app.get('/ve/:id', async (req, res) => {
     try {
