@@ -15,6 +15,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
+// 정적 파일 서빙 - 전체 프로젝트 디렉토리
+app.use('/src', express.static(path.join(__dirname, '..')));
+app.use('/assets', express.static(path.join(__dirname, '..', '..', 'assets')));
+app.use('/', express.static(path.join(__dirname, '..', '..')));
+
 // MongoDB 연결
 const connectToMongoDB = async () => {
     try {
@@ -388,6 +393,10 @@ app.post('/api/analytics/view', async (req, res) => {
 
 // 정적 파일 서빙
 app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/index.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
