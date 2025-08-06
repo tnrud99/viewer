@@ -20,37 +20,22 @@ app.use('/src', express.static(path.join(__dirname, '..')));
 app.use('/assets', express.static(path.join(__dirname, '..', '..', 'assets')));
 app.use('/', express.static(path.join(__dirname, '..', '..')));
 
-// MongoDB 연결
-const connectToMongoDB = async () => {
-    try {
-        const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ve_url_system';
-        console.log('Attempting to connect to MongoDB...');
-        console.log('MongoDB URI exists:', !!process.env.MONGODB_URI);
-        
-        await mongoose.connect(mongoUri, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 10000,
-            socketTimeoutMS: 45000,
-            connectTimeoutMS: 10000,
-            maxPoolSize: 10,
-            minPoolSize: 1,
-            maxIdleTimeMS: 30000,
-            retryWrites: true,
-            w: 'majority'
-        });
-        
-        console.log('✅ Successfully connected to MongoDB');
-        console.log('Database:', mongoose.connection.name);
-        console.log('Host:', mongoose.connection.host);
-        console.log('Port:', mongoose.connection.port);
-        
-    } catch (error) {
-        console.error('❌ MongoDB connection error:', error.message);
-        console.error('Error details:', error);
-        throw error;
-    }
-};
+// MongoDB 연결 설정 개선
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 15000,  // 15초로 증가
+    connectTimeoutMS: 15000,          // 15초로 증가
+    socketTimeoutMS: 45000,           // 45초로 증가
+    maxPoolSize: 20,                  // 풀 크기 증가
+    minPoolSize: 5,                   // 최소 풀 크기 증가
+    maxIdleTimeMS: 60000,             // 60초로 증가
+    retryWrites: true,
+    w: 'majority',
+    retryReads: true,
+    bufferCommands: false,            // 버퍼링 비활성화
+    bufferMaxEntries: 0
+});
 
 // MongoDB 연결 이벤트 리스너
 mongoose.connection.on('connected', () => {
@@ -66,7 +51,7 @@ mongoose.connection.on('disconnected', () => {
 });
 
 // MongoDB 연결 시도
-connectToMongoDB().catch(console.error);
+// connectToMongoDB().catch(console.error); // 이 부분은 더 이상 필요 없음
 
 // 데이터베이스 스키마
 const userSchema = new mongoose.Schema({
@@ -263,12 +248,32 @@ app.post('/api/ve-urls/create', async (req, res) => {
                         password_hash
                     });
                     
-                    const savePromise = user.save();
-                    const saveTimeoutPromise = new Promise((_, reject) => 
-                        setTimeout(() => reject(new Error('User save timeout')), 5000)
-                    );
+                    // 사용자 저장 시도 함수
+                    const saveUserWithRetry = async (user, maxRetries = 3) => {
+                        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                            try {
+                                console.log(`👤 User save attempt ${attempt}/${maxRetries}...`);
+                                
+                                const savePromise = user.save();
+                                const saveTimeoutPromise = new Promise((_, reject) => 
+                                    setTimeout(() => reject(new Error(`User save timeout (attempt ${attempt})`)), 10000)
+                                );
+                                
+                                await Promise.race([savePromise, saveTimeoutPromise]);
+                                console.log(`✅ User saved successfully on attempt ${attempt}`);
+                                return;
+                            } catch (error) {
+                                console.error(`❌ User save attempt ${attempt} failed:`, error.message);
+                                if (attempt === maxRetries) {
+                                    throw error;
+                                }
+                                // 잠시 대기 후 재시도
+                                await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                            }
+                        }
+                    };
                     
-                    await Promise.race([savePromise, saveTimeoutPromise]);
+                    await saveUserWithRetry(user);
                     console.log('✅ New user created');
                 } else {
                     console.log('✅ Existing user found');
@@ -310,28 +315,70 @@ app.post('/api/ve-urls/create', async (req, res) => {
         });
 
         console.log('💾 Saving VE URL to database...');
-        // 타임아웃과 함께 저장
-        const savePromise = veUrl.save();
-        const saveTimeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('VE URL save timeout')), 10000)
-        );
         
-        await Promise.race([savePromise, saveTimeoutPromise]);
+        // 저장 시도 함수
+        const saveWithRetry = async (veUrl, maxRetries = 3) => {
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    console.log(`💾 Save attempt ${attempt}/${maxRetries}...`);
+                    
+                    // 타임아웃과 함께 저장
+                    const savePromise = veUrl.save();
+                    const saveTimeoutPromise = new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error(`VE URL save timeout (attempt ${attempt})`)), 15000)
+                    );
+                    
+                    await Promise.race([savePromise, saveTimeoutPromise]);
+                    console.log(`✅ VE URL saved successfully on attempt ${attempt}`);
+                    return;
+                } catch (error) {
+                    console.error(`❌ Save attempt ${attempt} failed:`, error.message);
+                    if (attempt === maxRetries) {
+                        throw error;
+                    }
+                    // 잠시 대기 후 재시도
+                    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                }
+            }
+        };
+        
+        await saveWithRetry(veUrl);
         console.log('✅ VE URL saved to database:', veUrl.ve_id);
 
         // 사용자가 있는 경우 ve_urls 배열에 추가 (선택적)
         if (creator_id) {
             try {
                 console.log('👤 Updating user with VE URL reference...');
-                const updatePromise = User.findByIdAndUpdate(
-                    creator_id,
-                    { $push: { ve_urls: veUrl._id } }
-                );
-                const updateTimeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('User update timeout')), 5000)
-                );
                 
-                await Promise.race([updatePromise, updateTimeoutPromise]);
+                // 사용자 업데이트 시도 함수
+                const updateUserWithRetry = async (creator_id, veUrl_id, maxRetries = 3) => {
+                    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                        try {
+                            console.log(`👤 User update attempt ${attempt}/${maxRetries}...`);
+                            
+                            const updatePromise = User.findByIdAndUpdate(
+                                creator_id,
+                                { $push: { ve_urls: veUrl_id } }
+                            );
+                            const updateTimeoutPromise = new Promise((_, reject) => 
+                                setTimeout(() => reject(new Error(`User update timeout (attempt ${attempt})`)), 10000)
+                            );
+                            
+                            await Promise.race([updatePromise, updateTimeoutPromise]);
+                            console.log(`✅ User updated successfully on attempt ${attempt}`);
+                            return;
+                        } catch (error) {
+                            console.error(`❌ User update attempt ${attempt} failed:`, error.message);
+                            if (attempt === maxRetries) {
+                                throw error;
+                            }
+                            // 잠시 대기 후 재시도
+                            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                        }
+                    }
+                };
+                
+                await updateUserWithRetry(creator_id, veUrl._id);
                 console.log('✅ User updated with VE URL reference');
             } catch (updateError) {
                 console.error('❌ User update error:', updateError);
