@@ -421,21 +421,37 @@ app.post('/api/ve-urls/create', async (req, res) => {
     }
 });
 
+// VE URL 조회 엔드포인트 추가
 app.get('/api/ve-urls/:id', async (req, res) => {
     try {
+        console.log('📥 VE URL lookup request for ID:', req.params.id);
+        
         const veUrl = await VEUrl.findOne({ ve_id: req.params.id });
         
         if (!veUrl) {
+            console.log('❌ VE URL not found:', req.params.id);
             return res.status(404).json({ error: 'VE URL not found' });
         }
-
-        // 조회수 증가
-        veUrl.metadata.view_count += 1;
-        await veUrl.save();
-
-        res.json({
+        
+        console.log('✅ VE URL found:', veUrl.ve_id);
+        
+        // 조회수 증가 (타임아웃 처리)
+        try {
+            veUrl.metadata.view_count += 1;
+            const savePromise = veUrl.save();
+            const saveTimeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('View count save timeout')), 5000)
+            );
+            await Promise.race([savePromise, saveTimeoutPromise]);
+            console.log('✅ View count updated');
+        } catch (saveError) {
+            console.error('❌ View count save error:', saveError);
+            // 조회수 저장 실패해도 데이터는 반환
+        }
+        
+        // 뷰어에서 필요한 형식으로 데이터 반환
+        const veData = {
             ve_url: {
-                id: veUrl._id,
                 ve_id: veUrl.ve_id,
                 title: veUrl.title,
                 description: veUrl.description,
@@ -443,11 +459,17 @@ app.get('/api/ve-urls/:id', async (req, res) => {
                 original_url: veUrl.original_url,
                 timestamp_data: veUrl.timestamp_data,
                 settings: veUrl.settings,
+                access_control: veUrl.access_control,
                 metadata: veUrl.metadata
             }
-        });
+        };
+        
+        console.log('📤 Sending VE URL data to viewer');
+        res.json(veData);
+        
     } catch (error) {
-        res.status(500).json({ error: 'Server error' });
+        console.error('❌ VE URL lookup error:', error);
+        res.status(500).json({ error: 'Server error: ' + error.message });
     }
 });
 

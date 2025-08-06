@@ -199,13 +199,23 @@
                 if (veServer) {
                     // Load from server
                     updateDebug('📡 Loading from server...');
-                    const response = await fetch(`/api/ve-urls/${veServer}`);
-                    if (response.ok) {
-                        const data = await response.json();
-                        veData = data.ve_url;
-                        updateDebug('✅ Server data loaded successfully');
-                    } else {
-                        throw new Error('Failed to load from server');
+                    try {
+                        const response = await fetch(`/api/ve-urls/${veServer}`);
+                        console.log('📥 Server response status:', response.status);
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log('📥 Server response data:', data);
+                            veData = data.ve_url;
+                            updateDebug('✅ Server data loaded successfully');
+                        } else {
+                            const errorText = await response.text();
+                            console.error('❌ Server error:', errorText);
+                            throw new Error(`Server error: ${response.status} - ${errorText}`);
+                        }
+                    } catch (error) {
+                        console.error('❌ Server request failed:', error);
+                        throw new Error(`Failed to load from server: ${error.message}`);
                     }
                 } else if (veParam) {
                     // Load from URL parameter (legacy)
