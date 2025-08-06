@@ -405,19 +405,48 @@ app.get('/create-ve-url-server.html', (req, res) => {
 
 // src/viewer/ 경로의 파일들 서빙
 app.get('/src/viewer/create-ve-url-enhanced.html', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'viewer', 'create-ve-url-enhanced.html'));
+    const filePath = path.join(__dirname, '..', 'viewer', 'create-ve-url-enhanced.html');
+    console.log('Attempting to serve:', filePath);
+    console.log('File exists:', require('fs').existsSync(filePath));
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error('Error serving file:', err);
+            res.status(404).json({ error: 'File not found', path: filePath });
+        }
+    });
 });
 
 app.get('/src/viewer/viewer.html', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'viewer', 'viewer.html'));
+    const filePath = path.join(__dirname, '..', 'viewer', 'viewer.html');
+    console.log('Attempting to serve:', filePath);
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error('Error serving file:', err);
+            res.status(404).json({ error: 'File not found', path: filePath });
+        }
+    });
 });
 
 app.get('/src/viewer/server-status.html', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'viewer', 'server-status.html'));
+    const filePath = path.join(__dirname, '..', 'viewer', 'server-status.html');
+    console.log('Attempting to serve:', filePath);
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error('Error serving file:', err);
+            res.status(404).json({ error: 'File not found', path: filePath });
+        }
+    });
 });
 
 app.get('/src/viewer/index.html', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'viewer', 'index.html'));
+    const filePath = path.join(__dirname, '..', 'viewer', 'index.html');
+    console.log('Attempting to serve:', filePath);
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error('Error serving file:', err);
+            res.status(404).json({ error: 'File not found', path: filePath });
+        }
+    });
 });
 
 // src/recorder/ 경로의 파일들 서빙
