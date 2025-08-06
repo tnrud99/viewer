@@ -1,0 +1,48 @@
+{
+  "sync_points": [
+    {
+      "event": "youtube_play",
+      "reaction_time": 2.5,
+      "youtube_time": 0.0,
+      "duration": 1.0
+    },
+    {
+      "event": "youtube_pause",
+      "reaction_time": 12.3,
+      "youtube_time": 9.8
+    },
+    {
+      "event": "youtube_play",
+      "reaction_time": 18.7,
+      "youtube_time": 15.2,
+      "duration": 0.5
+    },
+    {
+      "event": "youtube_pause",
+      "reaction_time": 35.1,
+      "youtube_time": 31.6
+    },
+    {
+      "event": "youtube_play",
+      "reaction_time": 42.8,
+      "youtube_time": 39.3,
+      "duration": 2.0
+    },
+    {
+      "event": "youtube_pause",
+      "reaction_time": 58.9,
+      "youtube_time": 55.4
+    },
+    {
+      "event": "youtube_play",
+      "reaction_time": 65.2,
+      "youtube_time": 61.7
+    },
+    {
+      "event": "youtube_pause",
+      "reaction_time": 78.6,
+      "youtube_time": 75.1
+    }
+  ]
+}
+

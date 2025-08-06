@@ -1,0 +1,35 @@
+{
+  "sync_points": [
+    {
+      "event": "youtube_play",
+      "reaction_time": 5.0,
+      "youtube_time": 10.0
+    },
+    {
+      "event": "youtube_pause",
+      "reaction_time": 15.0,
+      "youtube_time": 20.0
+    },
+    {
+      "event": "youtube_play",
+      "reaction_time": 25.0,
+      "youtube_time": 30.0
+    },
+    {
+      "event": "youtube_pause",
+      "reaction_time": 40.0,
+      "youtube_time": 45.0
+    },
+    {
+      "event": "youtube_play",
+      "reaction_time": 50.0,
+      "youtube_time": 60.0
+    },
+    {
+      "event": "youtube_pause",
+      "reaction_time": 70.0,
+      "youtube_time": 80.0
+    }
+  ]
+}
+
