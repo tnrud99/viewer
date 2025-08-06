@@ -30,8 +30,14 @@ const connectToMongoDB = async () => {
         await mongoose.connect(mongoUri, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 5000,
+            serverSelectionTimeoutMS: 10000,
             socketTimeoutMS: 45000,
+            connectTimeoutMS: 10000,
+            maxPoolSize: 10,
+            minPoolSize: 1,
+            maxIdleTimeMS: 30000,
+            retryWrites: true,
+            w: 'majority'
         });
         
         console.log('✅ Successfully connected to MongoDB');
@@ -227,19 +233,24 @@ app.post('/api/ve-urls/create', async (req, res) => {
         // 사용자 정보 처리 (인증 없이도 작동)
         let creator_id = null;
         if (userInfo && userInfo.email) {
-            // 기존 사용자 확인 또는 새 사용자 생성
-            let user = await User.findOne({ email: userInfo.email });
-            if (!user) {
-                // 새 사용자 생성 (임시)
-                const password_hash = await bcrypt.hash(userInfo.password || 'temp123', 10);
-                user = new User({
-                    username: userInfo.username || 'Anonymous',
-                    email: userInfo.email,
-                    password_hash
-                });
-                await user.save();
+            try {
+                // 기존 사용자 확인 또는 새 사용자 생성
+                let user = await User.findOne({ email: userInfo.email }).maxTimeMS(5000);
+                if (!user) {
+                    // 새 사용자 생성 (임시)
+                    const password_hash = await bcrypt.hash(userInfo.password || 'temp123', 10);
+                    user = new User({
+                        username: userInfo.username || 'Anonymous',
+                        email: userInfo.email,
+                        password_hash
+                    });
+                    await user.save().maxTimeMS(5000);
+                }
+                creator_id = user._id;
+            } catch (userError) {
+                console.error('User creation error:', userError);
+                // 사용자 생성 실패해도 VE URL은 생성
             }
-            creator_id = user._id;
         }
 
         const veUrl = new VEUrl({
@@ -268,15 +279,21 @@ app.post('/api/ve-urls/create', async (req, res) => {
             }
         });
 
-        await veUrl.save();
+        // 타임아웃과 함께 저장
+        await veUrl.save().maxTimeMS(10000);
         console.log('✅ VE URL saved to database:', veUrl.ve_id);
 
-        // 사용자가 있는 경우 ve_urls 배열에 추가
+        // 사용자가 있는 경우 ve_urls 배열에 추가 (선택적)
         if (creator_id) {
-            await User.findByIdAndUpdate(
-                creator_id,
-                { $push: { ve_urls: veUrl._id } }
-            );
+            try {
+                await User.findByIdAndUpdate(
+                    creator_id,
+                    { $push: { ve_urls: veUrl._id } }
+                ).maxTimeMS(5000);
+            } catch (updateError) {
+                console.error('User update error:', updateError);
+                // 사용자 업데이트 실패해도 VE URL 생성은 성공
+            }
         }
 
         const fullUrl = `${req.protocol}://${req.get('host')}/viewer.html?ve_server=${veUrl.ve_id}`;
@@ -294,7 +311,15 @@ app.post('/api/ve-urls/create', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ VE URL creation error:', error);
-        res.status(500).json({ error: 'Server error: ' + error.message });
+        
+        // MongoDB 연결 오류인지 확인
+        if (error.message.includes('buffering timed out') || error.message.includes('MongoNetworkError')) {
+            res.status(503).json({ 
+                error: 'Database connection timeout. Please try again in a few moments.' 
+            });
+        } else {
+            res.status(500).json({ error: 'Server error: ' + error.message });
+        }
     }
 });
 
