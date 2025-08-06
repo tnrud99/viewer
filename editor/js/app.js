@@ -7,12 +7,13 @@ class TimestampEditor {
         this.isPlaying = false;
         this.currentTime = 0;
         this.duration = 0;
-        this.pixelsPerSecond = 50; // 타임라인 스케일
+        this.pixelsPerSecond = 10; // 최대 축소 상태를 기본값으로 설정
         this.rippleMode = true; // 연결 이동 모드
         this.selectedBlocks = [];
         this.undoStack = [];
         this.redoStack = [];
         this.syncCheckInterval = null;
+        this.autoSync = true; // 자동 동기화 모드 (기본값)
         
         this.init();
     }
@@ -25,15 +26,21 @@ class TimestampEditor {
         if (typeof AdvancedEditingFeatures !== 'undefined') {
             this.initAdvancedFeatures();
         }
+        
+        // 타임라인 컨트롤 초기화
+        if (typeof TimelineControls !== 'undefined') {
+            this.initTimelineControls();
+        }
     }
     
     setupEventListeners() {
         // 파일 로딩
         document.getElementById('load-btn').addEventListener('click', () => this.loadFiles());
         
+        // 파일 업로드 관련 이벤트 리스너 제거
+        
         // 재생 컨트롤
         document.getElementById('play-pause-btn').addEventListener('click', () => this.togglePlayback());
-        document.getElementById('sync-test-btn').addEventListener('click', () => this.testSync());
         
         // 타임라인 컨트롤
         document.getElementById('ripple-toggle').addEventListener('click', () => this.toggleRippleMode());
@@ -50,17 +57,22 @@ class TimestampEditor {
     
     async loadFiles() {
         const youtubeUrl = document.getElementById('youtube-url').value;
-        const reactionFile = document.getElementById('reaction-video').files[0];
         const reactionUrl = document.getElementById('reaction-url').value;
         const timestampFile = document.getElementById('timestamp-file').files[0];
+        
+        console.log('Loading files with:', {
+            youtubeUrl,
+            reactionUrl,
+            timestampFile: timestampFile ? timestampFile.name : 'none'
+        });
         
         if (!youtubeUrl) {
             alert('Please enter a YouTube URL.');
             return;
         }
         
-        if (!reactionFile && !reactionUrl) {
-            alert('Please select a reaction video file or enter a URL.');
+        if (!reactionUrl) {
+            alert('Please enter a reaction video URL.');
             return;
         }
         
@@ -74,25 +86,26 @@ class TimestampEditor {
             this.setLoading(true);
             
             // Load timestamp file first
+            console.log('Loading timestamp file...');
             await this.loadTimestampFile(timestampFile);
             
             // Load YouTube player
+            console.log('Loading YouTube player...');
             await this.loadYouTubePlayer(youtubeUrl);
             
-            // Load reaction video
-            if (reactionFile) {
-                await this.loadReactionVideo(reactionFile);
-            } else if (reactionUrl) {
-                await this.loadReactionVideoFromUrl(reactionUrl);
-            }
+            // Load reaction video from URL
+            console.log('Loading reaction video from URL...');
+            await this.loadReactionVideoFromUrl(reactionUrl);
             
             // Render timeline
+            console.log('Rendering timeline...');
             this.renderTimeline();
             
             // Start sync check
             this.startSyncCheck();
             
             this.setLoading(false);
+            console.log('All files loaded successfully');
             alert('Files loaded successfully.');
             
         } catch (error) {
@@ -134,6 +147,7 @@ class TimestampEditor {
                 events: {
                     'onReady': () => {
                         console.log('유튜브 플레이어 준비 완료');
+                        this.setupOriginalVideoEvents();
                         resolve();
                     },
                     'onError': (error) => {
@@ -142,6 +156,46 @@ class TimestampEditor {
                 }
             });
         });
+    }
+    
+    setupOriginalVideoEvents() {
+        if (!this.youtubePlayer) return;
+        
+        // Original video의 상태 변경을 주기적으로 체크
+        setInterval(() => {
+            if (this.youtubePlayer && this.youtubePlayer.getPlayerState) {
+                const state = this.youtubePlayer.getPlayerState();
+                
+                // Original video가 멈추면 Reaction video도 멈춤
+                if (state === 2 && this.isPlaying) { // 2 = paused
+                    this.syncReactionVideoPause();
+                }
+            }
+        }, 100);
+    }
+    
+    syncReactionVideoPause() {
+        if (!this.autoSync) return; // 자동 동기화가 꺼져있으면 무시
+        
+        if (this.reactionPlayer && this.reactionPlayer.pauseVideo) {
+            try {
+                this.reactionPlayer.pauseVideo();
+                this.isPlaying = false;
+                this.updatePlayButton();
+                console.log('Reaction video paused due to original video pause');
+            } catch (error) {
+                console.error('Failed to pause reaction video:', error);
+            }
+        } else if (this.reactionVideo && this.reactionVideo.pause) {
+            try {
+                this.reactionVideo.pause();
+                this.isPlaying = false;
+                this.updatePlayButton();
+                console.log('Reaction video paused due to original video pause');
+            } catch (error) {
+                console.error('Failed to pause reaction video:', error);
+            }
+        }
     }
     
     loadReactionVideo(file) {
@@ -166,110 +220,54 @@ class TimestampEditor {
     
     loadReactionVideoFromUrl(url) {
         return new Promise((resolve, reject) => {
-            const video = document.getElementById('reaction-player');
-            
-            // 기존 소스 정리
-            video.src = '';
-            video.load();
-            
-            // 새 소스 설정
-            video.src = url;
-            
-            // CORS 설정 (필요한 경우)
-            try {
-                video.crossOrigin = 'anonymous';
-            } catch (e) {
-                console.warn('CORS setting failed, continuing without it');
+            const videoId = this.extractYouTubeVideoId(url);
+            if (!videoId) {
+                reject(new Error('유효하지 않은 YouTube URL입니다.'));
+                return;
             }
             
-            // 로딩 완료 이벤트
-            const onLoadedMetadata = () => {
-                this.reactionVideo = video;
-                this.duration = video.duration;
-                this.setupVideoEvents();
-                console.log('Reaction video URL loaded successfully, duration:', this.duration);
-                
-                // 이벤트 리스너 정리
-                video.removeEventListener('loadedmetadata', onLoadedMetadata);
-                video.removeEventListener('error', onError);
-                video.removeEventListener('canplay', onCanPlay);
-                
-                resolve();
-            };
+            console.log('Loading reaction video from YouTube URL:', url, 'Video ID:', videoId);
             
-            // 오류 이벤트
-            const onError = (e) => {
-                console.error('Video loading error:', e);
-                
-                // 이벤트 리스너 정리
-                video.removeEventListener('loadedmetadata', onLoadedMetadata);
-                video.removeEventListener('error', onError);
-                video.removeEventListener('canplay', onCanPlay);
-                
-                // 다른 방법으로 재시도
-                this.tryAlternativeVideoLoad(url, resolve, reject);
-            };
+            // 기존 플레이어가 있으면 제거
+            if (this.reactionPlayer) {
+                this.reactionPlayer.destroy();
+            }
             
-            // 재생 가능 이벤트 (백업)
-            const onCanPlay = () => {
-                if (!this.reactionVideo) {
-                    this.reactionVideo = video;
-                    this.duration = video.duration || 60; // 기본값 설정
-                    this.setupVideoEvents();
-                    console.log('Reaction video can play, duration:', this.duration);
-                    
-                    // 이벤트 리스너 정리
-                    video.removeEventListener('loadedmetadata', onLoadedMetadata);
-                    video.removeEventListener('error', onError);
-                    video.removeEventListener('canplay', onCanPlay);
-                    
-                    resolve();
+            // YouTube API가 로드되지 않은 경우 대기
+            if (!window.YT || !window.YT.Player) {
+                setTimeout(() => this.loadReactionVideoFromUrl(url).then(resolve).catch(reject), 1000);
+                return;
+            }
+            
+            this.reactionPlayer = new YT.Player('reaction-player', {
+                height: '280',
+                width: '500',
+                videoId: videoId,
+                playerVars: {
+                    'playsinline': 1,
+                    'controls': 1,
+                    'rel': 0,
+                    'modestbranding': 1
+                },
+                events: {
+                    'onReady': () => {
+                        console.log('리액션 YouTube 플레이어 준비 완료');
+                        this.reactionVideo = this.reactionPlayer;
+                        this.duration = this.reactionPlayer.getDuration();
+                        this.setupVideoEvents();
+                        resolve();
+                    },
+                    'onError': (error) => {
+                        reject(new Error('리액션 YouTube 플레이어 로딩 실패: ' + error.data));
+                    }
                 }
-            };
-            
-            // 이벤트 리스너 등록
-            video.addEventListener('loadedmetadata', onLoadedMetadata);
-            video.addEventListener('error', onError);
-            video.addEventListener('canplay', onCanPlay);
-            
-            // 타임아웃 설정 (10초)
-            setTimeout(() => {
-                if (!this.reactionVideo) {
-                    video.removeEventListener('loadedmetadata', onLoadedMetadata);
-                    video.removeEventListener('error', onError);
-                    video.removeEventListener('canplay', onCanPlay);
-                    reject(new Error('Video loading timeout'));
-                }
-            }, 10000);
-            
-            // 로딩 시작
-            video.load();
+            });
         });
     }
     
-    tryAlternativeVideoLoad(url, resolve, reject) {
-        const video = document.getElementById('reaction-player');
-        
-        // 소스 엘리먼트를 사용한 방법
-        video.innerHTML = `<source src="${url}" type="video/mp4">`;
-        
-        const onLoadedMetadata = () => {
-            this.reactionVideo = video;
-            this.duration = video.duration || 60;
-            this.setupVideoEvents();
-            console.log('Alternative video loading successful');
-            resolve();
-        };
-        
-        const onError = () => {
-            reject(new Error('Failed to load reaction video from URL. Please check the URL or try a different video.'));
-        };
-        
-        video.addEventListener('loadedmetadata', onLoadedMetadata, { once: true });
-        video.addEventListener('error', onError, { once: true });
-        
-        video.load();
-    }
+    // YouTube iframe API 사용으로 변경되어 복잡한 대체 로딩 메서드들 제거
+    
+    // 복잡한 대체 로딩 메서드들 제거 - 간단한 방식으로 변경
     
     loadTimestampFile(file) {
         return new Promise((resolve, reject) => {
@@ -297,26 +295,73 @@ class TimestampEditor {
     setupVideoEvents() {
         if (!this.reactionVideo) return;
         
-        this.reactionVideo.addEventListener('timeupdate', () => {
-            this.currentTime = this.reactionVideo.currentTime;
-            this.updatePlayhead();
-            this.updateTimeDisplay();
-        });
+        // YouTube iframe API의 경우 다른 방식으로 이벤트 처리
+        if (this.reactionPlayer) {
+            // YouTube 플레이어의 상태 변경을 주기적으로 체크
+            setInterval(() => {
+                if (this.reactionPlayer && this.reactionPlayer.getPlayerState) {
+                    const state = this.reactionPlayer.getPlayerState();
+                    const currentTime = this.reactionPlayer.getCurrentTime();
+                    
+                    this.currentTime = currentTime;
+                    this.updatePlayhead();
+                    this.updateTimeDisplay();
+                    
+                    // 재생 상태 업데이트
+                    if (state === 1 && !this.isPlaying) {
+                        this.isPlaying = true;
+                        this.updatePlayButton();
+                    } else if ((state === 2 || state === 0) && this.isPlaying) {
+                        this.isPlaying = false;
+                        this.updatePlayButton();
+                        
+                        // Reaction video가 멈추면 Original video도 멈춤
+                        this.syncOriginalVideoPause();
+                    }
+                }
+            }, 100);
+        } else {
+            // 일반 HTML5 비디오 엘리먼트
+            this.reactionVideo.addEventListener('timeupdate', () => {
+                this.currentTime = this.reactionVideo.currentTime;
+                this.updatePlayhead();
+                this.updateTimeDisplay();
+            });
+            
+            this.reactionVideo.addEventListener('play', () => {
+                this.isPlaying = true;
+                this.updatePlayButton();
+            });
+            
+            this.reactionVideo.addEventListener('pause', () => {
+                this.isPlaying = false;
+                this.updatePlayButton();
+                
+                // Reaction video가 멈추면 Original video도 멈춤
+                this.syncOriginalVideoPause();
+            });
+            
+            this.reactionVideo.addEventListener('ended', () => {
+                this.isPlaying = false;
+                this.updatePlayButton();
+                
+                // Reaction video가 끝나면 Original video도 멈춤
+                this.syncOriginalVideoPause();
+            });
+        }
+    }
+    
+    syncOriginalVideoPause() {
+        if (!this.autoSync) return; // 자동 동기화가 꺼져있으면 무시
         
-        this.reactionVideo.addEventListener('play', () => {
-            this.isPlaying = true;
-            this.updatePlayButton();
-        });
-        
-        this.reactionVideo.addEventListener('pause', () => {
-            this.isPlaying = false;
-            this.updatePlayButton();
-        });
-        
-        this.reactionVideo.addEventListener('ended', () => {
-            this.isPlaying = false;
-            this.updatePlayButton();
-        });
+        if (this.youtubePlayer && this.youtubePlayer.pauseVideo) {
+            try {
+                this.youtubePlayer.pauseVideo();
+                console.log('Original video paused due to reaction video pause');
+            } catch (error) {
+                console.error('Failed to pause original video:', error);
+            }
+        }
     }
     
     startSyncCheck() {
@@ -403,12 +448,297 @@ class TimestampEditor {
         container.style.position = 'relative';
         container.style.height = '50px';
         
-        this.timestampData.sync_points.forEach((point, index) => {
-            const block = this.createTimestampBlock(point, index);
-            container.appendChild(block);
-        });
+        // play-pause 쌍으로 블록 생성
+        this.createPlayPauseBlocks(container);
         
         console.log('타임스탬프 블록 렌더링 완료:', this.timestampData.sync_points.length, '개');
+    }
+    
+    createPlayPauseBlocks(container) {
+        const points = this.timestampData.sync_points;
+        
+        for (let i = 0; i < points.length; i++) {
+            const currentPoint = points[i];
+            
+            if (currentPoint.event === 'youtube_play') {
+                // play 이벤트를 찾았으면 다음 pause 이벤트를 찾아서 쌍으로 만듦
+                const nextPauseIndex = points.findIndex((p, idx) => 
+                    idx > i && p.event === 'youtube_pause'
+                );
+                
+                if (nextPauseIndex !== -1) {
+                    const pausePoint = points[nextPauseIndex];
+                    const block = this.createPlayPauseBlock(currentPoint, pausePoint, i, nextPauseIndex);
+                    container.appendChild(block);
+                } else {
+                    // pause가 없으면 play만으로 블록 생성
+                    const block = this.createTimestampBlock(currentPoint, i);
+                    container.appendChild(block);
+                }
+            } else if (currentPoint.event === 'youtube_pause' && i === 0) {
+                // 첫 번째 pause는 조정 불가능한 표시용 블록
+                const block = this.createStaticPauseBlock(currentPoint, i);
+                container.appendChild(block);
+            }
+        }
+    }
+    
+    createPlayPauseBlock(playPoint, pausePoint, playIndex, pauseIndex) {
+        const block = document.createElement('div');
+        block.className = 'timestamp-block play-pause-block';
+        block.dataset.playIndex = playIndex;
+        block.dataset.pauseIndex = pauseIndex;
+        block.dataset.startTime = playPoint.reaction_time;
+        block.dataset.endTime = pausePoint.reaction_time;
+        
+        const left = playPoint.reaction_time * this.pixelsPerSecond;
+        const width = (pausePoint.reaction_time - playPoint.reaction_time) * this.pixelsPerSecond;
+        
+        block.style.left = left + 'px';
+        block.style.width = Math.max(60, width) + 'px';
+        
+        // 블록 내용
+        const content = document.createElement('div');
+        content.style.padding = '2px';
+        content.style.fontSize = '10px';
+        content.style.textAlign = 'center';
+        content.innerHTML = `
+            <div>PLAY-PAUSE</div>
+            <div>${this.formatTime(playPoint.reaction_time)} - ${this.formatTime(pausePoint.reaction_time)}</div>
+        `;
+        block.appendChild(content);
+        
+        // 이벤트 리스너
+        this.setupPlayPauseBlockEvents(block);
+        
+        return block;
+    }
+    
+    createStaticPauseBlock(pausePoint, index) {
+        const block = document.createElement('div');
+        block.className = 'timestamp-block static-pause-block';
+        block.dataset.index = index;
+        block.dataset.static = 'true';
+        
+        const left = pausePoint.reaction_time * this.pixelsPerSecond;
+        block.style.left = left + 'px';
+        block.style.width = '60px';
+        
+        // 블록 내용
+        const content = document.createElement('div');
+        content.style.padding = '2px';
+        content.style.fontSize = '10px';
+        content.style.textAlign = 'center';
+        content.innerHTML = `
+            <div>INITIAL PAUSE</div>
+            <div>${this.formatTime(pausePoint.reaction_time)}</div>
+        `;
+        block.appendChild(content);
+        
+        // 정적 블록이므로 드래그 이벤트 없음
+        block.style.cursor = 'default';
+        
+        return block;
+    }
+    
+    setupPlayPauseBlockEvents(block) {
+        let isDragging = false;
+        let startX = 0;
+        let startLeft = 0;
+        let startWidth = 0;
+        
+        block.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            isDragging = true;
+            startX = e.clientX;
+            startLeft = parseInt(block.style.left);
+            startWidth = parseInt(block.style.width);
+            
+            // 블록 선택
+            this.selectBlock(block, e.ctrlKey);
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        });
+        
+        const handleMouseMove = (e) => {
+            if (!isDragging) return;
+            
+            const deltaX = e.clientX - startX;
+            const newLeft = Math.max(0, startLeft + deltaX);
+            const newStartTime = newLeft / this.pixelsPerSecond;
+            const newEndTime = (newLeft + startWidth) / this.pixelsPerSecond;
+            
+            // 블록 이동
+            block.style.left = newLeft + 'px';
+            
+            // 데이터 업데이트
+            const playIndex = parseInt(block.dataset.playIndex);
+            const pauseIndex = parseInt(block.dataset.pauseIndex);
+            
+            if (this.timestampData.sync_points[playIndex]) {
+                this.timestampData.sync_points[playIndex].reaction_time = newStartTime;
+            }
+            if (this.timestampData.sync_points[pauseIndex]) {
+                this.timestampData.sync_points[pauseIndex].reaction_time = newEndTime;
+            }
+            
+            // 블록 내용 업데이트
+            const content = block.querySelector('div');
+            if (content) {
+                content.innerHTML = `
+                    <div>PLAY-PAUSE</div>
+                    <div>${this.formatTime(newStartTime)} - ${this.formatTime(newEndTime)}</div>
+                `;
+            }
+        };
+        
+        const handleMouseUp = () => {
+            if (isDragging) {
+                isDragging = false;
+                this.saveState();
+            }
+            
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+        
+        // 더블클릭으로 편집
+        block.addEventListener('dblclick', () => {
+            this.editPlayPauseBlock(block);
+        });
+        
+        // 컨텍스트 메뉴
+        block.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            this.showPlayPauseContextMenu(e, block);
+        });
+    }
+    
+    editPlayPauseBlock(block) {
+        const playIndex = parseInt(block.dataset.playIndex);
+        const pauseIndex = parseInt(block.dataset.pauseIndex);
+        
+        const playPoint = this.timestampData.sync_points[playIndex];
+        const pausePoint = this.timestampData.sync_points[pauseIndex];
+        
+        const newStartTime = parseFloat(prompt('시작 시간 (초):', playPoint.reaction_time.toFixed(2)));
+        if (isNaN(newStartTime)) return;
+        
+        const newEndTime = parseFloat(prompt('종료 시간 (초):', pausePoint.reaction_time.toFixed(2)));
+        if (isNaN(newEndTime) || newEndTime <= newStartTime) return;
+        
+        playPoint.reaction_time = newStartTime;
+        pausePoint.reaction_time = newEndTime;
+        
+        this.renderTimestampBlocks();
+        this.saveState();
+    }
+    
+    showPlayPauseContextMenu(e, block) {
+        const menu = document.createElement('div');
+        menu.className = 'context-menu';
+        menu.style.cssText = `
+            position: fixed;
+            left: ${e.clientX}px;
+            top: ${e.clientY}px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 5px 0;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            min-width: 150px;
+        `;
+        
+        const menuItems = [
+            { text: '구간 편집', action: () => this.editPlayPauseBlock(block) },
+            { text: '구간 복제', action: () => this.duplicatePlayPauseBlock(block) },
+            { text: '구간 삭제', action: () => this.deletePlayPauseBlock(block) },
+            { text: '구간 정보', action: () => this.showPlayPauseBlockInfo(block) }
+        ];
+        
+        menuItems.forEach(item => {
+            const menuItem = document.createElement('div');
+            menuItem.className = 'context-menu-item';
+            menuItem.textContent = item.text;
+            menuItem.addEventListener('click', () => {
+                item.action();
+                menu.remove();
+            });
+            menu.appendChild(menuItem);
+        });
+        
+        document.body.appendChild(menu);
+        
+        setTimeout(() => {
+            document.addEventListener('click', function closeMenu() {
+                menu.remove();
+                document.removeEventListener('click', closeMenu);
+            });
+        }, 100);
+    }
+    
+    duplicatePlayPauseBlock(block) {
+        const playIndex = parseInt(block.dataset.playIndex);
+        const pauseIndex = parseInt(block.dataset.pauseIndex);
+        
+        const playPoint = this.timestampData.sync_points[playIndex];
+        const pausePoint = this.timestampData.sync_points[pauseIndex];
+        
+        const duration = pausePoint.reaction_time - playPoint.reaction_time;
+        const offset = 5; // 5초 뒤에 복제
+        
+        const newPlayPoint = {
+            ...playPoint,
+            reaction_time: playPoint.reaction_time + offset
+        };
+        
+        const newPausePoint = {
+            ...pausePoint,
+            reaction_time: pausePoint.reaction_time + offset
+        };
+        
+        this.timestampData.sync_points.push(newPlayPoint, newPausePoint);
+        this.timestampData.sync_points.sort((a, b) => a.reaction_time - b.reaction_time);
+        
+        this.renderTimestampBlocks();
+        this.saveState();
+    }
+    
+    deletePlayPauseBlock(block) {
+        const playIndex = parseInt(block.dataset.playIndex);
+        const pauseIndex = parseInt(block.dataset.pauseIndex);
+        
+        // 인덱스가 큰 것부터 삭제 (인덱스 변화 방지)
+        const indices = [playIndex, pauseIndex].sort((a, b) => b - a);
+        indices.forEach(index => {
+            this.timestampData.sync_points.splice(index, 1);
+        });
+        
+        this.renderTimestampBlocks();
+        this.saveState();
+    }
+    
+    showPlayPauseBlockInfo(block) {
+        const playIndex = parseInt(block.dataset.playIndex);
+        const pauseIndex = parseInt(block.dataset.pauseIndex);
+        
+        const playPoint = this.timestampData.sync_points[playIndex];
+        const pausePoint = this.timestampData.sync_points[pauseIndex];
+        
+        const duration = pausePoint.reaction_time - playPoint.reaction_time;
+        
+        const info = `
+구간 정보:
+- 시작 시간: ${this.formatTime(playPoint.reaction_time)}
+- 종료 시간: ${this.formatTime(pausePoint.reaction_time)}
+- 지속 시간: ${this.formatTime(duration)}
+- 유튜브 시작: ${this.formatTime(playPoint.youtube_time || 0)}
+- 유튜브 종료: ${this.formatTime(pausePoint.youtube_time || 0)}
+        `.trim();
+        
+        alert(info);
     }
     
     createTimestampBlock(point, index) {
@@ -440,61 +770,113 @@ class TimestampEditor {
         `;
         block.appendChild(content);
         
-        // 이벤트 리스너
-        this.setupBlockEvents(block);
+        // 이벤트 리스너 (정적 블록이 아닌 경우에만)
+        if (!block.classList.contains('static-pause-block')) {
+            this.setupBlockEvents(block);
+        }
         
         return block;
     }
     
     setupBlockEvents(block) {
-        let isDragging = false;
-        let startX = 0;
-        let startLeft = 0;
-        
-        block.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            isDragging = true;
-            startX = e.clientX;
-            startLeft = parseInt(block.style.left);
-            
-            // 블록 선택
-            this.selectBlock(block, e.ctrlKey);
-            
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-        });
-        
-        const handleMouseMove = (e) => {
-            if (!isDragging) return;
-            
-            const deltaX = e.clientX - startX;
-            const newLeft = Math.max(0, startLeft + deltaX);
-            const newTime = newLeft / this.pixelsPerSecond;
-            
-            // 드래그 중인 블록 이동
-            block.style.left = newLeft + 'px';
-            
-            // 연결 이동 모드일 때 뒤따라오는 블록들도 이동
-            if (this.rippleMode) {
-                this.moveRippleBlocks(block, deltaX);
-            }
-        };
-        
-        const handleMouseUp = () => {
-            if (isDragging) {
-                isDragging = false;
-                this.updateTimestampData();
-                this.saveState();
-            }
-            
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-        };
-        
         // 더블클릭으로 편집
         block.addEventListener('dblclick', () => {
             this.editBlock(block);
         });
+        
+        // 컨텍스트 메뉴 (우클릭)
+        block.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            this.showBlockContextMenu(e, block);
+        });
+    }
+    
+    showBlockContextMenu(e, block) {
+        const menu = document.createElement('div');
+        menu.className = 'context-menu';
+        menu.style.cssText = `
+            position: fixed;
+            left: ${e.clientX}px;
+            top: ${e.clientY}px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 5px 0;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            min-width: 150px;
+        `;
+        
+        const menuItems = [
+            { text: '블록 편집', action: () => this.editBlock(block) },
+            { text: '블록 복제', action: () => this.duplicateBlock(block) },
+            { text: '블록 삭제', action: () => this.deleteBlock(block) },
+            { text: '시간 정보', action: () => this.showBlockInfo(block) }
+        ];
+        
+        menuItems.forEach(item => {
+            const menuItem = document.createElement('div');
+            menuItem.className = 'context-menu-item';
+            menuItem.textContent = item.text;
+            menuItem.addEventListener('click', () => {
+                item.action();
+                menu.remove();
+            });
+            menu.appendChild(menuItem);
+        });
+        
+        document.body.appendChild(menu);
+        
+        // 메뉴 외부 클릭 시 닫기
+        setTimeout(() => {
+            document.addEventListener('click', function closeMenu() {
+                menu.remove();
+                document.removeEventListener('click', closeMenu);
+            });
+        }, 100);
+    }
+    
+    duplicateBlock(block) {
+        const index = parseInt(block.dataset.index);
+        const originalPoint = this.timestampData.sync_points[index];
+        
+        const newPoint = {
+            ...originalPoint,
+            reaction_time: originalPoint.reaction_time + 5 // 5초 뒤에 복제
+        };
+        
+        this.timestampData.sync_points.push(newPoint);
+        this.timestampData.sync_points.sort((a, b) => a.reaction_time - b.reaction_time);
+        
+        this.renderTimestampBlocks();
+        this.saveState();
+        
+        console.log('블록 복제 완료');
+    }
+    
+    deleteBlock(block) {
+        const index = parseInt(block.dataset.index);
+        this.timestampData.sync_points.splice(index, 1);
+        
+        this.renderTimestampBlocks();
+        this.saveState();
+        
+        console.log('블록 삭제 완료');
+    }
+    
+    showBlockInfo(block) {
+        const index = parseInt(block.dataset.index);
+        const point = this.timestampData.sync_points[index];
+        
+        const info = `
+블록 정보:
+- 이벤트: ${point.event}
+- 리액션 시간: ${this.formatTime(point.reaction_time)}
+- 유튜브 시간: ${this.formatTime(point.youtube_time || 0)}
+- 인덱스: ${index}
+        `.trim();
+        
+        alert(info);
     }
     
     selectBlock(block, multiSelect = false) {
@@ -512,19 +894,7 @@ class TimestampEditor {
         }
     }
     
-    moveRippleBlocks(draggedBlock, deltaX) {
-        const draggedIndex = parseInt(draggedBlock.dataset.index);
-        const blocks = document.querySelectorAll('.timestamp-block');
-        
-        blocks.forEach(block => {
-            const blockIndex = parseInt(block.dataset.index);
-            if (blockIndex > draggedIndex) {
-                const currentLeft = parseInt(block.style.left);
-                const newLeft = Math.max(0, currentLeft + deltaX);
-                block.style.left = newLeft + 'px';
-            }
-        });
-    }
+    // moveRippleBlocks는 drag-drop.js에서 처리됨
     
     updateTimestampData() {
         const blocks = document.querySelectorAll('.timestamp-block');
@@ -597,35 +967,101 @@ class TimestampEditor {
     
     togglePlayback() {
         if (!this.reactionVideo) {
-            alert('먼저 리액션 영상을 로드해주세요.');
-            return;
+            return; // 알림 제거
         }
         
-        if (this.isPlaying) {
-            this.reactionVideo.pause();
+        if (this.reactionPlayer) {
+            // YouTube iframe API 사용
+            if (this.isPlaying) {
+                this.reactionPlayer.pauseVideo();
+            } else {
+                this.reactionPlayer.playVideo();
+            }
         } else {
-            this.reactionVideo.play();
+            // 일반 HTML5 비디오 엘리먼트
+            if (this.isPlaying) {
+                this.reactionVideo.pause();
+            } else {
+                this.reactionVideo.play();
+            }
         }
     }
     
-    testSync() {
-        if (!this.reactionVideo || !this.youtubePlayer) {
-            alert('먼저 모든 파일을 로드해주세요.');
-            return;
-        }
-        
-        // 처음부터 재생하여 동기화 테스트
-        this.reactionVideo.currentTime = 0;
-        this.youtubePlayer.seekTo(0, true);
-        this.youtubePlayer.pauseVideo();
-        this.reactionVideo.play();
-    }
+
     
     toggleRippleMode() {
         this.rippleMode = !this.rippleMode;
         const btn = document.getElementById('ripple-toggle');
         btn.classList.toggle('active', this.rippleMode);
         btn.textContent = this.rippleMode ? 'Linked Move' : 'Individual Move';
+        
+        // 모드 변경 시 사용자에게 알림
+        const mode = this.rippleMode ? 'Linked Move' : 'Individual Move';
+        console.log(`Mode changed to: ${mode}`);
+        
+        // 시각적 피드백 (선택사항)
+        this.showModeIndicator(mode);
+    }
+    
+    showModeIndicator(mode) {
+        // 기존 인디케이터 제거
+        const existingIndicator = document.querySelector('.mode-indicator');
+        if (existingIndicator) {
+            existingIndicator.remove();
+        }
+        
+        // 새 인디케이터 생성
+        const indicator = document.createElement('div');
+        indicator.className = 'mode-indicator';
+        indicator.textContent = `Mode: ${mode}`;
+        indicator.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        `;
+        
+        document.body.appendChild(indicator);
+        
+        // 2초 후 자동 제거
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+            setTimeout(() => indicator.remove(), 300);
+        }, 2000);
+    }
+    
+    // Auto Sync 토글 기능 제거 - 기본값으로 고정
+    
+    showSyncIndicator(status) {
+        const indicator = document.createElement('div');
+        indicator.className = 'sync-indicator';
+        indicator.textContent = `Auto Sync: ${status}`;
+        indicator.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        `;
+        
+        document.body.appendChild(indicator);
+        
+        // 2초 후 자동 제거
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+            setTimeout(() => indicator.remove(), 300);
+        }, 2000);
     }
     
     addTimestamp() {
@@ -757,28 +1193,10 @@ class TimestampEditor {
             return;
         }
         
-        // 내보내기 형식 선택
-        const format = prompt('내보내기 형식을 선택하세요:\n1. JSON (기본)\n2. CSV\n3. TXT (간단한 텍스트)', '1');
-        
-        let dataStr, fileName, mimeType;
-        
-        switch(format) {
-            case '2': // CSV
-                dataStr = this.exportToCSV();
-                fileName = 'edited_timestamp.csv';
-                mimeType = 'text/csv';
-                break;
-            case '3': // TXT
-                dataStr = this.exportToTXT();
-                fileName = 'edited_timestamp.txt';
-                mimeType = 'text/plain';
-                break;
-            default: // JSON
-                dataStr = JSON.stringify(this.timestampData, null, 2);
-                fileName = 'edited_timestamp.json';
-                mimeType = 'application/json';
-                break;
-        }
+        // JSON으로만 내보내기
+        const dataStr = JSON.stringify(this.timestampData, null, 2);
+        const fileName = 'edited_timestamp.json';
+        const mimeType = 'application/json';
         
         const dataBlob = new Blob([dataStr], {type: mimeType});
         
@@ -793,41 +1211,7 @@ class TimestampEditor {
         alert(`타임스탬프 파일이 ${fileName}으로 다운로드되었습니다.`);
     }
     
-    exportToCSV() {
-        const headers = ['Event Type', 'Reaction Time (s)', 'YouTube Time (s)', 'Duration (s)'];
-        const rows = [headers.join(',')];
-        
-        this.timestampData.sync_points.forEach(point => {
-            const row = [
-                point.event,
-                point.reaction_time.toFixed(2),
-                (point.youtube_time || 0).toFixed(2),
-                (point.duration || 0).toFixed(2)
-            ];
-            rows.push(row.join(','));
-        });
-        
-        return rows.join('\n');
-    }
-    
-    exportToTXT() {
-        const lines = ['타임스탬프 편집 결과', '=' * 30, ''];
-        
-        this.timestampData.sync_points.forEach((point, index) => {
-            lines.push(`${index + 1}. ${point.event}`);
-            lines.push(`   리액션 시간: ${this.formatTime(point.reaction_time)}`);
-            lines.push(`   유튜브 시간: ${this.formatTime(point.youtube_time || 0)}`);
-            if (point.duration) {
-                lines.push(`   지속 시간: ${this.formatTime(point.duration)}`);
-            }
-            lines.push('');
-        });
-        
-        lines.push(`총 ${this.timestampData.sync_points.length}개의 타임스탬프`);
-        lines.push(`편집 완료 시간: ${new Date().toLocaleString()}`);
-        
-        return lines.join('\n');
-    }
+    // CSV와 TXT 내보내기 기능 제거 - JSON만 사용
     
     showExportStats() {
         const stats = this.calculateStats();

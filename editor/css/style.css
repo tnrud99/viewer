@@ -111,6 +111,8 @@ body {
     background-color: var(--bg-primary);
 }
 
+/* 파일 업로드 버튼 스타일 제거 */
+
 .input-group .or {
     display: inline-block;
     margin: 10px 0;
@@ -179,7 +181,7 @@ body {
     border: 2px solid var(--border-color);
 }
 
-#youtube-player {
+#youtube-player, #reaction-player {
     width: 100%;
     max-width: 500px;
     height: 280px;
@@ -217,6 +219,8 @@ body {
     transform: translateY(-2px);
 }
 
+/* Auto Sync 토글 버튼 스타일 제거 */
+
 .playback-controls span {
     font-weight: 600;
     color: var(--text-primary);
@@ -236,6 +240,7 @@ body {
     gap: 10px;
     margin-bottom: 20px;
     flex-wrap: wrap;
+    align-items: center;
 }
 
 .timeline-controls button {
@@ -249,6 +254,9 @@ body {
     font-weight: 600;
     transition: all 0.3s ease;
     box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .timeline-controls button:hover {
@@ -256,12 +264,25 @@ body {
     transform: translateY(-2px);
 }
 
+.timeline-controls button .icon {
+    font-size: 12px;
+}
+
 .toggle-btn.active {
-    background-color: var(--error-color);
+    background-color: var(--success-color);
 }
 
 .toggle-btn.active:hover {
-    background-color: #d32f2f;
+    background-color: #45a049;
+}
+
+/* 스냅 컨트롤 제거 - 고정값 사용 */
+
+/* Grid와 Snap 라인 스타일 제거 */
+
+/* 중복된 줌 버튼 숨기기 - ID 기반 */
+.timeline-controls button[data-duplicate="true"] {
+    display: none;
 }
 
 .timeline-container {
@@ -269,6 +290,8 @@ body {
     border-radius: 8px;
     overflow: hidden;
     background-color: var(--bg-primary);
+    position: relative;
+    min-height: 200px;
 }
 
 .time-ruler {
@@ -353,6 +376,7 @@ body {
     min-width: 20px;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
     user-select: none;
+    z-index: 10;
 }
 
 .timestamp-block:hover {
@@ -363,8 +387,16 @@ body {
 }
 
 .timestamp-block.selected {
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.3);
+    border-color: #ffd700;
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.5);
+    background-color: var(--accent-hover);
+}
+
+.timestamp-block.dragging {
+    opacity: 0.8;
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
 }
 
 .timestamp-block.play {
@@ -381,6 +413,67 @@ body {
 
 .timestamp-block.pause:hover {
     background-color: #d32f2f;
+}
+
+/* Play-Pause 블록 스타일 */
+.timestamp-block.play-pause-block {
+    background: linear-gradient(45deg, var(--success-color) 0%, var(--accent-color) 50%, var(--error-color) 100%);
+    border: 2px solid var(--accent-color);
+    min-width: 80px;
+}
+
+.timestamp-block.play-pause-block:hover {
+    background: linear-gradient(45deg, #45a049 0%, var(--accent-hover) 50%, #d32f2f 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.timestamp-block.play-pause-block.selected {
+    border-color: #ffd700;
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.5);
+}
+
+/* 정적 Pause 블록 스타일 */
+.timestamp-block.static-pause-block {
+    background-color: #666;
+    border: 2px solid #999;
+    opacity: 0.7;
+    cursor: default;
+}
+
+.timestamp-block.static-pause-block:hover {
+    background-color: #777;
+    transform: none;
+    box-shadow: none;
+}
+
+.timestamp-block.static-pause-block.selected {
+    border-color: #999;
+    box-shadow: 0 0 0 2px rgba(153, 153, 153, 0.3);
+}
+
+/* 드래그 정보 표시 */
+.drag-info {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 14px;
+    z-index: 2000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--accent-color);
+}
+
+.drag-info div {
+    margin-bottom: 5px;
+}
+
+.drag-info div:last-child {
+    margin-bottom: 0;
 }
 
 /* 출력 섹션 */
@@ -486,6 +579,7 @@ body {
     cursor: pointer;
     color: var(--text-primary);
     transition: background-color 0.2s ease;
+    font-size: 14px;
 }
 
 .context-menu-item:hover {

@@ -147,7 +147,10 @@ class AdvancedEditingFeatures {
         const indices = this.editor.selectedBlocks.map(block => parseInt(block.dataset.index));
         const info = indices.map(index => {
             const block = this.editor.timestampData.sync_points[index];
-            return `${block.event}: ${this.editor.formatTime(block.reaction_time)} → ${this.editor.formatTime(block.youtube_time || 0)}`;
+            if (!block) {
+                return `Block ${index}: 데이터 없음`;
+            }
+            return `${block.event || 'unknown'}: ${this.editor.formatTime(block.reaction_time)} → ${this.editor.formatTime(block.youtube_time || 0)}`;
         }).join('\n');
         
         alert(`선택된 블록 정보:\n${info}`);
@@ -184,18 +187,30 @@ class AdvancedEditingFeatures {
                 const deltaTime = deltaX / this.editor.pixelsPerSecond;
                 
                 this.editor.selectedBlocks.forEach(block => {
-                    const index = parseInt(block.dataset.index);
-                    const originalTime = this.editor.timestampData.sync_points[index].reaction_time;
-                    const newTime = Math.max(0, originalTime + deltaTime);
+                    let index;
                     
-                    const newLeft = newTime * this.editor.pixelsPerSecond;
-                    block.style.left = newLeft + 'px';
+                    // play-pause-block인지 확인
+                    if (block.classList.contains('play-pause-block')) {
+                        index = parseInt(block.dataset.playIndex);
+                    } else {
+                        index = parseInt(block.dataset.index);
+                    }
+                    
+                    if (this.editor.timestampData.sync_points[index]) {
+                        const originalTime = this.editor.timestampData.sync_points[index].reaction_time;
+                        const newTime = Math.max(0, originalTime + deltaTime);
+                        
+                        const newLeft = newTime * this.editor.pixelsPerSecond;
+                        block.style.left = newLeft + 'px';
+                    }
                 });
                 
                 // 연결 이동 모드 처리
                 if (this.editor.rippleMode && this.editor.selectedBlocks.length === 1) {
                     const draggedIndex = parseInt(this.editor.selectedBlocks[0].dataset.index);
-                    this.editor.moveRippleBlocks(this.editor.selectedBlocks[0], deltaX);
+                    if (this.editor.timelineControls) {
+                        this.editor.timelineControls.moveRippleBlocks(this.editor.selectedBlocks[0], deltaTime);
+                    }
                 }
             }
         });

@@ -1,6 +1,11 @@
 {
   "sync_points": [
     {
+      "event": "youtube_pause",
+      "reaction_time": 0.0,
+      "youtube_time": 0.0
+    },
+    {
       "event": "youtube_play",
       "reaction_time": 5.0,
       "youtube_time": 10.0
