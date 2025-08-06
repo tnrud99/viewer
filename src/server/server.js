@@ -589,15 +589,25 @@ app.get('/ve/:id', async (req, res) => {
             return res.status(404).json({ error: 'VE URL not found' });
         }
 
-        // 조회수 증가
-        veUrl.metadata.view_count += 1;
-        await veUrl.save();
+        // 조회수 증가 (타임아웃 처리 추가)
+        try {
+            veUrl.metadata.view_count += 1;
+            const savePromise = veUrl.save();
+            const saveTimeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('View count save timeout')), 5000)
+            );
+            await Promise.race([savePromise, saveTimeoutPromise]);
+        } catch (saveError) {
+            console.error('View count save error:', saveError);
+            // 조회수 저장 실패해도 리다이렉트는 진행
+        }
 
         // viewer.html로 리다이렉트
         const viewerUrl = `${req.protocol}://${req.get('host')}/viewer.html?ve_server=${veUrl.ve_id}`;
         res.redirect(viewerUrl);
     } catch (error) {
-        res.status(500).json({ error: 'Server error' });
+        console.error('Short URL route error:', error);
+        res.status(500).json({ error: 'Server error: ' + error.message });
     }
 });
 
