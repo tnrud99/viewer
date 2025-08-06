@@ -208,7 +208,9 @@ app.post('/api/auth/login', async (req, res) => {
 // VE URL 라우트 - 인증 없이도 작동하도록 수정
 app.post('/api/ve-urls/create', async (req, res) => {
     try {
-        console.log('📥 Received VE URL creation request:', req.body);
+        console.log('📥 Received VE URL creation request');
+        console.log('📥 Request body keys:', Object.keys(req.body));
+        console.log('📥 Request body:', JSON.stringify(req.body, null, 2));
         
         const {
             reactionUrl,
@@ -222,18 +224,27 @@ app.post('/api/ve-urls/create', async (req, res) => {
 
         // 필수 필드 검증
         if (!reactionUrl || !originalUrl || !timestampData || !userInfo) {
+            console.log('❌ Missing required fields');
+            console.log('❌ reactionUrl:', !!reactionUrl);
+            console.log('❌ originalUrl:', !!originalUrl);
+            console.log('❌ timestampData:', !!timestampData);
+            console.log('❌ userInfo:', !!userInfo);
             return res.status(400).json({ 
                 error: 'Missing required fields: reactionUrl, originalUrl, timestampData, userInfo' 
             });
         }
 
+        console.log('✅ All required fields present');
+
         // 고유 VE ID 생성
         const ve_id = 've_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        console.log('✅ Generated VE ID:', ve_id);
 
         // 사용자 정보 처리 (인증 없이도 작동)
         let creator_id = null;
         if (userInfo && userInfo.email) {
             try {
+                console.log('👤 Processing user info for email:', userInfo.email);
                 // 기존 사용자 확인 또는 새 사용자 생성
                 const userPromise = User.findOne({ email: userInfo.email });
                 const timeoutPromise = new Promise((_, reject) => 
@@ -243,6 +254,7 @@ app.post('/api/ve-urls/create', async (req, res) => {
                 let user = await Promise.race([userPromise, timeoutPromise]);
                 
                 if (!user) {
+                    console.log('👤 Creating new user');
                     // 새 사용자 생성 (임시)
                     const password_hash = await bcrypt.hash(userInfo.password || 'temp123', 10);
                     user = new User({
@@ -257,14 +269,20 @@ app.post('/api/ve-urls/create', async (req, res) => {
                     );
                     
                     await Promise.race([savePromise, saveTimeoutPromise]);
+                    console.log('✅ New user created');
+                } else {
+                    console.log('✅ Existing user found');
                 }
                 creator_id = user._id;
             } catch (userError) {
-                console.error('User creation error:', userError);
+                console.error('❌ User creation error:', userError);
                 // 사용자 생성 실패해도 VE URL은 생성
             }
+        } else {
+            console.log('👤 No user email provided, creating anonymous VE URL');
         }
 
+        console.log('🏗️ Creating VE URL object...');
         const veUrl = new VEUrl({
             ve_id,
             creator_id: creator_id,
@@ -291,6 +309,7 @@ app.post('/api/ve-urls/create', async (req, res) => {
             }
         });
 
+        console.log('💾 Saving VE URL to database...');
         // 타임아웃과 함께 저장
         const savePromise = veUrl.save();
         const saveTimeoutPromise = new Promise((_, reject) => 
@@ -303,6 +322,7 @@ app.post('/api/ve-urls/create', async (req, res) => {
         // 사용자가 있는 경우 ve_urls 배열에 추가 (선택적)
         if (creator_id) {
             try {
+                console.log('👤 Updating user with VE URL reference...');
                 const updatePromise = User.findByIdAndUpdate(
                     creator_id,
                     { $push: { ve_urls: veUrl._id } }
@@ -312,8 +332,9 @@ app.post('/api/ve-urls/create', async (req, res) => {
                 );
                 
                 await Promise.race([updatePromise, updateTimeoutPromise]);
+                console.log('✅ User updated with VE URL reference');
             } catch (updateError) {
-                console.error('User update error:', updateError);
+                console.error('❌ User update error:', updateError);
                 // 사용자 업데이트 실패해도 VE URL 생성은 성공
             }
         }
@@ -321,7 +342,11 @@ app.post('/api/ve-urls/create', async (req, res) => {
         const fullUrl = `${req.protocol}://${req.get('host')}/viewer.html?ve_server=${veUrl.ve_id}`;
         const shortUrl = `${req.protocol}://${req.get('host')}/ve/${veUrl.ve_id}`;
         
-        res.status(201).json({
+        console.log('🔗 Generated URLs:');
+        console.log('🔗 Full URL:', fullUrl);
+        console.log('🔗 Short URL:', shortUrl);
+        
+        const response = {
             message: 'VE URL created successfully',
             ve_url: {
                 id: veUrl._id,
@@ -330,7 +355,11 @@ app.post('/api/ve-urls/create', async (req, res) => {
                 share_url: shortUrl,
                 full_url: fullUrl
             }
-        });
+        };
+        
+        console.log('📤 Sending response:', JSON.stringify(response, null, 2));
+        res.status(201).json(response);
+        
     } catch (error) {
         console.error('❌ VE URL creation error:', error);
         
