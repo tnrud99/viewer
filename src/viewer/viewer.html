@@ -115,15 +115,6 @@
             max-height: 200px;
             overflow-y: auto;
         }
-        .load-section {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .load-button {
-            background: linear-gradient(135deg, #5555ff 0%, #7777ff 100%);
-            font-size: 16px;
-            padding: 15px 30px;
-        }
         .status {
             margin-top: 10px;
             padding: 10px;
@@ -146,10 +137,9 @@
 </head>
 <body>
     <div class="container">
-        <!-- Load Section -->
-        <div class="load-section">
-            <button id="load-btn" class="load-button">Load VE Content</button>
-            <div id="status" class="status"></div>
+        <!-- Status Section -->
+        <div class="status-section">
+            <div id="status" class="status">Loading VE content...</div>
         </div>
 
         <!-- Video Container -->
@@ -157,7 +147,7 @@
             <div class="main-video-box">
                 <div id="reaction-youtube-container">
                     <div style="color: #888; text-align: center; padding: 20px;">
-                        Click "Load VE Content" to start
+                        Loading...
                     </div>
                 </div>
                 <div id="youtube-container" class="overlay-top-right"></div>
@@ -174,7 +164,7 @@
 
         <!-- Debug Information -->
         <div class="debug-info" id="debug-info">
-            Ready to load VE content...
+            Initializing...
         </div>
     </div>
 
@@ -186,7 +176,6 @@
         let isLoaded = false;
 
         // DOM elements
-        const loadBtn = document.getElementById('load-btn');
         const statusDiv = document.getElementById('status');
         const playBtn = document.getElementById('play-btn');
         const pauseBtn = document.getElementById('pause-btn');
@@ -224,7 +213,10 @@
                     veData = JSON.parse(atob(veParam));
                     updateDebug('✅ URL parameter data loaded');
                 } else {
-                    throw new Error('No VE content found in URL');
+                    // No VE content found
+                    updateStatus('No VE content found in URL', 'error');
+                    updateDebug('❌ No VE content found in URL parameters');
+                    return;
                 }
 
                 // Initialize players
@@ -380,7 +372,6 @@
         }
 
         // Event listeners
-        loadBtn.addEventListener('click', loadVEContent);
         playBtn.addEventListener('click', play);
         pauseBtn.addEventListener('click', pause);
         syncBtn.addEventListener('click', sync);
@@ -388,10 +379,7 @@
 
         // Auto-load if VE parameter is present
         window.addEventListener('load', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('ve_server') || urlParams.get('ve')) {
-                loadVEContent();
-            }
+            loadVEContent();
         });
     </script>
 </body>
