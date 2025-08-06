@@ -531,7 +531,6 @@
 
                     // Server upload
                     try {
-                        console.log('🔄 Sending request to server...');
                         const response = await fetch('/api/ve-urls/create', {
                             method: 'POST',
                             headers: {
@@ -542,35 +541,29 @@
 
                         console.log('📥 Server response status:', response.status);
                         console.log('📥 Server response headers:', response.headers);
-                        console.log('📥 Response ok:', response.ok);
 
                         if (response.ok) {
                             const result = await response.json();
                             console.log('✅ Server response data:', result);
                             
-                            if (result.ve_url && result.ve_url.share_url) {
-                                const veUrl = result.ve_url.share_url;
-                                generatedLinkElement.textContent = veUrl;
-                                linkSection.style.display = 'block';
-                                showMessage('✅ VE URL created successfully on server!', 'success');
-                                
-                                // Show server info
-                                dataSizeInfoElement.innerHTML = `
-                                    <div style="margin-top: 10px; padding: 10px; background: rgba(0,255,0,0.1); border-radius: 5px;">
-                                        <strong>✅ Server Upload Successful!</strong><br>
-                                        • User: ${veUrlData.userInfo.username}<br>
-                                        • Email: ${veUrlData.userInfo.email || 'Not provided'}<br>
-                                        • Reaction URL: ${veUrlData.reactionUrl.substring(0, 50)}...<br>
-                                        • Original URL: ${veUrlData.originalUrl.substring(0, 50)}...<br>
-                                        • Timestamp points: ${veUrlData.timestampData.sync_points.length}<br>
-                                        • Server ID: ${result.ve_url.ve_id}<br>
-                                        • Created at: ${new Date().toLocaleString()}
-                                    </div>
-                                `;
-                            } else {
-                                console.error('❌ Invalid server response format:', result);
-                                showMessage('❌ Server response format error', 'error');
-                            }
+                            const veUrl = result.ve_url.full_url;
+                            generatedLinkElement.textContent = veUrl;
+                            linkSection.style.display = 'block';
+                            showMessage('✅ VE URL created successfully on server!', 'success');
+                            
+                            // Show server info
+                            dataSizeInfoElement.innerHTML = `
+                                <div style="margin-top: 10px; padding: 10px; background: rgba(0,255,0,0.1); border-radius: 5px;">
+                                    <strong>✅ Server Upload Successful!</strong><br>
+                                    • User: ${veUrlData.userInfo.username}<br>
+                                    • Email: ${veUrlData.userInfo.email || 'Not provided'}<br>
+                                    • Reaction URL: ${veUrlData.reactionUrl.substring(0, 50)}...<br>
+                                    • Original URL: ${veUrlData.originalUrl.substring(0, 50)}...<br>
+                                    • Timestamp points: ${veUrlData.timestampData.sync_points.length}<br>
+                                    • Server ID: ${result.ve_url.ve_id}<br>
+                                    • Created at: ${new Date().toLocaleString()}
+                                </div>
+                            `;
                         } else {
                             const errorText = await response.text();
                             console.error('❌ Server error response:', errorText);

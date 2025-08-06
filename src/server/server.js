@@ -20,22 +20,31 @@ app.use('/src', express.static(path.join(__dirname, '..')));
 app.use('/assets', express.static(path.join(__dirname, '..', '..', 'assets')));
 app.use('/', express.static(path.join(__dirname, '..', '..')));
 
-// MongoDB 연결 설정 개선
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 15000,  // 15초로 증가
-    connectTimeoutMS: 15000,          // 15초로 증가
-    socketTimeoutMS: 45000,           // 45초로 증가
-    maxPoolSize: 20,                  // 풀 크기 증가
-    minPoolSize: 5,                   // 최소 풀 크기 증가
-    maxIdleTimeMS: 60000,             // 60초로 증가
-    retryWrites: true,
-    w: 'majority',
-    retryReads: true,
-    bufferCommands: false,            // 버퍼링 비활성화
-    bufferMaxEntries: 0
-});
+// MongoDB 연결
+const connectToMongoDB = async () => {
+    try {
+        const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ve_url_system';
+        console.log('Attempting to connect to MongoDB...');
+        console.log('MongoDB URI exists:', !!process.env.MONGODB_URI);
+        
+        await mongoose.connect(mongoUri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+        });
+        
+        console.log('✅ Successfully connected to MongoDB');
+        console.log('Database:', mongoose.connection.name);
+        console.log('Host:', mongoose.connection.host);
+        console.log('Port:', mongoose.connection.port);
+        
+    } catch (error) {
+        console.error('❌ MongoDB connection error:', error.message);
+        console.error('Error details:', error);
+        throw error;
+    }
+};
 
 // MongoDB 연결 이벤트 리스너
 mongoose.connection.on('connected', () => {
@@ -51,7 +60,7 @@ mongoose.connection.on('disconnected', () => {
 });
 
 // MongoDB 연결 시도
-// connectToMongoDB().catch(console.error); // 이 부분은 더 이상 필요 없음
+connectToMongoDB().catch(console.error);
 
 // 데이터베이스 스키마
 const userSchema = new mongoose.Schema({
@@ -64,7 +73,7 @@ const userSchema = new mongoose.Schema({
 
 const veUrlSchema = new mongoose.Schema({
     ve_id: { type: String, required: true, unique: true },
-    creator_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
+    creator_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     title: { type: String, required: true },
     description: { type: String },
     reaction_url: { type: String, required: true },
@@ -193,9 +202,7 @@ app.post('/api/auth/login', async (req, res) => {
 // VE URL 라우트 - 인증 없이도 작동하도록 수정
 app.post('/api/ve-urls/create', async (req, res) => {
     try {
-        console.log('📥 Received VE URL creation request');
-        console.log('📥 Request body keys:', Object.keys(req.body));
-        console.log('📥 Request body:', JSON.stringify(req.body, null, 2));
+        console.log('📥 Received VE URL creation request:', req.body);
         
         const {
             reactionUrl,
@@ -209,85 +216,32 @@ app.post('/api/ve-urls/create', async (req, res) => {
 
         // 필수 필드 검증
         if (!reactionUrl || !originalUrl || !timestampData || !userInfo) {
-            console.log('❌ Missing required fields');
-            console.log('❌ reactionUrl:', !!reactionUrl);
-            console.log('❌ originalUrl:', !!originalUrl);
-            console.log('❌ timestampData:', !!timestampData);
-            console.log('❌ userInfo:', !!userInfo);
             return res.status(400).json({ 
                 error: 'Missing required fields: reactionUrl, originalUrl, timestampData, userInfo' 
             });
         }
 
-        console.log('✅ All required fields present');
-
         // 고유 VE ID 생성
         const ve_id = 've_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        console.log('✅ Generated VE ID:', ve_id);
 
         // 사용자 정보 처리 (인증 없이도 작동)
         let creator_id = null;
         if (userInfo && userInfo.email) {
-            try {
-                console.log('👤 Processing user info for email:', userInfo.email);
-                // 기존 사용자 확인 또는 새 사용자 생성
-                const userPromise = User.findOne({ email: userInfo.email });
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('User lookup timeout')), 5000)
-                );
-                
-                let user = await Promise.race([userPromise, timeoutPromise]);
-                
-                if (!user) {
-                    console.log('👤 Creating new user');
-                    // 새 사용자 생성 (임시)
-                    const password_hash = await bcrypt.hash(userInfo.password || 'temp123', 10);
-                    user = new User({
-                        username: userInfo.username || 'Anonymous',
-                        email: userInfo.email,
-                        password_hash
-                    });
-                    
-                    // 사용자 저장 시도 함수
-                    const saveUserWithRetry = async (user, maxRetries = 3) => {
-                        for (let attempt = 1; attempt <= maxRetries; attempt++) {
-                            try {
-                                console.log(`👤 User save attempt ${attempt}/${maxRetries}...`);
-                                
-                                const savePromise = user.save();
-                                const saveTimeoutPromise = new Promise((_, reject) => 
-                                    setTimeout(() => reject(new Error(`User save timeout (attempt ${attempt})`)), 10000)
-                                );
-                                
-                                await Promise.race([savePromise, saveTimeoutPromise]);
-                                console.log(`✅ User saved successfully on attempt ${attempt}`);
-                                return;
-                            } catch (error) {
-                                console.error(`❌ User save attempt ${attempt} failed:`, error.message);
-                                if (attempt === maxRetries) {
-                                    throw error;
-                                }
-                                // 잠시 대기 후 재시도
-                                await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-                            }
-                        }
-                    };
-                    
-                    await saveUserWithRetry(user);
-                    console.log('✅ New user created');
-                } else {
-                    console.log('✅ Existing user found');
-                }
-                creator_id = user._id;
-            } catch (userError) {
-                console.error('❌ User creation error:', userError);
-                // 사용자 생성 실패해도 VE URL은 생성
+            // 기존 사용자 확인 또는 새 사용자 생성
+            let user = await User.findOne({ email: userInfo.email });
+            if (!user) {
+                // 새 사용자 생성 (임시)
+                const password_hash = await bcrypt.hash(userInfo.password || 'temp123', 10);
+                user = new User({
+                    username: userInfo.username || 'Anonymous',
+                    email: userInfo.email,
+                    password_hash
+                });
+                await user.save();
             }
-        } else {
-            console.log('👤 No user email provided, creating anonymous VE URL');
+            creator_id = user._id;
         }
 
-        console.log('🏗️ Creating VE URL object...');
         const veUrl = new VEUrl({
             ve_id,
             creator_id: creator_id,
@@ -314,144 +268,50 @@ app.post('/api/ve-urls/create', async (req, res) => {
             }
         });
 
-        console.log('💾 Saving VE URL to database...');
-        
-        // 저장 시도 함수
-        const saveWithRetry = async (veUrl, maxRetries = 3) => {
-            for (let attempt = 1; attempt <= maxRetries; attempt++) {
-                try {
-                    console.log(`💾 Save attempt ${attempt}/${maxRetries}...`);
-                    
-                    // 타임아웃과 함께 저장
-                    const savePromise = veUrl.save();
-                    const saveTimeoutPromise = new Promise((_, reject) => 
-                        setTimeout(() => reject(new Error(`VE URL save timeout (attempt ${attempt})`)), 15000)
-                    );
-                    
-                    await Promise.race([savePromise, saveTimeoutPromise]);
-                    console.log(`✅ VE URL saved successfully on attempt ${attempt}`);
-                    return;
-                } catch (error) {
-                    console.error(`❌ Save attempt ${attempt} failed:`, error.message);
-                    if (attempt === maxRetries) {
-                        throw error;
-                    }
-                    // 잠시 대기 후 재시도
-                    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-                }
-            }
-        };
-        
-        await saveWithRetry(veUrl);
+        await veUrl.save();
         console.log('✅ VE URL saved to database:', veUrl.ve_id);
 
-        // 사용자가 있는 경우 ve_urls 배열에 추가 (선택적)
+        // 사용자가 있는 경우 ve_urls 배열에 추가
         if (creator_id) {
-            try {
-                console.log('👤 Updating user with VE URL reference...');
-                
-                // 사용자 업데이트 시도 함수
-                const updateUserWithRetry = async (creator_id, veUrl_id, maxRetries = 3) => {
-                    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-                        try {
-                            console.log(`👤 User update attempt ${attempt}/${maxRetries}...`);
-                            
-                            const updatePromise = User.findByIdAndUpdate(
-                                creator_id,
-                                { $push: { ve_urls: veUrl_id } }
-                            );
-                            const updateTimeoutPromise = new Promise((_, reject) => 
-                                setTimeout(() => reject(new Error(`User update timeout (attempt ${attempt})`)), 10000)
-                            );
-                            
-                            await Promise.race([updatePromise, updateTimeoutPromise]);
-                            console.log(`✅ User updated successfully on attempt ${attempt}`);
-                            return;
-                        } catch (error) {
-                            console.error(`❌ User update attempt ${attempt} failed:`, error.message);
-                            if (attempt === maxRetries) {
-                                throw error;
-                            }
-                            // 잠시 대기 후 재시도
-                            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-                        }
-                    }
-                };
-                
-                await updateUserWithRetry(creator_id, veUrl._id);
-                console.log('✅ User updated with VE URL reference');
-            } catch (updateError) {
-                console.error('❌ User update error:', updateError);
-                // 사용자 업데이트 실패해도 VE URL 생성은 성공
-            }
+            await User.findByIdAndUpdate(
+                creator_id,
+                { $push: { ve_urls: veUrl._id } }
+            );
         }
 
         const fullUrl = `${req.protocol}://${req.get('host')}/viewer.html?ve_server=${veUrl.ve_id}`;
-        const shortUrl = `${req.protocol}://${req.get('host')}/ve/${veUrl.ve_id}`;
         
-        console.log('🔗 Generated URLs:');
-        console.log('🔗 Full URL:', fullUrl);
-        console.log('🔗 Short URL:', shortUrl);
-        
-        const response = {
+        res.status(201).json({
             message: 'VE URL created successfully',
             ve_url: {
                 id: veUrl._id,
                 ve_id: veUrl.ve_id,
                 title: veUrl.title,
-                share_url: shortUrl,
+                share_url: `${req.protocol}://${req.get('host')}/ve/${veUrl.ve_id}`,
                 full_url: fullUrl
             }
-        };
-        
-        console.log('📤 Sending response:', JSON.stringify(response, null, 2));
-        res.status(201).json(response);
-        
+        });
     } catch (error) {
         console.error('❌ VE URL creation error:', error);
-        
-        // MongoDB 연결 오류인지 확인
-        if (error.message.includes('buffering timed out') || error.message.includes('MongoNetworkError')) {
-            res.status(503).json({ 
-                error: 'Database connection timeout. Please try again in a few moments.' 
-            });
-        } else {
-            res.status(500).json({ error: 'Server error: ' + error.message });
-        }
+        res.status(500).json({ error: 'Server error: ' + error.message });
     }
 });
 
-// VE URL 조회 엔드포인트 추가
 app.get('/api/ve-urls/:id', async (req, res) => {
     try {
-        console.log('📥 VE URL lookup request for ID:', req.params.id);
-        
         const veUrl = await VEUrl.findOne({ ve_id: req.params.id });
         
         if (!veUrl) {
-            console.log('❌ VE URL not found:', req.params.id);
             return res.status(404).json({ error: 'VE URL not found' });
         }
-        
-        console.log('✅ VE URL found:', veUrl.ve_id);
-        
-        // 조회수 증가 (타임아웃 처리)
-        try {
-            veUrl.metadata.view_count += 1;
-            const savePromise = veUrl.save();
-            const saveTimeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('View count save timeout')), 5000)
-            );
-            await Promise.race([savePromise, saveTimeoutPromise]);
-            console.log('✅ View count updated');
-        } catch (saveError) {
-            console.error('❌ View count save error:', saveError);
-            // 조회수 저장 실패해도 데이터는 반환
-        }
-        
-        // 뷰어에서 필요한 형식으로 데이터 반환
-        const veData = {
+
+        // 조회수 증가
+        veUrl.metadata.view_count += 1;
+        await veUrl.save();
+
+        res.json({
             ve_url: {
+                id: veUrl._id,
                 ve_id: veUrl.ve_id,
                 title: veUrl.title,
                 description: veUrl.description,
@@ -459,17 +319,11 @@ app.get('/api/ve-urls/:id', async (req, res) => {
                 original_url: veUrl.original_url,
                 timestamp_data: veUrl.timestamp_data,
                 settings: veUrl.settings,
-                access_control: veUrl.access_control,
                 metadata: veUrl.metadata
             }
-        };
-        
-        console.log('📤 Sending VE URL data to viewer');
-        res.json(veData);
-        
+        });
     } catch (error) {
-        console.error('❌ VE URL lookup error:', error);
-        res.status(500).json({ error: 'Server error: ' + error.message });
+        res.status(500).json({ error: 'Server error' });
     }
 });
 
@@ -494,7 +348,7 @@ app.put('/api/ve-urls/:id', authenticateToken, async (req, res) => {
         }
 
         // 권한 확인
-        if (veUrl.creator_id && veUrl.creator_id.toString() !== req.user.userId) {
+        if (veUrl.creator_id.toString() !== req.user.userId) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
@@ -526,7 +380,7 @@ app.delete('/api/ve-urls/:id', authenticateToken, async (req, res) => {
         }
 
         // 권한 확인
-        if (veUrl.creator_id && veUrl.creator_id.toString() !== req.user.userId) {
+        if (veUrl.creator_id.toString() !== req.user.userId) {
             return res.status(403).json({ error: 'Access denied' });
         }
 
@@ -583,11 +437,6 @@ app.get('/create-ve-url-enhanced.html', (req, res) => {
 // Server status page
 app.get('/server-status.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'server-status.html'));
-});
-
-// Viewer page
-app.get('/viewer.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'viewer.html'));
 });
 
 // src/viewer/ 경로의 파일들 서빙
@@ -692,25 +541,15 @@ app.get('/ve/:id', async (req, res) => {
             return res.status(404).json({ error: 'VE URL not found' });
         }
 
-        // 조회수 증가 (타임아웃 처리 추가)
-        try {
-            veUrl.metadata.view_count += 1;
-            const savePromise = veUrl.save();
-            const saveTimeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('View count save timeout')), 5000)
-            );
-            await Promise.race([savePromise, saveTimeoutPromise]);
-        } catch (saveError) {
-            console.error('View count save error:', saveError);
-            // 조회수 저장 실패해도 리다이렉트는 진행
-        }
+        // 조회수 증가
+        veUrl.metadata.view_count += 1;
+        await veUrl.save();
 
         // viewer.html로 리다이렉트
         const viewerUrl = `${req.protocol}://${req.get('host')}/viewer.html?ve_server=${veUrl.ve_id}`;
         res.redirect(viewerUrl);
     } catch (error) {
-        console.error('Short URL route error:', error);
-        res.status(500).json({ error: 'Server error: ' + error.message });
+        res.status(500).json({ error: 'Server error' });
     }
 });
 
@@ -719,7 +558,7 @@ app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'OK', 
         timestamp: new Date().toISOString(),
-        mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+        environment: process.env.NODE_ENV || 'development'
     });
 });
 

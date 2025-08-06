@@ -308,7 +308,7 @@
             </div>
             
             <div class="button-group">
-                <!-- Load button removed - automatic loading implemented -->
+                <button id="load-btn" class="primary">Load</button>
             </div>
         </div>
 
@@ -524,7 +524,7 @@
         const reactionVideoInput = document.getElementById('reaction-video');
         const reactionUrlInput = document.getElementById('reaction-url');
         const youtubeUrlInput = document.getElementById('youtube-url');
-        // loadBtn removed - automatic loading implemented
+        const loadBtn = document.getElementById('load-btn');
         const playBtn = document.getElementById('play-btn');
         const pauseBtn = document.getElementById('pause-btn');
         const stopBtn = document.getElementById('stop-btn');
@@ -694,162 +694,47 @@
             showMessage('Reaction video loaded.', 'success');
         });
 
-        // Auto-load VE content on page load
-        window.addEventListener('load', function() {
-            // Check for VE URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            const veServer = urlParams.get('ve_server');
-            
-            if (veServer) {
-                // Load VE content from server
-                loadVEContentFromServer(veServer);
-            } else {
-                // Check for legacy VE parameter
-                const veParam = urlParams.get('ve');
-                if (veParam) {
-                    loadVEContentFromParam(veParam);
-                } else {
-                    showMessage('No VE content found in URL parameters.', 'info');
-                }
-            }
-        });
-
-        // Load VE content from server
-        async function loadVEContentFromServer(veServer) {
-            try {
-                statusElement.textContent = 'Status: Loading from server...';
-                addDebugMessage(`Loading VE content from server: ${veServer}`);
-                
-                const response = await fetch(`/api/ve-urls/${veServer}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    addDebugMessage('Server data loaded successfully');
-                    
-                    // Extract data from server response
-                    const veData = data.ve_url;
-                    
-                    // Set up the content
-                    setupVEContent(veData);
-                } else {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-            } catch (error) {
-                addDebugMessage(`Error loading from server: ${error.message}`);
-                showMessage('Failed to load VE content from server.', 'error');
-            }
-        }
-
-        // Load VE content from URL parameter (legacy)
-        function loadVEContentFromParam(veParam) {
-            try {
-                statusElement.textContent = 'Status: Loading from URL parameter...';
-                addDebugMessage('Loading VE content from URL parameter');
-                
-                const veData = JSON.parse(atob(veParam));
-                setupVEContent(veData);
-            } catch (error) {
-                addDebugMessage(`Error loading from URL parameter: ${error.message}`);
-                showMessage('Failed to load VE content from URL parameter.', 'error');
-            }
-        }
-
-        // Setup VE content
-        function setupVEContent(veData) {
-            try {
-                addDebugMessage('Setting up VE content...');
-                
-                // Set timestamp data
-                timestampData = veData.timestamp_data;
-                addDebugMessage(`Timestamp data loaded: ${timestampData.sync_points.length} sync points`);
-                
-                // Set reaction URL
-                if (veData.reaction_url) {
-                    reactionUrlInput.value = veData.reaction_url;
-                    reactionSource = 'youtube';
-                    // Trigger source type change
-                    document.querySelector('input[name="reaction-source"][value="youtube"]').checked = true;
-                    document.getElementById('file-source-container').style.display = 'none';
-                    document.getElementById('youtube-source-container').style.display = 'block';
-                    reactionPlayer.style.display = 'none';
-                    document.getElementById('reaction-youtube-container').style.display = 'block';
-                    youtubeYoutubeMode = true;
-                }
-                
-                // Set original URL
-                if (veData.original_url) {
-                    youtubeUrlInput.value = veData.original_url;
-                }
-                
-                // Set settings
-                if (veData.settings) {
-                    if (veData.settings.overlay_position) {
-                        overlayPosition = veData.settings.overlay_position;
-                        overlayPositionSelect.value = overlayPosition;
-                        updateOverlayPosition();
-                    }
-                    if (veData.settings.overlay_size) {
-                        overlaySize = veData.settings.overlay_size;
-                        overlaySizeSlider.value = overlaySize;
-                        overlaySizeValue.textContent = overlaySize + '%';
-                        updateOverlaySize();
-                    }
-                    if (veData.settings.youtube_volume) {
-                        youtubeVolume = veData.settings.youtube_volume;
-                        youtubeVolumeSlider.value = youtubeVolume;
-                        youtubeVolumeValue.textContent = youtubeVolume + '%';
-                        updateYoutubeVolume();
-                    }
-                }
-                
-                // Auto-initialize players
-                initializePlayers();
-                
-                statusElement.textContent = 'Status: VE content loaded successfully';
-                showMessage('VE content loaded successfully!', 'success');
-                
-            } catch (error) {
-                addDebugMessage(`Error setting up VE content: ${error.message}`);
-                showMessage('Error setting up VE content.', 'error');
-            }
-        }
-
-        // Initialize players
-        function initializePlayers() {
+        // Load button click
+        loadBtn.addEventListener('click', function() {
             const youtubeUrl = youtubeUrlInput.value.trim();
-            const reactionUrl = reactionUrlInput.value.trim();
             
             if (!timestampData) {
-                showMessage('No timestamp data available.', 'error');
+                showMessage('Please load timestamp file first.', 'error');
                 return;
             }
             
-            if (reactionSource === 'youtube' && !reactionUrl) {
-                showMessage('No reaction video URL available.', 'error');
+            if (reactionSource === 'file' && !reactionPlayer.src) {
+                showMessage('Please select reaction video first.', 'error');
                 return;
             }
             
-            if (!youtubeUrl) {
-                showMessage('No original video URL available.', 'error');
-                return;
-            }
-            
-            // Extract video IDs
-            const reactionVideoId = extractYouTubeVideoId(reactionUrl);
-            youtubeVideoId = extractYouTubeVideoId(youtubeUrl);
-            
-            if (!reactionVideoId || !youtubeVideoId) {
-                showMessage('Invalid video URLs.', 'error');
-                return;
-            }
-            
-            // Create reaction player
             if (reactionSource === 'youtube') {
-                if (reactionYoutubePlayer) {
-                    reactionYoutubePlayer.destroy();
+                const reactionUrl = reactionUrlInput.value.trim();
+                if (!reactionUrl) {
+                    showMessage('Please enter reaction video URL.', 'error');
+                    return;
                 }
                 
+                // Extract reaction video YouTube ID
+                const reactionVideoId = extractYouTubeVideoId(reactionUrl);
+                if (!reactionVideoId) {
+                    showMessage('Invalid reaction video YouTube URL.', 'error');
+                    return;
+                }
+                
+                // Remove existing reaction YouTube player
+                if (reactionYoutubePlayer) {
+                    reactionYoutubePlayer.destroy();
+                    reactionYoutubePlayer = null;
+                }
+                
+                // Set YouTube-YouTube mode flag
+                youtubeYoutubeMode = true;
+                reactionYoutubeReady = false;
+                
+                // Create new reaction YouTube player with improved height
                 reactionYoutubePlayer = new YT.Player('reaction-youtube-container', {
-                    height: '540',
+                    height: '540', // 1.5배 높이 증가 (기본 360px의 1.5배)
                     width: '100%',
                     videoId: reactionVideoId,
                     playerVars: {
@@ -865,24 +750,61 @@
                 });
                 
                 addDebugMessage(`Created reaction YouTube player with video ID: ${reactionVideoId}`);
+            } else {
+                // Set YouTube-YouTube mode flag to false for file mode
+                youtubeYoutubeMode = false;
+            }
+            
+            if (!youtubeUrl) {
+                showMessage('Please enter YouTube URL.', 'error');
+                return;
+            }
+
+            // Extract YouTube video ID
+            youtubeVideoId = extractYouTubeVideoId(youtubeUrl);
+            if (!youtubeVideoId) {
+                showMessage('Invalid YouTube URL.', 'error');
+                return;
+            }
+
+            // CRITICAL CHANGE: We don't create the YouTube player here anymore
+            // We'll create it only when we reach the first sync point
+            
+            // If there was a previous player, destroy it
+            if (youtubePlayer) {
+                youtubePlayer.destroy();
+                youtubePlayer = null;
+                youtubePlayerCreated = false;
             }
             
             // Hide YouTube container until first sync point
             document.getElementById('youtube-container').style.display = 'none';
-            
+
             statusElement.textContent = 'Status: Ready to Play';
             enableControls(true);
             
-            // Reset flags
+            // Reset YouTube started flag
             youtubeStarted = false;
             waitingForFirstSync = false;
-            youtubePlayerCreated = false;
             
-            addDebugMessage('Players initialized successfully');
-        }
-
-        // Load button click - REMOVED
-        // loadBtn.addEventListener('click', function() {
+            // Reset tracking variables
+            lastProcessedPauseTime = -1;
+            lastProcessedPlayTime = -1;
+            youtubePaused = false;
+            currentSyncPoint = null;
+            nextPauseTime = null;
+            nextPlayTime = null;
+            lastReactionTime = 0;
+            reactionYoutubeCurrentTime = 0;
+            lastReactionYoutubeTime = 0;
+            
+            // Clear debug info
+            debugInfo = [];
+            addDebugMessage("Ready to play. Click Play to start.");
+            updateDebugDisplay();
+            
+            showMessage('All media loaded. Click Play to start.', 'success');
+        });
 
         // Play button click
         playBtn.addEventListener('click', function() {
