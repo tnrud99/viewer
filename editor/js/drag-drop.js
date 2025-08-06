@@ -103,7 +103,12 @@ class DragDropHandler {
             deltaX,
             deltaTime,
             selectedBlocksCount: this.editor.selectedBlocks.length,
-            rippleMode: this.editor.rippleMode
+            rippleMode: this.editor.rippleMode,
+            selectedBlocks: this.editor.selectedBlocks.map(b => ({
+                index: b.dataset.index,
+                playIndex: b.dataset.playIndex,
+                className: b.className
+            }))
         });
         
         // 선택된 모든 블록 이동
@@ -128,17 +133,13 @@ class DragDropHandler {
             }
         });
         
-        // 연결 이동 모드 처리
-        if (this.editor.rippleMode && this.editor.selectedBlocks.length === 1) {
-            console.log('Calling moveRippleBlocks from updateDrag');
+        // 연결 이동 모드 처리 - 조건 완화
+        if (this.editor.rippleMode) {
+            console.log('Ripple mode is active, attempting to move ripple blocks');
             this.moveRippleBlocks(deltaTime);
         } else {
-            console.log('Ripple mode conditions not met in updateDrag:', {
-                rippleMode: this.editor.rippleMode,
-                selectedBlocksCount: this.editor.selectedBlocks.length
-            });
+            console.log('Ripple mode is disabled');
         }
-        // Individual Move 모드: 선택된 블록만 이동 (기본 동작)
         
         // 타임라인 컨트롤이 있으면 드래그 업데이트 알림
         if (this.editor.timelineControls) {
@@ -182,6 +183,21 @@ class DragDropHandler {
             draggedIndex = parseInt(selectedBlock.dataset.index);
         }
         
+        console.log('moveRippleBlocks called:', {
+            draggedIndex,
+            deltaTime,
+            selectedBlockType: selectedBlock.classList.contains('play-pause-block') ? 'play-pause' : 'timestamp',
+            selectedBlockData: {
+                index: selectedBlock.dataset.index,
+                playIndex: selectedBlock.dataset.playIndex
+            }
+        });
+        
+        if (isNaN(draggedIndex)) {
+            console.error('Invalid draggedIndex:', draggedIndex);
+            return;
+        }
+        
         const blocks = document.querySelectorAll('.timestamp-block');
         
         console.log('DragDrop: Ripple mode activated:', {
@@ -189,8 +205,11 @@ class DragDropHandler {
             deltaTime,
             rippleMode: this.editor.rippleMode,
             selectedBlocksCount: this.editor.selectedBlocks.length,
-            blockType: selectedBlock.classList.contains('play-pause-block') ? 'play-pause' : 'timestamp'
+            blockType: selectedBlock.classList.contains('play-pause-block') ? 'play-pause' : 'timestamp',
+            totalBlocks: blocks.length
         });
+        
+        let movedBlocksCount = 0;
         
         blocks.forEach(block => {
             let blockIndex;
@@ -202,6 +221,13 @@ class DragDropHandler {
                 blockIndex = parseInt(block.dataset.index);
             }
             
+            console.log('Processing block:', {
+                blockIndex,
+                isSelected: this.editor.selectedBlocks.includes(block),
+                isAfterDragged: blockIndex > draggedIndex,
+                blockType: block.classList.contains('play-pause-block') ? 'play-pause' : 'timestamp'
+            });
+            
             if (blockIndex > draggedIndex && !this.editor.selectedBlocks.includes(block)) {
                 // 원본 데이터에서 현재 시간 가져오기
                 const currentTime = this.editor.timestampData.sync_points[blockIndex].reaction_time;
@@ -211,9 +237,12 @@ class DragDropHandler {
                 const newLeft = newTime * this.editor.pixelsPerSecond;
                 block.style.left = newLeft + 'px';
                 
+                movedBlocksCount++;
                 console.log(`DragDrop: Moved block ${blockIndex}: ${currentTime}s -> ${newTime}s`);
             }
         });
+        
+        console.log(`Ripple move completed: ${movedBlocksCount} blocks moved`);
     }
     
     updateTimestampData() {

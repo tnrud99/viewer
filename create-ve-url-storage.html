@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create VE URL - Local Storage Version</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #ff5555;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #888;
+            font-size: 1.1em;
+        }
+        .form-section {
+            background-color: #2a2a2a;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .form-section h3 {
+            margin-top: 0;
+            color: #ff5555;
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ddd;
+        }
+        .input-group input[type="text"],
+        .input-group input[type="file"],
+        .input-group select {
+            width: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+            background-color: #333;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .input-group input[type="text"]:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #ff5555;
+            box-shadow: 0 0 0 2px rgba(255, 85, 85, 0.2);
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .slider-container input[type="range"] {
+            flex-grow: 1;
+            height: 6px;
+            background: #444;
+            border-radius: 3px;
+            outline: none;
+        }
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #ff5555;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .slider-value {
+            min-width: 50px;
+            text-align: center;
+            font-weight: bold;
+            color: #ff5555;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        button {
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #5a5a5a;
+            transform: translateY(-1px);
+        }
+        button:disabled {
+            background-color: #3a3a3a;
+            cursor: not-allowed;
+            transform: none;
+        }
+        button.primary {
+            background-color: #ff5555;
+        }
+        button.primary:hover {
+            background-color: #ff7777;
+        }
+        button.secondary {
+            background-color: #5555ff;
+        }
+        button.secondary:hover {
+            background-color: #7777ff;
+        }
+        .message {
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        .message.error {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #ff5555;
+            display: block;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+        .message.success {
+            background-color: rgba(0, 255, 0, 0.2);
+            color: #55ff55;
+            display: block;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+        .link-section {
+            background-color: #2a2a2a;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 25px;
+            display: none;
+        }
+        .link-section h3 {
+            margin-top: 0;
+            color: #55ff55;
+        }
+        .generated-link {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+            color: #55ff55;
+            border: 1px solid #444;
+        }
+        .copy-button {
+            background-color: #5555ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .copy-button:hover {
+            background-color: #7777ff;
+        }
+        .info-box {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid #ffaa55;
+        }
+        .info-box h3 {
+            margin-top: 0;
+            color: #ffaa55;
+        }
+        .info-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .info-box li {
+            margin: 5px 0;
+        }
+        .method-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .method-selector label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 6px;
+            border: 2px solid transparent;
+        }
+        .method-selector input[type="radio"] {
+            margin-right: 8px;
+        }
+        .method-selector input[type="radio"]:checked + span {
+            color: #ff5555;
+        }
+        .method-selector label:has(input[type="radio"]:checked) {
+            border-color: #ff5555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Create VE URL - Storage Method</h1>
+            <p class="subtitle">Choose your preferred method for sharing synchronized video experiences</p>
+        </header>
+
+        <div class="info-box">
+            <h3>📋 Sharing Methods</h3>
+            <p>Choose how you want to share your synchronized video experience:</p>
+            <ul>
+                <li><strong>URL Method</strong>: All data embedded in the URL (limited by URL length)</li>
+                <li><strong>Local Storage Method</strong>: Data stored locally, URL contains only a reference ID</li>
+                <li><strong>Server Method</strong>: Data uploaded to server, URL contains server reference (requires server)</li>
+            </ul>
+        </div>
+
+        <div class="method-selector">
+            <label>
+                <input type="radio" name="method" value="url" checked>
+                <span>URL Method</span>
+            </label>
+            <label>
+                <input type="radio" name="method" value="local">
+                <span>Local Storage</span>
+            </label>
+            <label>
+                <input type="radio" name="method" value="server">
+                <span>Server Upload</span>
+            </label>
+        </div>
+
+        <div class="form-section">
+            <h3>📹 Video Information</h3>
+            
+            <div class="input-group">
+                <label for="reaction-url">Reaction Video YouTube URL <span class="required">*</span></label>
+                <input type="text" id="reaction-url" placeholder="https://www.youtube.com/watch?v=..." value="https://www.youtube.com/watch?v=niYgb0IfP4U">
+                <div class="help-text">Enter the YouTube link for the reaction video</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="original-url">Original Video YouTube URL <span class="required">*</span></label>
+                <input type="text" id="original-url" placeholder="https://www.youtube.com/watch?v=..." value="https://www.youtube.com/watch?v=AbZH7XWDW_k">
+                <div class="help-text">Enter the YouTube link for the original video</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="timestamp-file">Timestamp File <span class="required">*</span></label>
+                <input type="file" id="timestamp-file" accept=".json">
+                <div class="help-text">Select a JSON file containing synchronization information</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>⚙️ Viewer Settings</h3>
+            
+            <div class="input-group">
+                <label for="overlay-position">Overlay Position</label>
+                <select id="overlay-position">
+                    <option value="top-right">Top Right</option>
+                    <option value="top-left">Top Left</option>
+                    <option value="bottom-right">Bottom Right</option>
+                    <option value="bottom-left">Bottom Left</option>
+                </select>
+                <div class="help-text">Select where the original video will be displayed</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="overlay-size">Overlay Size</label>
+                <div class="slider-container">
+                    <input type="range" id="overlay-size" min="10" max="60" value="50">
+                    <span id="overlay-size-value" class="slider-value">50%</span>
+                </div>
+                <div class="help-text">Adjust the size of the original video (10% - 60%)</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="youtube-volume">Original Video Volume</label>
+                <div class="slider-container">
+                    <input type="range" id="youtube-volume" min="0" max="100" value="100">
+                    <span id="youtube-volume-value" class="slider-value">100%</span>
+                </div>
+                <div class="help-text">Adjust the volume of the original video (0% - 100%)</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>📝 Additional Information (Optional)</h3>
+            
+            <div class="input-group">
+                <label for="title">Title</label>
+                <input type="text" id="title" placeholder="e.g., [Reaction] Popular Video Review">
+                <div class="help-text">Enter a title for the generated link</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="description">Description</label>
+                <input type="text" id="description" placeholder="e.g., Fun reaction video">
+                <div class="help-text">Enter a description for the generated link</div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="create-url-btn" class="primary">Create URL Method VE</button>
+            <button id="create-local-btn" class="secondary">Create Local Storage VE</button>
+            <button id="create-server-btn" class="secondary">Create Server VE</button>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div id="link-section" class="link-section">
+            <h3>✅ VE URL Created Successfully!</h3>
+            <p>Copy the link below to share with others:</p>
+            <div id="generated-link" class="generated-link"></div>
+            <button id="copy-link-btn" class="copy-button">Copy Link</button>
+            <div id="method-info" style="margin-top: 15px; font-size: 12px; color: #888;"></div>
+            <div style="margin-top: 20px;">
+                <p><strong>How to use:</strong></p>
+                <ul>
+                    <li>Click the link to open the synchronized viewer</li>
+                    <li>Reaction video and original video will be automatically synchronized</li>
+                    <li>Use play/pause buttons in the viewer to control playback</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM 요소들
+        const reactionUrlInput = document.getElementById('reaction-url');
+        const originalUrlInput = document.getElementById('original-url');
+        const timestampFileInput = document.getElementById('timestamp-file');
+        const overlayPositionSelect = document.getElementById('overlay-position');
+        const overlaySizeSlider = document.getElementById('overlay-size');
+        const overlaySizeValue = document.getElementById('overlay-size-value');
+        const youtubeVolumeSlider = document.getElementById('youtube-volume');
+        const youtubeVolumeValue = document.getElementById('youtube-volume-value');
+        const titleInput = document.getElementById('title');
+        const descriptionInput = document.getElementById('description');
+        const createUrlBtn = document.getElementById('create-url-btn');
+        const createLocalBtn = document.getElementById('create-local-btn');
+        const createServerBtn = document.getElementById('create-server-btn');
+        const messageElement = document.getElementById('message');
+        const linkSection = document.getElementById('link-section');
+        const generatedLinkElement = document.getElementById('generated-link');
+        const copyLinkBtn = document.getElementById('copy-link-btn');
+        const methodInfoElement = document.getElementById('method-info');
+
+        // 슬라이더 이벤트 리스너
+        overlaySizeSlider.addEventListener('input', function() {
+            overlaySizeValue.textContent = this.value + '%';
+        });
+
+        youtubeVolumeSlider.addEventListener('input', function() {
+            youtubeVolumeValue.textContent = this.value + '%';
+        });
+
+        // YouTube URL 검증 함수
+        function extractYouTubeVideoId(url) {
+            if (!url) return null;
+            const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[7].length === 11) ? match[7] : null;
+        }
+
+        // 필수 필드 검증
+        function validateRequiredFields() {
+            const reactionUrl = reactionUrlInput.value.trim();
+            const originalUrl = originalUrlInput.value.trim();
+            const timestampFile = timestampFileInput.files[0];
+
+            if (!reactionUrl) {
+                showMessage('Please enter the reaction video URL.', 'error');
+                return false;
+            }
+
+            if (!extractYouTubeVideoId(reactionUrl)) {
+                showMessage('Please enter a valid reaction video YouTube URL.', 'error');
+                return false;
+            }
+
+            if (!originalUrl) {
+                showMessage('Please enter the original video URL.', 'error');
+                return false;
+            }
+
+            if (!extractYouTubeVideoId(originalUrl)) {
+                showMessage('Please enter a valid original video YouTube URL.', 'error');
+                return false;
+            }
+
+            if (!timestampFile) {
+                showMessage('Please select a timestamp file.', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
+        // 메시지 표시 함수
+        function showMessage(text, type) {
+            messageElement.textContent = text;
+            messageElement.className = 'message ' + type;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (messageElement.textContent === text) {
+                        messageElement.className = 'message';
+                        messageElement.textContent = '';
+                    }
+                }, 5000);
+            }
+        }
+
+        // 로컬 스토리지에 데이터 저장
+        function saveToLocalStorage(data) {
+            const id = 've_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem(id, JSON.stringify(data));
+            return id;
+        }
+
+        // URL 메서드로 VE 생성
+        function createUrlMethodVE() {
+            if (!validateRequiredFields()) return;
+
+            const timestampFile = timestampFileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const timestampData = JSON.parse(e.target.result);
+                    
+                    const veUrlData = {
+                        reactionUrl: reactionUrlInput.value.trim(),
+                        originalUrl: originalUrlInput.value.trim(),
+                        timestampData: timestampData,
+                        settings: {
+                            overlayPosition: overlayPositionSelect.value,
+                            overlaySize: parseInt(overlaySizeSlider.value),
+                            youtubeVolume: parseInt(youtubeVolumeSlider.value)
+                        },
+                        metadata: {
+                            title: titleInput.value.trim() || 'Synchronized Reaction Video',
+                            description: descriptionInput.value.trim() || 'Reaction video synchronized with original video',
+                            createdAt: new Date().toISOString()
+                        }
+                    };
+
+                    // URL 인코딩
+                    const jsonString = JSON.stringify(veUrlData);
+                    const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
+                    const veUrl = `${window.location.origin}/viewer.html?ve=${encodedData}`;
+
+                    generatedLinkElement.textContent = veUrl;
+                    methodInfoElement.textContent = 'Method: URL embedded (all data in URL)';
+                    linkSection.style.display = 'block';
+                    showMessage('URL method VE created successfully!', 'success');
+                } catch (error) {
+                    showMessage('Error creating URL method VE: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(timestampFile);
+        }
+
+        // 로컬 스토리지 메서드로 VE 생성
+        function createLocalStorageVE() {
+            if (!validateRequiredFields()) return;
+
+            const timestampFile = timestampFileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const timestampData = JSON.parse(e.target.result);
+                    
+                    const veUrlData = {
+                        reactionUrl: reactionUrlInput.value.trim(),
+                        originalUrl: originalUrlInput.value.trim(),
+                        timestampData: timestampData,
+                        settings: {
+                            overlayPosition: overlayPositionSelect.value,
+                            overlaySize: parseInt(overlaySizeSlider.value),
+                            youtubeVolume: parseInt(youtubeVolumeSlider.value)
+                        },
+                        metadata: {
+                            title: titleInput.value.trim() || 'Synchronized Reaction Video',
+                            description: descriptionInput.value.trim() || 'Reaction video synchronized with original video',
+                            createdAt: new Date().toISOString()
+                        }
+                    };
+
+                    // 로컬 스토리지에 저장
+                    const storageId = saveToLocalStorage(veUrlData);
+                    const veUrl = `${window.location.origin}/viewer.html?ve_local=${storageId}`;
+
+                    generatedLinkElement.textContent = veUrl;
+                    methodInfoElement.textContent = 'Method: Local Storage (data stored in browser)';
+                    linkSection.style.display = 'block';
+                    showMessage('Local storage VE created successfully!', 'success');
+                } catch (error) {
+                    showMessage('Error creating local storage VE: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(timestampFile);
+        }
+
+        // 서버 메서드로 VE 생성 (시뮬레이션)
+        function createServerVE() {
+            if (!validateRequiredFields()) return;
+
+            showMessage('Server method requires backend implementation. This is a simulation.', 'error');
+            
+            // 시뮬레이션: 서버 ID 생성
+            const serverId = 'server_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            const veUrl = `${window.location.origin}/viewer.html?ve_server=${serverId}`;
+
+            generatedLinkElement.textContent = veUrl;
+            methodInfoElement.textContent = 'Method: Server Upload (simulation - requires backend)';
+            linkSection.style.display = 'block';
+            showMessage('Server method VE created (simulation)!', 'success');
+        }
+
+        // 버튼 이벤트 리스너
+        createUrlBtn.addEventListener('click', createUrlMethodVE);
+        createLocalBtn.addEventListener('click', createLocalStorageVE);
+        createServerBtn.addEventListener('click', createServerVE);
+
+        // 링크 복사 버튼 클릭
+        copyLinkBtn.addEventListener('click', function() {
+            const linkText = generatedLinkElement.textContent;
+            navigator.clipboard.writeText(linkText).then(() => {
+                showMessage('Link copied to clipboard!', 'success');
+            }).catch(() => {
+                showMessage('Failed to copy link. Please copy manually.', 'error');
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create VE URL - Server Version</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #ff5555;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #888;
+            font-size: 1.1em;
+        }
+        .form-section {
+            background-color: #2a2a2a;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .form-section h3 {
+            margin-top: 0;
+            color: #ff5555;
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ddd;
+        }
+        .input-group input[type="text"],
+        .input-group input[type="file"],
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+            background-color: #333;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .input-group input[type="text"]:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #ff5555;
+            box-shadow: 0 0 0 2px rgba(255, 85, 85, 0.2);
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .slider-container input[type="range"] {
+            flex-grow: 1;
+            height: 6px;
+            background: #444;
+            border-radius: 3px;
+            outline: none;
+        }
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #ff5555;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .slider-value {
+            min-width: 50px;
+            text-align: center;
+            font-weight: bold;
+            color: #ff5555;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        button {
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #5a5a5a;
+            transform: translateY(-1px);
+        }
+        button:disabled {
+            background-color: #3a3a3a;
+            cursor: not-allowed;
+            transform: none;
+        }
+        button.primary {
+            background-color: #ff5555;
+        }
+        button.primary:hover {
+            background-color: #ff7777;
+        }
+        button.secondary {
+            background-color: #5555ff;
+        }
+        button.secondary:hover {
+            background-color: #7777ff;
+        }
+        .message {
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        .message.error {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #ff5555;
+            display: block;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+        .message.success {
+            background-color: rgba(0, 255, 0, 0.2);
+            color: #55ff55;
+            display: block;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+        .link-section {
+            background-color: #2a2a2a;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 25px;
+            display: none;
+        }
+        .link-section h3 {
+            margin-top: 0;
+            color: #55ff55;
+        }
+        .generated-link {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+            color: #55ff55;
+            border: 1px solid #444;
+        }
+        .copy-button {
+            background-color: #5555ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .copy-button:hover {
+            background-color: #7777ff;
+        }
+        .auth-section {
+            background-color: #2a2a2a;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .auth-section h3 {
+            margin-top: 0;
+            color: #ffaa55;
+        }
+        .auth-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .auth-toggle label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 6px;
+            border: 2px solid transparent;
+        }
+        .auth-toggle input[type="radio"] {
+            margin-right: 8px;
+        }
+        .auth-toggle input[type="radio"]:checked + span {
+            color: #ff5555;
+        }
+        .auth-toggle label:has(input[type="radio"]:checked) {
+            border-color: #ff5555;
+        }
+        .access-control {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #333;
+            border-radius: 6px;
+        }
+        .access-control.show {
+            display: block;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .checkbox-group input[type="checkbox"] {
+            margin: 0;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        .required {
+            color: #ff5555;
+        }
+        .server-info {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid #55ff55;
+        }
+        .server-info h3 {
+            margin-top: 0;
+            color: #55ff55;
+        }
+        .server-info ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .server-info li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Create VE URL - Server Version</h1>
+            <p class="subtitle">Create and share synchronized video experiences with server storage</p>
+        </header>
+
+        <div class="server-info">
+            <h3>🚀 Server Benefits</h3>
+            <ul>
+                <li><strong>Unlimited Size</strong>: No data size restrictions</li>
+                <li><strong>Global Access</strong>: Share with anyone, anywhere</li>
+                <li><strong>Analytics</strong>: Track views and engagement</li>
+                <li><strong>User Management</strong>: Create accounts and manage VE URLs</li>
+                <li><strong>Access Control</strong>: Public/private sharing options</li>
+            </ul>
+        </div>
+
+        <div class="auth-section">
+            <h3>🔐 Authentication</h3>
+            <div class="auth-toggle">
+                <label>
+                    <input type="radio" name="auth-type" value="guest" checked>
+                    <span>Guest Mode</span>
+                </label>
+                <label>
+                    <input type="radio" name="auth-type" value="user">
+                    <span>User Account</span>
+                </label>
+            </div>
+            
+            <div id="login-form" style="display: none;">
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="your@email.com">
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password">
+                </div>
+                <div class="button-group">
+                    <button id="login-btn" class="secondary">Login</button>
+                    <button id="register-btn" class="secondary">Register</button>
+                </div>
+            </div>
+            
+            <div id="user-info" style="display: none;">
+                <p>Logged in as: <span id="username-display"></span></p>
+                <button id="logout-btn" class="secondary">Logout</button>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>📹 Video Information</h3>
+            
+            <div class="input-group">
+                <label for="title">Title <span class="required">*</span></label>
+                <input type="text" id="title" placeholder="e.g., [Reaction] Popular Video Review">
+                <div class="help-text">Enter a descriptive title for your VE URL</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="description">Description</label>
+                <textarea id="description" placeholder="Describe your synchronized video experience..."></textarea>
+                <div class="help-text">Optional description for your VE URL</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="reaction-url">Reaction Video YouTube URL <span class="required">*</span></label>
+                <input type="text" id="reaction-url" placeholder="https://www.youtube.com/watch?v=..." value="https://www.youtube.com/watch?v=niYgb0IfP4U">
+                <div class="help-text">Enter the YouTube link for the reaction video</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="original-url">Original Video YouTube URL <span class="required">*</span></label>
+                <input type="text" id="original-url" placeholder="https://www.youtube.com/watch?v=..." value="https://www.youtube.com/watch?v=AbZH7XWDW_k">
+                <div class="help-text">Enter the YouTube link for the original video</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="timestamp-file">Timestamp File <span class="required">*</span></label>
+                <input type="file" id="timestamp-file" accept=".json">
+                <div class="help-text">Select a JSON file containing synchronization information</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>⚙️ Viewer Settings</h3>
+            
+            <div class="input-group">
+                <label for="overlay-position">Overlay Position</label>
+                <select id="overlay-position">
+                    <option value="top-right">Top Right</option>
+                    <option value="top-left">Top Left</option>
+                    <option value="bottom-right">Bottom Right</option>
+                    <option value="bottom-left">Bottom Left</option>
+                </select>
+                <div class="help-text">Select where the original video will be displayed</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="overlay-size">Overlay Size</label>
+                <div class="slider-container">
+                    <input type="range" id="overlay-size" min="10" max="60" value="50">
+                    <span id="overlay-size-value" class="slider-value">50%</span>
+                </div>
+                <div class="help-text">Adjust the size of the original video (10% - 60%)</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="youtube-volume">Original Video Volume</label>
+                <div class="slider-container">
+                    <input type="range" id="youtube-volume" min="0" max="100" value="100">
+                    <span id="youtube-volume-value" class="slider-value">100%</span>
+                </div>
+                <div class="help-text">Adjust the volume of the original video (0% - 100%)</div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>🔒 Access Control</h3>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="is-public" checked>
+                <label for="is-public">Make this VE URL public</label>
+            </div>
+            
+            <div class="access-control" id="access-control">
+                <div class="input-group">
+                    <label for="access-password">Password Protection (Optional)</label>
+                    <input type="password" id="access-password" placeholder="Leave empty for no password">
+                    <div class="help-text">Set a password to restrict access to this VE URL</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="create-server-btn" class="primary">Create Server VE URL</button>
+            <button id="preview-btn" class="secondary">Preview</button>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div id="link-section" class="link-section">
+            <h3>✅ Server VE URL Created Successfully!</h3>
+            <p>Copy the link below to share with others:</p>
+            <div id="generated-link" class="generated-link"></div>
+            <button id="copy-link-btn" class="copy-button">Copy Link</button>
+            <div id="server-info" style="margin-top: 15px; font-size: 12px; color: #888;"></div>
+            <div style="margin-top: 20px;">
+                <p><strong>Server Features:</strong></p>
+                <ul>
+                    <li>✅ Unlimited data size</li>
+                    <li>✅ Global access</li>
+                    <li>✅ View analytics</li>
+                    <li>✅ Access control</li>
+                    <li>✅ User management</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API 설정
+        const API_BASE_URL = 'http://localhost:3000/api';
+        let authToken = null;
+        let currentUser = null;
+
+        // DOM 요소들
+        const authTypeRadios = document.querySelectorAll('input[name="auth-type"]');
+        const loginForm = document.getElementById('login-form');
+        const userInfo = document.getElementById('user-info');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const usernameDisplay = document.getElementById('username-display');
+        
+        const titleInput = document.getElementById('title');
+        const descriptionInput = document.getElementById('description');
+        const reactionUrlInput = document.getElementById('reaction-url');
+        const originalUrlInput = document.getElementById('original-url');
+        const timestampFileInput = document.getElementById('timestamp-file');
+        const overlayPositionSelect = document.getElementById('overlay-position');
+        const overlaySizeSlider = document.getElementById('overlay-size');
+        const overlaySizeValue = document.getElementById('overlay-size-value');
+        const youtubeVolumeSlider = document.getElementById('youtube-volume');
+        const youtubeVolumeValue = document.getElementById('youtube-volume-value');
+        const isPublicCheckbox = document.getElementById('is-public');
+        const accessControl = document.getElementById('access-control');
+        const accessPasswordInput = document.getElementById('access-password');
+        
+        const createServerBtn = document.getElementById('create-server-btn');
+        const previewBtn = document.getElementById('preview-btn');
+        const messageElement = document.getElementById('message');
+        const linkSection = document.getElementById('link-section');
+        const generatedLinkElement = document.getElementById('generated-link');
+        const copyLinkBtn = document.getElementById('copy-link-btn');
+        const serverInfoElement = document.getElementById('server-info');
+
+        // 슬라이더 이벤트 리스너
+        overlaySizeSlider.addEventListener('input', function() {
+            overlaySizeValue.textContent = this.value + '%';
+        });
+
+        youtubeVolumeSlider.addEventListener('input', function() {
+            youtubeVolumeValue.textContent = this.value + '%';
+        });
+
+        // 인증 타입 변경
+        authTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'guest') {
+                    loginForm.style.display = 'none';
+                    userInfo.style.display = 'none';
+                    authToken = null;
+                    currentUser = null;
+                } else {
+                    loginForm.style.display = 'block';
+                    if (authToken) {
+                        userInfo.style.display = 'block';
+                    }
+                }
+            });
+        });
+
+        // 공개/비공개 토글
+        isPublicCheckbox.addEventListener('change', function() {
+            accessControl.classList.toggle('show', !this.checked);
+        });
+
+        // 로그인
+        loginBtn.addEventListener('click', async function() {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) {
+                showMessage('Please enter email and password.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    usernameDisplay.textContent = currentUser.username;
+                    loginForm.style.display = 'none';
+                    userInfo.style.display = 'block';
+                    showMessage('Login successful!', 'success');
+                } else {
+                    showMessage(data.error || 'Login failed.', 'error');
+                }
+            } catch (error) {
+                showMessage('Server connection error.', 'error');
+            }
+        });
+
+        // 회원가입
+        registerBtn.addEventListener('click', async function() {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            const username = email.split('@')[0]; // 임시 사용자명
+
+            if (!email || !password) {
+                showMessage('Please enter email and password.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    usernameDisplay.textContent = currentUser.username;
+                    loginForm.style.display = 'none';
+                    userInfo.style.display = 'block';
+                    showMessage('Registration successful!', 'success');
+                } else {
+                    showMessage(data.error || 'Registration failed.', 'error');
+                }
+            } catch (error) {
+                showMessage('Server connection error.', 'error');
+            }
+        });
+
+        // 로그아웃
+        logoutBtn.addEventListener('click', function() {
+            authToken = null;
+            currentUser = null;
+            loginForm.style.display = 'block';
+            userInfo.style.display = 'none';
+            showMessage('Logged out successfully.', 'success');
+        });
+
+        // YouTube URL 검증 함수
+        function extractYouTubeVideoId(url) {
+            if (!url) return null;
+            const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[7].length === 11) ? match[7] : null;
+        }
+
+        // 필수 필드 검증
+        function validateRequiredFields() {
+            const title = titleInput.value.trim();
+            const reactionUrl = reactionUrlInput.value.trim();
+            const originalUrl = originalUrlInput.value.trim();
+            const timestampFile = timestampFileInput.files[0];
+
+            if (!title) {
+                showMessage('Please enter a title.', 'error');
+                return false;
+            }
+
+            if (!reactionUrl) {
+                showMessage('Please enter the reaction video URL.', 'error');
+                return false;
+            }
+
+            if (!extractYouTubeVideoId(reactionUrl)) {
+                showMessage('Please enter a valid reaction video YouTube URL.', 'error');
+                return false;
+            }
+
+            if (!originalUrl) {
+                showMessage('Please enter the original video URL.', 'error');
+                return false;
+            }
+
+            if (!extractYouTubeVideoId(originalUrl)) {
+                showMessage('Please enter a valid original video YouTube URL.', 'error');
+                return false;
+            }
+
+            if (!timestampFile) {
+                showMessage('Please select a timestamp file.', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
+        // 메시지 표시 함수
+        function showMessage(text, type) {
+            messageElement.textContent = text;
+            messageElement.className = 'message ' + type;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (messageElement.textContent === text) {
+                        messageElement.className = 'message';
+                        messageElement.textContent = '';
+                    }
+                }, 5000);
+            }
+        }
+
+        // 서버 VE URL 생성
+        createServerBtn.addEventListener('click', async function() {
+            if (!validateRequiredFields()) return;
+
+            const timestampFile = timestampFileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = async function(e) {
+                try {
+                    const timestampData = JSON.parse(e.target.result);
+                    
+                    const veUrlData = {
+                        title: titleInput.value.trim(),
+                        description: descriptionInput.value.trim(),
+                        reaction_url: reactionUrlInput.value.trim(),
+                        original_url: originalUrlInput.value.trim(),
+                        timestamp_data: timestampData,
+                        settings: {
+                            overlay_position: overlayPositionSelect.value,
+                            overlay_size: parseInt(overlaySizeSlider.value),
+                            youtube_volume: parseInt(youtubeVolumeSlider.value)
+                        },
+                        access_control: {
+                            is_public: isPublicCheckbox.checked,
+                            password: accessPasswordInput.value.trim() || null
+                        }
+                    };
+
+                    // 서버에 업로드
+                    const headers = {
+                        'Content-Type': 'application/json'
+                    };
+
+                    if (authToken) {
+                        headers['Authorization'] = `Bearer ${authToken}`;
+                    }
+
+                    const response = await fetch(`${API_BASE_URL}/ve-urls/create`, {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(veUrlData)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        const shareUrl = `${window.location.origin}/viewer.html?ve_server=${data.ve_url.ve_id}`;
+                        generatedLinkElement.textContent = shareUrl;
+                        serverInfoElement.textContent = `VE ID: ${data.ve_url.ve_id} | Created by: ${currentUser ? currentUser.username : 'Guest'}`;
+                        linkSection.style.display = 'block';
+                        showMessage('Server VE URL created successfully!', 'success');
+                    } else {
+                        showMessage(data.error || 'Failed to create VE URL.', 'error');
+                    }
+                } catch (error) {
+                    showMessage('Error creating server VE URL: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(timestampFile);
+        });
+
+        // 링크 복사 버튼 클릭
+        copyLinkBtn.addEventListener('click', function() {
+            const linkText = generatedLinkElement.textContent;
+            navigator.clipboard.writeText(linkText).then(() => {
+                showMessage('Link copied to clipboard!', 'success');
+            }).catch(() => {
+                showMessage('Failed to copy link. Please copy manually.', 'error');
+            });
+        });
+
+        // 미리보기 버튼 (시뮬레이션)
+        previewBtn.addEventListener('click', function() {
+            if (!validateRequiredFields()) return;
+            showMessage('Preview feature will be available after server implementation.', 'error');
+        });
+    </script>
+</body>
+</html> 
