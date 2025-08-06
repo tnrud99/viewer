@@ -585,6 +585,11 @@ app.get('/server-status.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'server-status.html'));
 });
 
+// Viewer page
+app.get('/viewer.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'viewer.html'));
+});
+
 // src/viewer/ 경로의 파일들 서빙
 app.get('/src/viewer/create-ve-url-enhanced.html', (req, res) => {
     const filePath = path.join(__dirname, '..', 'viewer', 'create-ve-url-enhanced.html');
@@ -714,7 +719,7 @@ app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'OK', 
         timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'development'
+        mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
     });
 });
 
