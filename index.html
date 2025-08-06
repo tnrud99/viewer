@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Reaction Video Maker</title>
+    <title>YouTube Reaction Video Suite</title> <!-- 제목을 좀 더 포괄적으로 변경 -->
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -34,11 +34,13 @@
         }
         .button-group {
             display: flex;
-            gap: 20px;
-            justify-content: center;
+            flex-direction: column; /* 버튼을 세로로 정렬 */
+            gap: 15px; /* 버튼 간격 조정 */
+            align-items: center; /* 가운데 정렬 */
         }
         .button {
-            display: inline-block;
+            display: block; /* 버튼이 전체 너비를 차지하도록 설정 */
+            width: 80%; /* 버튼 너비 설정 */
             padding: 15px 30px;
             font-size: 1em;
             font-weight: bold;
@@ -60,15 +62,24 @@
         .button.secondary:hover {
             background-color: #7777ff;
         }
+        /* ▼▼▼ 에디터 버튼을 위한 새로운 스타일 추가 ▼▼▼ */
+        .button.tertiary {
+            background-color: #28a745; /* 초록색 계열 */
+        }
+        .button.tertiary:hover {
+            background-color: #2dbf4c;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>YouTube Reaction Video Maker</h1>
-        <p>Record your reaction or watch a previously created one.</p>
+        <h1>YouTube Reaction Video Suite</h1>
+        <p>Record, edit, or watch your reaction videos.</p>
         <div class="button-group">
             <a href="/recorder.html" class="button">Record a Reaction</a>
             <a href="/viewer.html" class="button secondary">Watch a Reaction</a>
+            <!-- ▼▼▼ 새로 추가된 에디터 버튼 ▼▼▼ -->
+            <a href="/editor/" class="button tertiary">Edit Timestamps</a>
         </div>
     </div>
 </body>
