@@ -244,7 +244,8 @@ app.post('/api/ve-urls/create', authenticateToken, async (req, res) => {
                 id: veUrl._id,
                 ve_id: veUrl.ve_id,
                 title: veUrl.title,
-                share_url: `${req.protocol}://${req.get('host')}/viewer.html?ve_server=${veUrl.ve_id}`
+                share_url: `${req.protocol}://${req.get('host')}/ve/${veUrl.ve_id}`,
+                full_url: `${req.protocol}://${req.get('host')}/viewer.html?ve_server=${veUrl.ve_id}`
             }
         });
     } catch (error) {
@@ -378,6 +379,27 @@ app.get('/create-ve-url.html', (req, res) => {
 
 app.get('/create-ve-url-server.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'create-ve-url-server.html'));
+});
+
+// 짧은 URL 라우트 추가
+app.get('/ve/:id', async (req, res) => {
+    try {
+        const veUrl = await VEUrl.findOne({ ve_id: req.params.id });
+        
+        if (!veUrl) {
+            return res.status(404).json({ error: 'VE URL not found' });
+        }
+
+        // 조회수 증가
+        veUrl.metadata.view_count += 1;
+        await veUrl.save();
+
+        // viewer.html로 리다이렉트
+        const viewerUrl = `${req.protocol}://${req.get('host')}/viewer.html?ve_server=${veUrl.ve_id}`;
+        res.redirect(viewerUrl);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
 });
 
 // API 상태 확인

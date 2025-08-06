@@ -785,13 +785,13 @@
                     if (response.ok) {
                         const result = await response.json();
                         
-                        // 생성된 링크 표시
+                        // 생성된 링크 표시 (짧은 URL)
                         generatedLinkElement.textContent = result.ve_url.share_url;
                         linkSection.style.display = 'block';
                         previewSection.style.display = 'none';
 
                         // 서버 정보 표시
-                        serverInfoElement.textContent = `VE ID: ${result.ve_url.ve_id} | Created at: ${new Date().toLocaleString()}`;
+                        serverInfoElement.textContent = `VE ID: ${result.ve_url.ve_id} | Short URL: ${result.ve_url.share_url} | Created at: ${new Date().toLocaleString()}`;
 
                         showMessage('VE URL created successfully on server!', 'success');
                     } else {
