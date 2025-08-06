@@ -280,6 +280,7 @@ app.post('/api/ve-urls/create', async (req, res) => {
         }
 
         const fullUrl = `${req.protocol}://${req.get('host')}/viewer.html?ve_server=${veUrl.ve_id}`;
+        const shortUrl = `${req.protocol}://${req.get('host')}/ve/${veUrl.ve_id}`;
         
         res.status(201).json({
             message: 'VE URL created successfully',
@@ -287,7 +288,7 @@ app.post('/api/ve-urls/create', async (req, res) => {
                 id: veUrl._id,
                 ve_id: veUrl.ve_id,
                 title: veUrl.title,
-                share_url: `${req.protocol}://${req.get('host')}/ve/${veUrl.ve_id}`,
+                share_url: shortUrl,
                 full_url: fullUrl
             }
         });

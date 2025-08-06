@@ -546,7 +546,7 @@
                             const result = await response.json();
                             console.log('✅ Server response data:', result);
                             
-                            const veUrl = result.ve_url.full_url;
+                            const veUrl = result.ve_url.share_url;
                             generatedLinkElement.textContent = veUrl;
                             linkSection.style.display = 'block';
                             showMessage('✅ VE URL created successfully on server!', 'success');
