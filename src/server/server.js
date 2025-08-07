@@ -26,12 +26,31 @@ const connectToMongoDB = async () => {
         const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ve_url_system';
         console.log('Attempting to connect to MongoDB...');
         console.log('MongoDB URI exists:', !!process.env.MONGODB_URI);
+        console.log('MongoDB URI length:', process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0);
+        
+        // 이미 연결되어 있다면 재사용
+        if (mongoose.connection.readyState === 1) {
+            console.log('✅ MongoDB already connected');
+            return;
+        }
+        
+        // 기존 연결이 있다면 정리
+        if (mongoose.connection.readyState !== 0) {
+            await mongoose.disconnect();
+        }
         
         await mongoose.connect(mongoUri, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 5000,
+            serverSelectionTimeoutMS: 30000,
             socketTimeoutMS: 45000,
+            connectTimeoutMS: 30000,
+            maxPoolSize: 1,
+            minPoolSize: 0,
+            maxIdleTimeMS: 30000,
+            bufferCommands: false,
+            retryWrites: true,
+            w: 'majority'
         });
         
         console.log('✅ Successfully connected to MongoDB');
@@ -62,6 +81,37 @@ mongoose.connection.on('disconnected', () => {
 // MongoDB 연결 시도
 connectToMongoDB().catch(console.error);
 
+// MongoDB 연결 상태 확인 미들웨어
+const ensureMongoConnection = async (req, res, next) => {
+    try {
+        console.log('Checking MongoDB connection...');
+        console.log('Connection state:', mongoose.connection.readyState);
+        
+        if (mongoose.connection.readyState !== 1) {
+            console.log('MongoDB not connected, attempting to reconnect...');
+            await connectToMongoDB();
+        }
+        
+        // 연결 상태 재확인
+        if (mongoose.connection.readyState === 1) {
+            console.log('✅ MongoDB connection verified');
+            next();
+        } else {
+            console.error('❌ MongoDB connection failed after reconnect attempt');
+            res.status(500).json({ 
+                error: 'Database connection failed',
+                details: 'Unable to establish database connection'
+            });
+        }
+    } catch (error) {
+        console.error('MongoDB connection failed:', error);
+        res.status(500).json({ 
+            error: 'Database connection failed',
+            details: error.message
+        });
+    }
+};
+
 // 데이터베이스 스키마
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
@@ -73,7 +123,7 @@ const userSchema = new mongoose.Schema({
 
 const veUrlSchema = new mongoose.Schema({
     ve_id: { type: String, required: true, unique: true },
-    creator_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    creator_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     title: { type: String, required: true },
     description: { type: String },
     reaction_url: { type: String, required: true },
@@ -200,7 +250,7 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // VE URL 라우트 - 인증 없이도 작동하도록 수정
-app.post('/api/ve-urls/create', async (req, res) => {
+app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
     try {
         console.log('📥 Received VE URL creation request:', req.body);
         
@@ -240,11 +290,13 @@ app.post('/api/ve-urls/create', async (req, res) => {
                 await user.save();
             }
             creator_id = user._id;
+        } else {
+            // 사용자 정보가 없는 경우 익명 사용자 생성 또는 null 허용
+            console.log('No user info provided, creating VE URL without creator_id');
         }
 
-        const veUrl = new VEUrl({
+        const veUrlData = {
             ve_id,
-            creator_id: creator_id,
             title: metadata?.title || 'Synchronized Reaction Video',
             description: metadata?.description || 'Reaction video synchronized with original video',
             reaction_url: reactionUrl,
@@ -266,7 +318,14 @@ app.post('/api/ve-urls/create', async (req, res) => {
                 view_count: 0,
                 is_public: true
             }
-        });
+        };
+
+        // creator_id가 있는 경우에만 추가
+        if (creator_id) {
+            veUrlData.creator_id = creator_id;
+        }
+
+        const veUrl = new VEUrl(veUrlData);
 
         await veUrl.save();
         console.log('✅ VE URL saved to database:', veUrl.ve_id);
@@ -297,7 +356,7 @@ app.post('/api/ve-urls/create', async (req, res) => {
     }
 });
 
-app.get('/api/ve-urls/:id', async (req, res) => {
+app.get('/api/ve-urls/:id', ensureMongoConnection, async (req, res) => {
     try {
         const veUrl = await VEUrl.findOne({ ve_id: req.params.id });
         
@@ -327,7 +386,7 @@ app.get('/api/ve-urls/:id', async (req, res) => {
     }
 });
 
-app.get('/api/ve-urls/user/:userId', authenticateToken, async (req, res) => {
+app.get('/api/ve-urls/user/:userId', authenticateToken, ensureMongoConnection, async (req, res) => {
     try {
         const veUrls = await VEUrl.find({ creator_id: req.params.userId })
             .select('ve_id title description metadata')
@@ -339,7 +398,7 @@ app.get('/api/ve-urls/user/:userId', authenticateToken, async (req, res) => {
     }
 });
 
-app.put('/api/ve-urls/:id', authenticateToken, async (req, res) => {
+app.put('/api/ve-urls/:id', authenticateToken, ensureMongoConnection, async (req, res) => {
     try {
         const veUrl = await VEUrl.findOne({ ve_id: req.params.id });
 
@@ -371,7 +430,7 @@ app.put('/api/ve-urls/:id', authenticateToken, async (req, res) => {
     }
 });
 
-app.delete('/api/ve-urls/:id', authenticateToken, async (req, res) => {
+app.delete('/api/ve-urls/:id', authenticateToken, ensureMongoConnection, async (req, res) => {
     try {
         const veUrl = await VEUrl.findOne({ ve_id: req.params.id });
 
@@ -393,7 +452,7 @@ app.delete('/api/ve-urls/:id', authenticateToken, async (req, res) => {
 });
 
 // 통계 라우트
-app.post('/api/analytics/view', async (req, res) => {
+app.post('/api/analytics/view', ensureMongoConnection, async (req, res) => {
     try {
         const { ve_id } = req.body;
         
@@ -533,7 +592,7 @@ app.get('/assets/samples/test_data.json', (req, res) => {
 });
 
 // 짧은 URL 라우트 추가
-app.get('/ve/:id', async (req, res) => {
+app.get('/ve/:id', ensureMongoConnection, async (req, res) => {
     try {
         const veUrl = await VEUrl.findOne({ ve_id: req.params.id });
         
@@ -574,12 +633,28 @@ app.get('/api/test-mongodb', async (req, res) => {
             3: 'disconnecting'
         };
         
+        // 연결 시도
+        let connectionTest = 'not_attempted';
+        if (dbState !== 1) {
+            try {
+                await connectToMongoDB();
+                connectionTest = 'success';
+            } catch (error) {
+                connectionTest = 'failed';
+                console.error('Connection test failed:', error);
+            }
+        } else {
+            connectionTest = 'already_connected';
+        }
+        
         res.json({
             status: 'MongoDB Test',
-            connection_state: states[dbState],
-            ready_state: dbState,
+            connection_state: states[mongoose.connection.readyState],
+            ready_state: mongoose.connection.readyState,
+            connection_test: connectionTest,
             timestamp: new Date().toISOString(),
             mongodb_uri_set: !!process.env.MONGODB_URI,
+            mongodb_uri_length: process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0,
             node_env: process.env.NODE_ENV || 'development'
         });
     } catch (error) {
