@@ -385,7 +385,7 @@
     // Global variables
     let youtubePlayer = null;
     let reactionPlayer = null;
-    let timestampData = null;
+    var timestampData = null;
     let syncInterval = null; // Interval for file mode sync
     let isPlaying = false;
     let youtubeReady = false;
@@ -437,7 +437,7 @@
 
     // New variables for improved synchronization
     let pauseEvents = []; // Store all pause events for quick lookup
-    let playEvents = []; // Store all play events for quick lookup
+    var playEvents = []; // Store all play events for quick lookup
     let currentSyncPoint = null; // Current active sync point
     let nextPauseTime = null; // Next pause time in reaction video timeline
     let nextPlayTime = null; // Next play time in reaction video timeline
@@ -505,17 +505,20 @@
             }
         }
 
-        // 서버 방식 지원 (시뮬레이션)
+        // 서버 방식 지원 (실제 구현)
         const veServerParam = urlParams.get('ve_server');
         if (veServerParam) {
             try {
-                // 서버에서 데이터를 가져오는 시뮬레이션
-                console.log('VE Server mode detected (simulation):', veServerParam);
-                addDebugMessage('VE Server mode detected (simulation)');
-                showMessage('Server method requires backend implementation. This is a simulation.', 'error');
+                console.log('VE Server mode detected:', veServerParam);
+                addDebugMessage('VE Server mode detected: ' + veServerParam);
+                showMessage('🔄 Loading VE URL data from server...', 'success');
+                
+                // 서버에서 VE URL 데이터 가져오기
+                loadVEUrlFromServer(veServerParam);
             } catch (error) {
                 console.error('Error parsing VE Server parameter:', error);
                 addDebugMessage('Error parsing VE Server parameter: ' + error.message);
+                showMessage('Error loading VE URL data.', 'error');
             }
         }
         
@@ -1000,7 +1003,7 @@
             // Check for pause events with enhanced timing
             if (nextPauseTime !== null && currentTime >= nextPauseTime) {
                 // Find the exact pause event with wider detection window
-                const pauseEvent = findNearestEvent(pauseEvents, currentTime, eventDetectionWindow);
+                const pauseEvent = findNearestEvent(window.pauseEvents, currentTime, eventDetectionWindow);
                 
                 if (pauseEvent && pauseEvent.reaction_time > lastProcessedPauseTime) {
                     console.log("Pause event detected at reaction time:", currentTime, "event time:", pauseEvent.reaction_time);
@@ -1030,7 +1033,7 @@
             // Check for play events with enhanced timing
             if (nextPlayTime !== null && currentTime >= nextPlayTime) {
                 // Find the exact play event with wider detection window
-                const playEvent = findNearestEvent(playEvents, currentTime, eventDetectionWindow);
+                const playEvent = findNearestEvent(window.playEvents, currentTime, eventDetectionWindow);
                 
                 if (playEvent && playEvent.reaction_time > lastProcessedPlayTime) {
                     console.log("Play event detected at reaction time:", currentTime, "event time:", playEvent.reaction_time);
@@ -1093,7 +1096,7 @@
     // ENHANCED: Check for missed events
     function checkForMissedEvents(currentTime) {
         // Check for missed play events
-        for (const event of playEvents) {
+        for (const event of window.playEvents) {
             if (event.reaction_time > lastProcessedPlayTime && 
                 event.reaction_time < currentTime && 
                 Math.abs(event.reaction_time - currentTime) < 2.0) {
@@ -1134,7 +1137,7 @@
         }
         
         // Check for missed pause events
-        for (const event of pauseEvents) {
+        for (const event of window.pauseEvents) {
             if (event.reaction_time > lastProcessedPauseTime && 
                 event.reaction_time < currentTime && 
                 Math.abs(event.reaction_time - currentTime) < 2.0) {
@@ -1259,20 +1262,45 @@
 
     // Find sync point for a given reaction time
     function findSyncPointForTime(reactionTime) {
+        console.log('🔍 Finding sync point for reaction time:', reactionTime);
+        console.log('🔍 Available play events:', window.playEvents);
+        
+        if (!window.playEvents || window.playEvents.length === 0) {
+            console.log('🔍 No play events available');
+            return null;
+        }
+        
+        // If reaction time is 0 or very small, return the first sync point
+        if (reactionTime <= 0.1) {
+            const firstPoint = window.playEvents[0];
+            console.log('🔍 Reaction time is 0, returning first sync point:', firstPoint);
+            return firstPoint;
+        }
+        
         // Find the nearest sync point before the given reaction time
         let nearestPoint = null;
         let minDiff = Infinity;
         
-        for (const point of playEvents) {
+        for (const point of window.playEvents) {
+            console.log('🔍 Checking point:', point);
             if (point.reaction_time <= reactionTime) {
                 const diff = reactionTime - point.reaction_time;
+                console.log('🔍 Point is before reaction time, diff:', diff);
                 if (diff < minDiff) {
                     minDiff = diff;
                     nearestPoint = point;
+                    console.log('🔍 New nearest point:', nearestPoint);
                 }
             }
         }
         
+        // If no point found before the reaction time, return the first point
+        if (!nearestPoint && window.playEvents.length > 0) {
+            nearestPoint = window.playEvents[0];
+            console.log('🔍 No point found before reaction time, returning first point:', nearestPoint);
+        }
+        
+        console.log('🔍 Final nearest point:', nearestPoint);
         return nearestPoint;
     }
 
@@ -1307,7 +1335,7 @@
     function updateNextEventTimes(currentTime) {
         // Find next pause event
         nextPauseTime = null;
-        for (const event of pauseEvents) {
+        for (const event of window.pauseEvents) {
             if (event.reaction_time > currentTime) {
                 nextPauseTime = event.reaction_time;
                 console.log("Next pause at reaction time:", nextPauseTime, "YouTube time:", event.relative_youtube_time);
@@ -1318,7 +1346,7 @@
         
         // Find next play event
         nextPlayTime = null;
-        for (const event of playEvents) {
+        for (const event of window.playEvents) {
             if (event.reaction_time > currentTime) {
                 nextPlayTime = event.reaction_time;
                 console.log("Next play at reaction time:", nextPlayTime, "YouTube time:", event.relative_youtube_time);
@@ -1334,6 +1362,12 @@
     // ENHANCED: Synchronize YouTube position based on current time
     function synchronizeYouTubePosition(currentTime) {
         if (!youtubePlayer || !currentSyncPoint || !youtubeStarted) return;
+        
+        // Check if YouTube player is ready and has getCurrentTime method
+        if (typeof youtubePlayer.getCurrentTime !== 'function') {
+            console.log("YouTube player not ready yet, skipping sync");
+            return;
+        }
         
         // Calculate expected YouTube time based on current sync point
         const timeSinceSyncPoint = currentTime - currentSyncPoint.reaction_time;
@@ -1666,6 +1700,264 @@
         document.getElementById('pause-btn').disabled = !playing;
         document.getElementById('stop-btn').disabled = !playing;
         document.getElementById('restart-btn').disabled = !playing;
+    }
+
+    // Load VE URL data from server
+    async function loadVEUrlFromServer(veId) {
+        try {
+            // Determine server URL
+            const serverUrl = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3000' 
+                : window.location.origin;
+
+            console.log('📡 Loading VE URL from server:', veId);
+            addDebugMessage('📡 Loading VE URL from server: ' + veId);
+
+            const response = await fetch(`${serverUrl}/api/ve-urls/${veId}`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ VE URL data loaded:', data);
+                console.log('🔍 Full server response:', JSON.stringify(data, null, 2));
+                addDebugMessage('✅ VE URL data loaded successfully');
+
+                // Extract data from server response
+                const veUrlData = data.ve_url;
+                console.log('🔍 Extracted veUrlData:', veUrlData);
+                
+                // Set up the viewer with server data
+                setupViewerWithServerData(veUrlData);
+                
+                showMessage('✅ VE URL loaded successfully!', 'success');
+            } else {
+                const errorText = await response.text();
+                console.error('❌ Server error:', errorText);
+                addDebugMessage('❌ Server error: ' + errorText);
+                showMessage('❌ Failed to load VE URL from server.', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Network error:', error);
+            addDebugMessage('❌ Network error: ' + error.message);
+            showMessage('❌ Network error. Please check your connection.', 'error');
+        }
+    }
+
+    // Setup viewer with server data
+    function setupViewerWithServerData(veUrlData) {
+        try {
+            console.log('🔧 Setting up viewer with server data:', veUrlData);
+            addDebugMessage('🔧 Setting up viewer with server data');
+
+            // Set reaction video URL
+            const reactionUrl = veUrlData.reaction_url;
+            const originalUrl = veUrlData.original_url;
+            const timestampData = veUrlData.timestamp_data || veUrlData.timestampData;
+            const settings = veUrlData.settings || {};
+
+            // Update UI with server data
+            document.getElementById('reaction-url').value = reactionUrl;
+            document.getElementById('youtube-url').value = originalUrl;
+
+            // Set overlay settings
+            if (settings.overlay_position) {
+                overlayPosition = settings.overlay_position;
+                document.getElementById('overlay-position').value = overlayPosition;
+                updateOverlayPosition();
+            }
+
+            if (settings.overlay_size) {
+                overlaySize = settings.overlay_size;
+                document.getElementById('overlay-size').value = overlaySize;
+                document.getElementById('overlay-size-value').textContent = overlaySize + '%';
+                updateOverlaySize();
+            }
+
+            if (settings.youtube_volume) {
+                youtubeVolume = settings.youtube_volume;
+                document.getElementById('youtube-volume').value = youtubeVolume;
+                document.getElementById('youtube-volume-value').textContent = youtubeVolume + '%';
+                updateYoutubeVolume();
+            }
+
+            // Set timestamp data
+            syncPoints = timestampData;
+            window.timestampData = timestampData; // Set global timestampData variable
+            
+            console.log('🔧 Raw timestamp data:', timestampData);
+            console.log('🔧 Timestamp data type:', typeof timestampData);
+            console.log('🔧 Timestamp data keys:', Object.keys(timestampData || {}));
+            console.log('🔧 veUrlData structure:', veUrlData);
+            console.log('🔧 veUrlData.timestamp_data:', veUrlData.timestamp_data);
+            console.log('🔧 veUrlData.timestampData:', veUrlData.timestampData);
+            
+            // Check if we have sync_points array
+            const syncPointsArray = timestampData.sync_points || timestampData.syncPoints;
+            console.log('🔧 Sync points found:', syncPointsArray);
+            console.log('🔧 Sync points type:', typeof syncPointsArray);
+            console.log('🔧 Sync points length:', syncPointsArray ? syncPointsArray.length : 0);
+            
+            // Convert timestamp data to play/pause events
+            window.playEvents = [];
+            window.pauseEvents = [];
+            
+            console.log('🔄 Converting timestamp data to play events...');
+            
+            if (syncPointsArray && Array.isArray(syncPointsArray)) {
+                // Process sync_points array
+                for (const syncPoint of syncPointsArray) {
+                    console.log(`🔄 Processing sync point:`, syncPoint);
+                    
+                    if (syncPoint.reaction_time !== undefined) {
+                        if (syncPoint.event === 'youtube_play' || syncPoint.event === 'start') {
+                            // This is a play event
+                            if (syncPoint.relative_youtube_time !== null && syncPoint.relative_youtube_time !== undefined) {
+                                window.playEvents.push({
+                                    reaction_time: syncPoint.reaction_time,
+                                    relative_youtube_time: syncPoint.relative_youtube_time
+                                });
+                                console.log(`✅ Added play event: reaction_time=${syncPoint.reaction_time}, relative_youtube_time=${syncPoint.relative_youtube_time}`);
+                            } else if (syncPoint.youtube_time !== null && syncPoint.youtube_time !== undefined) {
+                                window.playEvents.push({
+                                    reaction_time: syncPoint.reaction_time,
+                                    relative_youtube_time: syncPoint.youtube_time
+                                });
+                                console.log(`✅ Added play event: reaction_time=${syncPoint.reaction_time}, youtube_time=${syncPoint.youtube_time}`);
+                            }
+                        } else if (syncPoint.event === 'youtube_pause' || syncPoint.event === 'end') {
+                            // This is a pause event
+                            if (syncPoint.relative_youtube_time !== null && syncPoint.relative_youtube_time !== undefined) {
+                                window.pauseEvents.push({
+                                    reaction_time: syncPoint.reaction_time,
+                                    relative_youtube_time: syncPoint.relative_youtube_time
+                                });
+                                console.log(`⏸️ Added pause event: reaction_time=${syncPoint.reaction_time}, relative_youtube_time=${syncPoint.relative_youtube_time}`);
+                            } else if (syncPoint.youtube_time !== null && syncPoint.youtube_time !== undefined) {
+                                window.pauseEvents.push({
+                                    reaction_time: syncPoint.reaction_time,
+                                    relative_youtube_time: syncPoint.youtube_time
+                                });
+                                console.log(`⏸️ Added pause event: reaction_time=${syncPoint.reaction_time}, youtube_time=${syncPoint.youtube_time}`);
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Fallback to old format
+                for (const [key, value] of Object.entries(timestampData)) {
+                    console.log(`🔄 Processing key: ${key}, value:`, value);
+                    
+                    if (typeof value === 'object' && value.reaction_time !== undefined) {
+                        // This is a complex sync point object
+                        if (value.relative_youtube_time !== null && value.relative_youtube_time !== undefined) {
+                            window.playEvents.push({
+                                reaction_time: value.reaction_time,
+                                relative_youtube_time: value.relative_youtube_time
+                            });
+                            console.log(`✅ Added play event: reaction_time=${value.reaction_time}, relative_youtube_time=${value.relative_youtube_time}`);
+                        } else if (value.youtube_time !== null && value.youtube_time !== undefined) {
+                            window.playEvents.push({
+                                reaction_time: value.reaction_time,
+                                relative_youtube_time: value.youtube_time
+                            });
+                            console.log(`✅ Added play event: reaction_time=${value.reaction_time}, youtube_time=${value.youtube_time}`);
+                        }
+                    } else if (typeof value === 'number') {
+                        // This is a simple timestamp, treat as play event
+                        window.playEvents.push({
+                            reaction_time: parseFloat(key),
+                            relative_youtube_time: value
+                        });
+                        console.log(`✅ Added simple play event: reaction_time=${parseFloat(key)}, relative_youtube_time=${value}`);
+                    }
+                }
+            }
+            
+            console.log('📊 Timestamp data loaded:', Object.keys(syncPoints).length, 'sync points');
+            console.log('📊 Play events created:', window.playEvents.length);
+            console.log('📊 Play events content:', window.playEvents);
+            addDebugMessage('📊 Timestamp data loaded: ' + Object.keys(syncPoints).length + ' sync points');
+            addDebugMessage('📊 Play events created: ' + window.playEvents.length);
+            addDebugMessage('📊 Play events content: ' + JSON.stringify(window.playEvents));
+
+            // Switch to YouTube mode
+            const youtubeSourceRadio = document.getElementById('youtube-source');
+            if (youtubeSourceRadio) {
+                youtubeSourceRadio.checked = true;
+            }
+            
+            const fileSourceContainer = document.getElementById('file-source-container');
+            const youtubeSourceContainer = document.getElementById('youtube-source-container');
+            const reactionYoutubeContainer = document.getElementById('reaction-youtube-container');
+            
+            if (fileSourceContainer) fileSourceContainer.style.display = 'none';
+            if (youtubeSourceContainer) youtubeSourceContainer.style.display = 'block';
+            if (reactionPlayer) reactionPlayer.style.display = 'none';
+            if (reactionYoutubeContainer) reactionYoutubeContainer.style.display = 'block';
+            
+            youtubeYoutubeMode = true;
+
+            // Load YouTube videos directly
+            if (reactionUrl) {
+                const reactionVideoId = extractYouTubeVideoId(reactionUrl);
+                if (reactionVideoId) {
+                    // Create reaction YouTube player
+                    if (reactionYoutubePlayer) {
+                        reactionYoutubePlayer.destroy();
+                        reactionYoutubePlayer = null;
+                    }
+                    
+                    reactionYoutubePlayer = new YT.Player('reaction-youtube-container', {
+                        height: '540',
+                        width: '100%',
+                        videoId: reactionVideoId,
+                        playerVars: {
+                            'playsinline': 1,
+                            'controls': 1,
+                            'autoplay': 0,
+                            'rel': 0
+                        },
+                        events: {
+                            'onReady': onReactionPlayerReady,
+                            'onStateChange': onReactionPlayerStateChange
+                        }
+                    });
+                    
+                    addDebugMessage(`Created reaction YouTube player with video ID: ${reactionVideoId}`);
+                }
+            }
+            
+            // Extract original video ID for delayed YouTube player creation
+            if (originalUrl) {
+                youtubeVideoId = extractYouTubeVideoId(originalUrl);
+                console.log('🔧 Original YouTube video ID:', youtubeVideoId);
+                addDebugMessage(`Original YouTube video ID: ${youtubeVideoId}`);
+            }
+            
+            // Initialize sync variables
+            waitingForFirstSync = true;
+            youtubeStarted = false;
+            youtubePlayerCreated = false;
+            currentSyncPoint = null;
+            
+            // Set first sync point
+            if (window.playEvents && window.playEvents.length > 0) {
+                firstSyncPoint = window.playEvents[0];
+                console.log('🔧 First sync point set:', firstSyncPoint);
+                addDebugMessage(`First sync point set: reaction_time=${firstSyncPoint.reaction_time}, relative_youtube_time=${firstSyncPoint.relative_youtube_time}`);
+            }
+
+            // Enable controls
+            enableControls(true);
+            updateButtonStates(false);
+
+            showMessage('✅ Viewer setup complete! Click Play to start synchronized playback.', 'success');
+            addDebugMessage('✅ Viewer setup complete - ready for synchronized playback');
+
+        } catch (error) {
+            console.error('❌ Error setting up viewer:', error);
+            addDebugMessage('❌ Error setting up viewer: ' + error.message);
+            showMessage('❌ Error setting up viewer.', 'error');
+        }
     }
 
     // Show message

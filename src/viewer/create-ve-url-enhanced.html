@@ -527,11 +527,16 @@
 
                     // Show debug info
                     console.log('📤 Sending data to server:', veUrlData);
-                    showMessage('🔄 Uploading data to server...', 'success');
+                    showMessage('🔄 Creating VE URL on server...', 'success');
+
+                    // Determine server URL
+                    const serverUrl = window.location.hostname === 'localhost' 
+                        ? 'http://localhost:3000' 
+                        : window.location.origin;
 
                     // Server upload
                     try {
-                        const response = await fetch('/api/ve-urls/create', {
+                        const response = await fetch(`${serverUrl}/api/ve-urls/create`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -549,7 +554,7 @@
                             const veUrl = result.ve_url.full_url;
                             generatedLinkElement.textContent = veUrl;
                             linkSection.style.display = 'block';
-                            showMessage('✅ VE URL created successfully on server!', 'success');
+                            showMessage('✅ VE URL created successfully!', 'success');
                             
                             // Show server info
                             dataSizeInfoElement.innerHTML = `
@@ -559,15 +564,31 @@
                                     • Email: ${veUrlData.userInfo.email || 'Not provided'}<br>
                                     • Reaction URL: ${veUrlData.reactionUrl.substring(0, 50)}...<br>
                                     • Original URL: ${veUrlData.originalUrl.substring(0, 50)}...<br>
-                                    • Timestamp points: ${veUrlData.timestampData.sync_points.length}<br>
+                                    • Timestamp points: ${Object.keys(timestampData).length}<br>
                                     • Server ID: ${result.ve_url.ve_id}<br>
                                     • Created at: ${new Date().toLocaleString()}
                                 </div>
                             `;
+
+                            // Auto-redirect after 3 seconds
+                            setTimeout(() => {
+                                if (confirm('VE URL이 성공적으로 생성되었습니다! 생성된 페이지로 이동하시겠습니까?')) {
+                                    window.open(veUrl, '_blank');
+                                }
+                            }, 3000);
                         } else {
                             const errorText = await response.text();
                             console.error('❌ Server error response:', errorText);
-                            showMessage(`❌ Server error: ${response.status} - ${errorText}`, 'error');
+                            
+                            let errorMessage = `Server error: ${response.status}`;
+                            try {
+                                const errorData = JSON.parse(errorText);
+                                errorMessage += ` - ${errorData.error || errorData.details || errorText}`;
+                            } catch {
+                                errorMessage += ` - ${errorText}`;
+                            }
+                            
+                            showMessage(`❌ ${errorMessage}`, 'error');
                         }
                     } catch (error) {
                         console.error('❌ Server upload error:', error);
