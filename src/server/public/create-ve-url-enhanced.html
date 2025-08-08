@@ -264,7 +264,7 @@
                 <div class="input-group">
                     <label for="password">Password <span class="required">*</span></label>
                     <input type="password" id="password" placeholder="Enter your password">
-                    <div class="help-text">Minimum 8 characters required</div>
+                    <div class="help-text">Minimum 4 characters required</div>
                 </div>
             </div>
             
@@ -492,8 +492,8 @@
                 showMessage('Please enter your password.', 'error');
                 return false;
             }
-            if (passwordInput.value.length < 8) {
-                showMessage('Password must be at least 8 characters long.', 'error');
+            if (passwordInput.value.length < 4) {
+                showMessage('Password must be at least 4 characters long.', 'error');
                 return false;
             }
 
