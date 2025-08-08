@@ -70,6 +70,12 @@ class TimestampEditor {
         // 재생 컨트롤
         document.getElementById('play-pause-btn').addEventListener('click', () => this.togglePlayback());
         
+        // Resync 버튼 이벤트 리스너 추가
+        const resyncBtn = document.getElementById('resync-btn');
+        if (resyncBtn) {
+            resyncBtn.addEventListener('click', () => this.resyncYouTubeVideo());
+        }
+        
         // 타임라인 컨트롤
         document.getElementById('ripple-toggle').addEventListener('click', () => this.toggleRippleMode());
         document.getElementById('add-timestamp-btn').addEventListener('click', () => this.addTimestamp());
@@ -1051,6 +1057,80 @@ class TimestampEditor {
         });
     }
     
+    // 🔄 Resync 버튼 기능 구현
+    resyncYouTubeVideo() {
+        if (!this.timestampData || !this.youtubePlayer) {
+            console.log('❌ 타임스탬프 데이터 또는 YouTube 플레이어가 없습니다.');
+            return;
+        }
+        
+        // 현재 리액션 비디오 시간 가져오기
+        let currentReactionTime = 0;
+        if (this.reactionPlayer) {
+            currentReactionTime = this.reactionPlayer.getCurrentTime();
+        } else if (this.reactionVideo) {
+            currentReactionTime = this.reactionVideo.currentTime;
+        }
+        
+        console.log(`🔄 재동기화 시작: 현재 시간 ${currentReactionTime}초`);
+        
+        // 현재 시간에서 가장 가까운 sync point 찾기
+        const nearestPoint = this.findNearestSyncPoint(currentReactionTime);
+        
+        if (nearestPoint) {
+            console.log(`📍 가장 가까운 sync point: ${nearestPoint.reaction_time}초 (${nearestPoint.event})`);
+            
+            // 해당 sync point로 YouTube 비디오 동기화
+            this.syncToPoint(nearestPoint);
+            
+            console.log('✅ 재동기화 완료');
+        } else {
+            console.log('❌ 가까운 sync point를 찾을 수 없습니다.');
+        }
+    }
+    
+    // 가장 가까운 sync point 찾기
+    findNearestSyncPoint(currentTime) {
+        if (!this.timestampData || !this.timestampData.sync_points) {
+            return null;
+        }
+        
+        let nearestPoint = null;
+        let minDistance = Infinity;
+        
+        this.timestampData.sync_points.forEach(point => {
+            const distance = Math.abs(point.reaction_time - currentTime);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestPoint = point;
+            }
+        });
+        
+        return nearestPoint;
+    }
+    
+    // 특정 sync point로 동기화
+    syncToPoint(syncPoint) {
+        try {
+            const youtubeTime = syncPoint.youtube_time || syncPoint.relative_youtube_time || 0;
+            
+            // YouTube 비디오를 해당 시간으로 이동
+            this.youtubePlayer.seekTo(youtubeTime, true);
+            
+            // sync point의 이벤트에 따라 YouTube 상태 조정
+            if (syncPoint.event === 'youtube_play') {
+                this.youtubePlayer.playVideo();
+                console.log(`▶️ YouTube 재생: ${youtubeTime}초`);
+            } else if (syncPoint.event === 'youtube_pause') {
+                this.youtubePlayer.pauseVideo();
+                console.log(`⏸️ YouTube 일시정지: ${youtubeTime}초`);
+            }
+            
+        } catch (error) {
+            console.error('❌ YouTube 동기화 오류:', error);
+        }
+    }
+    
     togglePlayback() {
         if (!this.reactionVideo) {
             return; // 알림 제거
@@ -1444,6 +1524,12 @@ class TimestampEditor {
             e.preventDefault();
             this.resizeSelectedBlocks();
         } 
+        // 🔄 Resync 키보드 단축키 추가
+        else if (e.ctrlKey && e.key === 'r') {
+            e.preventDefault();
+            this.resyncYouTubeVideo();
+            console.log('🔄 키보드 단축키로 재동기화 실행');
+        }
         // 🔧 줌 키보드 단축키 추가
         else if (e.ctrlKey && e.key === '=') {
             e.preventDefault();

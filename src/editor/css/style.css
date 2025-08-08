@@ -219,7 +219,16 @@ body {
     transform: translateY(-2px);
 }
 
-/* Auto Sync 토글 버튼 스타일 제거 */
+/* Resync 버튼 스타일 */
+.resync-btn {
+    background-color: var(--warning-color) !important;
+    color: white !important;
+}
+
+.resync-btn:hover {
+    background-color: #e68900 !important;
+    transform: translateY(-2px);
+}
 
 .playback-controls span {
     font-weight: 600;
