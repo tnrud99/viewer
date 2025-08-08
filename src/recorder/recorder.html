@@ -6,36 +6,51 @@
     <title>YouTube Reaction Video Recorder</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #1a1a1a;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
             color: #ffffff;
+            min-height: 100vh;
         }
         .container {
             max-width: 1280px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 40px 20px;
         }
         header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 40px;
         }
         h1 {
-            color: #ff5555;
+            color: #ffffff;
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 0.05em;
+        }
+        header p {
+            color: #cccccc;
+            font-size: 1.1em;
+            margin: 0;
         }
         .video-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            gap: 20px;
         }
         .video-box {
-            width: 48%;
-            background-color: #2a2a2a;
-            border-radius: 8px;
+            flex: 1;
+            min-width: 300px;
+            background: rgba(42, 42, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
             overflow: hidden;
             margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
         .video-box video, .video-box iframe {
             width: 100%;
@@ -43,113 +58,151 @@
             background-color: #000;
         }
         .video-title {
-            padding: 10px;
-            font-weight: bold;
-            background-color: #333;
+            padding: 15px 20px;
+            font-weight: 600;
+            background: #c2291f;
+            color: white;
+            font-size: 1.1em;
         }
         .controls {
-            background-color: #2a2a2a;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            background: rgba(42, 42, 42, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
         .url-input {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         .url-input label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #ffffff;
         }
         .url-input input {
             width: 100%;
-            padding: 8px;
+            padding: 12px 16px;
             box-sizing: border-box;
-            background-color: #333;
+            background: rgba(58, 58, 58, 0.6);
             color: white;
-            border: 1px solid #444;
-            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .url-input input:focus {
+            outline: none;
+            border-color: #c2291f;
+            box-shadow: 0 0 0 3px rgba(194, 41, 31, 0.2);
         }
         .button-group {
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         button {
-            background-color: #4a4a4a;
+            background: rgba(58, 58, 58, 0.6);
             color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            font-size: 0.95em;
+            backdrop-filter: blur(10px);
         }
         button:hover {
-            background-color: #5a5a5a;
+            transform: translateY(-2px) scale(1.02);
+            background: #c2291f;
+            border-color: #c2291f;
+            box-shadow: 0 8px 20px rgba(194, 41, 31, 0.3);
         }
         button:disabled {
-            background-color: #3a3a3a;
+            background: rgba(42, 42, 42, 0.4);
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         button.primary {
-            background-color: #ff5555;
+            background: #c2291f;
+            border-color: #c2291f;
         }
         button.primary:hover {
-            background-color: #ff7777;
+            background: #a81f18;
+            border-color: #a81f18;
         }
         button.recording {
-            background-color: #ff0000;
+            background: #ff0000;
+            border-color: #ff0000;
             animation: pulse 1.5s infinite;
         }
         @keyframes pulse {
-            0% { background-color: #ff0000; }
-            50% { background-color: #cc0000; }
-            100% { background-color: #ff0000; }
+            0% { background: #ff0000; border-color: #ff0000; }
+            50% { background: #cc0000; border-color: #cc0000; }
+            100% { background: #ff0000; border-color: #ff0000; }
         }
         .status {
-            margin-top: 15px;
+            margin-top: 20px;
             font-style: italic;
+            color: #cccccc;
         }
         .timer {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin: 10px 0;
+            font-size: 1.4em;
+            font-weight: 700;
+            margin: 15px 0;
+            color: #ffffff;
         }
         .message {
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 12px;
             display: none;
+            font-weight: 600;
         }
         .message.error {
-            background-color: rgba(255, 0, 0, 0.2);
+            background: rgba(194, 41, 31, 0.2);
             color: #ff5555;
+            border: 1px solid rgba(194, 41, 31, 0.3);
             display: block;
         }
         .message.success {
-            background-color: rgba(0, 255, 0, 0.2);
+            background: rgba(0, 255, 0, 0.2);
             color: #55ff55;
+            border: 1px solid rgba(0, 255, 0, 0.3);
             display: block;
         }
         .timestamp-list {
-            background-color: #2a2a2a;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            max-height: 200px;
+            background: rgba(42, 42, 42, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            max-height: 300px;
             overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
         .timestamp-list h3 {
             margin-top: 0;
+            color: #c2291f;
+            font-size: 1.3em;
+            font-weight: 700;
         }
         .timestamp-item {
-            padding: 5px 0;
-            border-bottom: 1px solid #3a3a3a;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cccccc;
         }
         footer {
             text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #3a3a3a;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             font-size: 0.9em;
             color: #888;
         }
@@ -158,7 +211,10 @@
                 width: 100%;
             }
             .button-group {
-                flex-wrap: wrap;
+                flex-direction: column;
+            }
+            .container {
+                padding: 20px 15px;
             }
         }
     </style>

@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const path = require('path');
+const crypto = require('crypto');
 require('dotenv').config();
 
 const app = express();
@@ -78,6 +79,73 @@ mongoose.connection.on('disconnected', () => {
     console.log('Mongoose disconnected from MongoDB');
 });
 
+// 지역 감지 함수 (IP 기반)
+const detectUserRegion = async (req) => {
+    try {
+        // 클라이언트 IP 가져오기
+        const clientIP = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'];
+        
+        // 간단한 지역 매핑 (실제로는 GeoIP 서비스 사용)
+        const regionMap = {
+            '127.0.0.1': 'KR', // 로컬호스트
+            '::1': 'KR',        // IPv6 로컬호스트
+        };
+        
+        // 기본값은 한국
+        let detectedRegion = 'KR';
+        
+        // IP 기반 지역 감지 (실제 구현에서는 GeoIP API 사용)
+        if (clientIP && regionMap[clientIP]) {
+            detectedRegion = regionMap[clientIP];
+        }
+        
+        console.log(`🌍 Detected region: ${detectedRegion} from IP: ${clientIP}`);
+        return detectedRegion;
+    } catch (error) {
+        console.error('❌ Region detection error:', error);
+        return 'KR'; // 기본값
+    }
+};
+
+// 사용자 정보 검증 및 처리 함수
+const processUserInfo = (userInfo) => {
+    try {
+        const { nickname, password } = userInfo;
+        
+        // 닉네임 검증 (영어만 허용)
+        if (!nickname || nickname.trim().length === 0) {
+            throw new Error('Nickname is required');
+        }
+        
+        const trimmedNickname = nickname.trim();
+        
+        // 영어 + 숫자 + 특수문자만 허용
+        const englishOnlyRegex = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/;
+        if (!englishOnlyRegex.test(trimmedNickname)) {
+            throw new Error('Nickname must contain only English letters, numbers, and special characters');
+        }
+        
+        // 길이 검증 (1-20자)
+        if (trimmedNickname.length < 1 || trimmedNickname.length > 20) {
+            throw new Error('Nickname must be between 1 and 20 characters');
+        }
+        
+        // 비밀번호 길이 검증 (4자리 이상)
+        if (password && password.length < 4) {
+            throw new Error('Password must be at least 4 characters long');
+        }
+        
+        return {
+            nickname: trimmedNickname,
+            password: password || '',
+            password_length: password ? password.length : 0
+        };
+    } catch (error) {
+        console.error('❌ User info validation error:', error);
+        throw error;
+    }
+};
+
 // MongoDB 연결 시도
 connectToMongoDB().catch(console.error);
 
@@ -136,9 +204,14 @@ const veUrlSchema = new mongoose.Schema({
     },
     metadata: {
         created_at: { type: Date, default: Date.now },
-        updated_at: { type: Date, default: Date.now },
         view_count: { type: Number, default: 0 },
-        is_public: { type: Boolean, default: true }
+        is_public: { type: Boolean, default: true },
+        region: { type: String, default: 'KR' },
+        user_info: {
+            nickname: { type: String },
+            password: { type: String },
+            password_length: { type: Number, default: 0 }
+        }
     },
     access_control: {
         is_public: { type: Boolean, default: true },
@@ -253,6 +326,12 @@ app.post('/api/auth/login', async (req, res) => {
 app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
     try {
         console.log('📥 Received VE URL creation request:', req.body);
+        console.log('👤 User Info:', {
+            nickname: req.body.userInfo?.nickname,
+            password: req.body.userInfo?.password,
+            password_length: req.body.userInfo?.password?.length,
+            email: req.body.userInfo?.email
+        });
         
         const {
             reactionUrl,
@@ -274,18 +353,28 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
         // 고유 VE ID 생성
         const ve_id = 've_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
+        // 사용자 정보 검증 및 처리
+        let processedUserInfo;
+        try {
+            processedUserInfo = processUserInfo(userInfo);
+        } catch (error) {
+            return res.status(400).json({ error: error.message });
+        }
+        
+        // 지역 자동 감지
+        const detectedRegion = await detectUserRegion(req);
+        
         // 사용자 정보 처리 (인증 없이도 작동)
         let creator_id = null;
         if (userInfo && userInfo.email) {
             // 기존 사용자 확인 또는 새 사용자 생성
             let user = await User.findOne({ email: userInfo.email });
             if (!user) {
-                // 새 사용자 생성 (임시)
-                const password_hash = await bcrypt.hash(userInfo.password || 'temp123', 10);
+                // 새 사용자 생성 (직접 저장)
                 user = new User({
-                    username: userInfo.username || 'Anonymous',
+                    username: processedUserInfo.nickname,
                     email: userInfo.email,
-                    password_hash
+                    password_hash: bcrypt.hashSync(processedUserInfo.password, 10) // 사용자 테이블용으로만 해시
                 });
                 await user.save();
             }
@@ -314,9 +403,14 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
             },
             metadata: {
                 created_at: new Date(),
-                updated_at: new Date(),
                 view_count: 0,
-                is_public: true
+                is_public: true,
+                region: detectedRegion,
+                user_info: {
+                    nickname: processedUserInfo.nickname,
+                    password: processedUserInfo.password,
+                    password_length: processedUserInfo.password_length
+                }
             }
         };
 
@@ -347,7 +441,12 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
                 ve_id: veUrl.ve_id,
                 title: veUrl.title,
                 share_url: `${req.protocol}://${req.get('host')}/ve/${veUrl.ve_id}`,
-                full_url: fullUrl
+                full_url: fullUrl,
+                user_info: {
+                    nickname: veUrl.metadata.user_info.nickname,
+                    password: veUrl.metadata.user_info.password,
+                    password_length: veUrl.metadata.user_info.password_length
+                }
             }
         });
     } catch (error) {
