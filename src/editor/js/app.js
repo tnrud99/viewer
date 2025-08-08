@@ -31,6 +31,34 @@ class TimestampEditor {
         if (typeof TimelineControls !== 'undefined') {
             this.initTimelineControls();
         }
+        
+        // 동기화 인터벌 설정
+        this.setupSyncInterval();
+    }
+    
+    // 🔧 누락된 초기화 메서드 구현
+    initTimelineControls() {
+        console.log('타임라인 컨트롤 초기화 중...');
+        this.timelineControls = new TimelineControls(this);
+        console.log('타임라인 컨트롤 초기화 완료');
+    }
+    
+    initAdvancedFeatures() {
+        console.log('고급 편집 기능 초기화 중...');
+        this.advancedFeatures = new AdvancedEditingFeatures(this);
+        console.log('고급 편집 기능 초기화 완료');
+    }
+    
+    // 🔧 동기화 인터벌 설정
+    setupSyncInterval() {
+        // 정기적으로 타임스탬프 이벤트 체크 (100ms마다)
+        this.syncCheckInterval = setInterval(() => {
+            if (this.isPlaying) {
+                this.handleTimestampEvents();
+            }
+        }, 100);
+        
+        console.log('동기화 인터벌 설정 완료');
     }
     
     setupEventListeners() {
@@ -47,6 +75,36 @@ class TimestampEditor {
         document.getElementById('add-timestamp-btn').addEventListener('click', () => this.addTimestamp());
         document.getElementById('undo-btn').addEventListener('click', () => this.undo());
         document.getElementById('redo-btn').addEventListener('click', () => this.redo());
+        
+        // 🔧 줌 컨트롤 이벤트 리스너 추가 (TimelineControls 초기화 전 백업)
+        const zoomInBtn = document.getElementById('zoom-in');
+        const zoomOutBtn = document.getElementById('zoom-out');
+        
+        if (zoomInBtn) {
+            zoomInBtn.addEventListener('click', () => {
+                if (this.timelineControls) {
+                    this.timelineControls.zoomIn();
+                } else {
+                    // 백업 줌인 로직
+                    this.pixelsPerSecond = Math.min(200, this.pixelsPerSecond * 1.2);
+                    this.renderTimeline();
+                    console.log('줌인:', this.pixelsPerSecond);
+                }
+            });
+        }
+        
+        if (zoomOutBtn) {
+            zoomOutBtn.addEventListener('click', () => {
+                if (this.timelineControls) {
+                    this.timelineControls.zoomOut();
+                } else {
+                    // 백업 줌아웃 로직
+                    this.pixelsPerSecond = Math.max(5, this.pixelsPerSecond / 1.2);
+                    this.renderTimeline();
+                    console.log('줌아웃:', this.pixelsPerSecond);
+                }
+            });
+        }
         
         // 내보내기
         document.getElementById('export-btn').addEventListener('click', () => this.exportTimestamp());
@@ -942,25 +1000,53 @@ class TimestampEditor {
     handleTimestampEvents() {
         if (!this.timestampData || !this.youtubePlayer || !this.isPlaying) return;
         
-        // 현재 시간에 해당하는 타임스탬프 이벤트 찾기
-        const tolerance = 0.2; // 0.2초 오차 허용
+        // 🔧 개선된 타임스탬프 이벤트 처리
+        const tolerance = 0.15; // 0.15초 오차 허용 (더 정확하게)
         const currentEvents = this.timestampData.sync_points.filter(point => {
             return Math.abs(point.reaction_time - this.currentTime) < tolerance;
         });
         
+        // 이미 처리된 이벤트 중복 방지
+        if (!this.processedEvents) {
+            this.processedEvents = new Set();
+        }
+        
         currentEvents.forEach(event => {
+            const eventKey = `${event.reaction_time}_${event.event}`;
+            
+            // 이미 처리된 이벤트는 건너뛰기
+            if (this.processedEvents.has(eventKey)) return;
+            
             try {
                 if (event.event === 'youtube_play') {
                     const youtubeTime = event.youtube_time || event.relative_youtube_time || 0;
-                    this.youtubePlayer.seekTo(youtubeTime, true);
-                    this.youtubePlayer.playVideo();
-                    console.log('YouTube 재생:', youtubeTime);
+                    
+                    // YouTube 플레이어 상태 확인
+                    if (this.youtubePlayer.getPlayerState() !== 1) { // 1 = PLAYING
+                        this.youtubePlayer.seekTo(youtubeTime, true);
+                        this.youtubePlayer.playVideo();
+                        console.log('✅ YouTube 재생:', youtubeTime);
+                    }
+                    
                 } else if (event.event === 'youtube_pause') {
-                    this.youtubePlayer.pauseVideo();
-                    console.log('YouTube 일시정지');
+                    
+                    // YouTube 플레이어 상태 확인
+                    if (this.youtubePlayer.getPlayerState() === 1) { // 1 = PLAYING
+                        this.youtubePlayer.pauseVideo();
+                        console.log('✅ YouTube 일시정지');
+                    }
                 }
+                
+                // 처리된 이벤트로 마킹
+                this.processedEvents.add(eventKey);
+                
+                // 일정 시간 후 처리된 이벤트 목록에서 제거 (재활성화를 위해)
+                setTimeout(() => {
+                    this.processedEvents.delete(eventKey);
+                }, 1000);
+                
             } catch (error) {
-                console.error('YouTube 플레이어 제어 오류:', error);
+                console.error('❌ YouTube 플레이어 제어 오류:', error);
             }
         });
     }
@@ -1357,6 +1443,28 @@ class TimestampEditor {
         } else if (e.key === 'r' || e.key === 'R') {
             e.preventDefault();
             this.resizeSelectedBlocks();
+        } 
+        // 🔧 줌 키보드 단축키 추가
+        else if (e.ctrlKey && e.key === '=') {
+            e.preventDefault();
+            // 줌인
+            if (this.timelineControls) {
+                this.timelineControls.zoomIn();
+            } else {
+                this.pixelsPerSecond = Math.min(200, this.pixelsPerSecond * 1.2);
+                this.renderTimeline();
+            }
+            console.log('🔍 키보드 줌인:', this.pixelsPerSecond);
+        } else if (e.ctrlKey && e.key === '-') {
+            e.preventDefault();
+            // 줌아웃
+            if (this.timelineControls) {
+                this.timelineControls.zoomOut();
+            } else {
+                this.pixelsPerSecond = Math.max(5, this.pixelsPerSecond / 1.2);
+                this.renderTimeline();
+            }
+            console.log('🔍 키보드 줌아웃:', this.pixelsPerSecond);
         }
     }
     
