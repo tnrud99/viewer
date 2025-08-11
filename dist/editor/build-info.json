@@ -1,0 +1,32 @@
+{
+  "component": "Editor",
+  "buildTime": "2025-08-11T05:09:57.921Z",
+  "version": "1.0.0",
+  "dependencies": {
+    "shared": [
+      "config.js",
+      "youtube-api.js",
+      "timestamp-parser.js",
+      "loader.js"
+    ],
+    "editor": [
+      "app.js",
+      "timeline-controls.js",
+      "drag-drop.js",
+      "advanced-editing.js",
+      "editor-utils.js"
+    ]
+  },
+  "integrity": {
+    "errors": 1,
+    "warnings": 0
+  },
+  "features": [
+    "Timeline editing",
+    "Drag and drop",
+    "Zoom controls",
+    "Keyboard shortcuts",
+    "Undo/Redo",
+    "Export functionality"
+  ]
+}

@@ -1,161 +1,265 @@
-# VE Viewer
+# VirtuEDIT Studio
 
-Virtual Environment 뷰어 및 관련 도구들을 제공하는 웹 기반 플랫폼입니다.
+**Copyright-safe virtual editing with multi-window viewing system**
 
-## 📁 프로젝트 구조
+A comprehensive platform for creating synchronized reaction videos while ensuring copyright safety for content creators and reactors.
+
+## 🎯 Overview
+
+VirtuEDIT Studio is designed to help YouTubers and content creators produce reaction videos safely by providing:
+
+- **Timestamp Recording**: Create precise timestamps for reaction videos
+- **Timeline Editing**: Advanced editing tools for video synchronization
+- **VE URL Creation**: Generate shareable URLs for synchronized viewing
+- **Multi-window Viewing**: Simultaneous playback of original and reaction content
+
+## 🏗️ Project Structure
 
 ```
 viewer/
-├── index.html                 # 메인 페이지
-├── README.md                  # 프로젝트 설명서
-├── src/                       # 소스 코드
-│   ├── viewer/               # VE 뷰어 관련 파일들
-│   │   ├── viewer.html
-│   │   ├── index.html
-│   │   ├── create-ve-url.html
-│   │   ├── create-ve-url-enhanced.html  # 🆕 향상된 VE URL 생성기
-│   │   ├── create-ve-url-server.html
-│   │   └── create-ve-url-storage.html
-│   ├── editor/               # VE 에디터 관련 파일들
-│   │   ├── index.html
-│   │   ├── js/
-│   │   └── css/
-│   ├── recorder/             # VE 레코더 관련 파일들
-│   │   ├── recorder.html
-│   │   └── recorder.js
-│   └── server/               # 서버 관련 파일들
-│       ├── server.js
-│       ├── package.json
-│       ├── public/
-│       └── ...
-├── assets/                    # 정적 자원들
-│   ├── samples/              # 샘플 데이터 파일들
-│   │   ├── sample_ve_timestamp.json
-│   │   ├── sample_timestamp.json
-│   │   └── test_data.json
-│   └── config/               # 설정 파일들
-│       └── vercel.json
-└── docs/                      # 문서들
-    ├── deployment-guide.md
-    └── server-architecture.md
+├── src/
+│   ├── server/                 # Backend server (Node.js/Express)
+│   │   ├── public/            # Served static files
+│   │   │   ├── index.html     # Main landing page
+│   │   │   ├── viewer.html    # VE URL viewer
+│   │   │   ├── create-ve-url*.html  # URL creation pages
+│   │   │   ├── server-status.html
+│   │   │   └── logo/          # Logo assets
+│   │   ├── server.js          # Main server file
+│   │   ├── package.json       # Node.js dependencies
+│   │   └── env.example        # Environment variables template
+│   ├── recorder/              # Recording functionality
+│   │   ├── recorder.html      # Recording interface
+│   │   └── recorder.js        # Recording logic
+│   └── editor/                # Timeline editing tools
+│       ├── index.html         # Editor interface
+│       ├── css/style.css      # Editor styles
+│       └── js/                # Editor JavaScript files
+├── assets/                    # Static assets
+│   ├── config/               # Configuration files
+│   └── samples/              # Sample data files
+├── vercel.json               # Vercel deployment config
+└── README.md                 # This file
 ```
 
-## 🚀 주요 기능
+## 🚀 Features
 
-### 1. VE 뷰어 (Viewer)
-- Virtual Environment 데이터를 시각화
-- 3D 환경에서 객체 탐색
-- 실시간 데이터 업데이트
+### 1. **Recorder** (`/recorder.html`)
+- Create timestamps for reaction videos
+- Record precise synchronization points
+- Export timestamp data for editing
 
-### 2. VE 에디터 (Editor)
-- Virtual Environment 데이터 편집
-- 타임라인 기반 편집 기능
-- 드래그 앤 드롭 인터페이스
+### 2. **Timeline Editor** (`/editor`)
+- Advanced timeline editing interface
+- Drag-and-drop functionality
+- Real-time preview capabilities
+- Export synchronized data
 
-### 3. VE 레코더 (Recorder)
-- Virtual Environment 데이터 녹화
-- 실시간 데이터 캡처
-- 다양한 포맷 지원
+### 3. **VE URL Creator** (`/create-ve-url-enhanced.html`)
+- Generate shareable VE URLs
+- Configure synchronization settings
+- User authentication and metadata storage
 
-### 4. VE URL 생성기
-- Virtual Environment URL 생성
-- 서버 및 스토리지 연동
-- URL 관리 기능
+### 4. **Viewer** (`/viewer.html`)
+- Synchronized video playback
+- Real-time synchronization
+- Resync functionality for manual adjustments
+- Multi-window viewing system
 
-### 5. 🆕 향상된 VE URL 생성기 (Enhanced VE URL Creator)
-- **사용자 정보 입력**: 사용자 이름, 이메일, 비밀번호 입력
-- **비디오 정보 설정**: 리액션 유튜브 영상 URL과 원본 유튜브 영상 URL 입력
-- **타임스탬프 파일**: 동기화 정보가 포함된 JSON 파일 업로드
-- **뷰어 설정**: 오버레이 위치, 크기, 볼륨 등 설정
-- **접근 제어**: 공개/비공개 링크 설정
-- **서버 업로드**: 생성된 데이터를 서버에 업로드하여 온라인 공유 가능
-- **온라인 공유**: 특정 코드가 포함된 고유 URL 생성으로 누구나 시청 가능
+### 5. **ReactCentral** (Under Development)
+- Platform for sharing and discovering VE URLs
+- Community features
+- Content discovery tools
 
-## 🎬 VE URL 시스템 특징
+## 🛠️ Technology Stack
 
-### 사용자 경험
-1. **간단한 정보 입력**: 사용자 이름, 비밀번호, 비디오 URL, 타임스탬프 파일만 입력
-2. **자동 설정**: 기본 설정으로도 바로 사용 가능
-3. **온라인 공유**: 생성된 URL로 누구나 접근 가능
+### Backend
+- **Node.js** with **Express.js**
+- **MongoDB** with **Mongoose** ODM
+- **JWT** for authentication
+- **bcrypt** for password hashing
 
-### 기술적 특징
-- **UTF-8 지원**: 안전한 Base64 인코딩으로 한글 지원
-- **데이터 압축**: URL 길이 제한을 위한 데이터 최적화
-- **서버 연동**: MongoDB 데이터베이스와 연동
-- **에러 처리**: 로컬 모드와 서버 모드 자동 전환
-- **반응형 디자인**: 모바일 환경에서도 최적화된 UI
+### Frontend
+- **Vanilla JavaScript** (ES6+)
+- **HTML5** with modern CSS
+- **YouTube IFrame API** for video integration
+- **Apple OS-style UI** with dark mode
 
-### 생성된 URL 특징
-- **특정 코드 포함**: URL에 동기화 정보가 인코딩되어 포함
-- **뷰어 연결**: URL 클릭 시 바로 뷰어로 연결
-- **타임스탬프 동기화**: 구현된 타임스탬프 기반 동시재생
-- **추가 입력 불필요**: 뷰어에서는 기타 입력 없이 바로 재생
+### Deployment
+- **Vercel** for hosting
+- **MongoDB Atlas** for database
 
-## 🛠️ 사용 방법
+## 📋 Prerequisites
 
-### 1. 메인 페이지 접속
-`index.html`을 웹 브라우저에서 열기
+- Node.js 14.0.0 or higher
+- MongoDB database (local or Atlas)
+- Vercel account for deployment
 
-### 2. 향상된 VE URL 생성기 사용
-1. **향상된 VE URL 생성기** 클릭
-2. **사용자 정보 입력**: 이름, 이메일, 비밀번호 입력
-3. **비디오 정보 설정**: 리액션 영상 URL, 원본 영상 URL 입력
-4. **타임스탬프 파일 업로드**: JSON 파일 선택
-5. **뷰어 설정**: 오버레이 위치, 크기, 볼륨 설정
-6. **VE URL 생성**: 생성 버튼 클릭
-7. **링크 공유**: 생성된 URL을 복사하여 공유
+## 🔧 Installation & Setup
 
-### 3. 생성된 URL 사용
-1. 생성된 URL 클릭
-2. 뷰어에서 자동으로 동기화된 재생 시작
-3. 재생/일시정지 버튼으로 제어
-
-## 📋 요구사항
-
-- 최신 웹 브라우저 (Chrome, Firefox, Safari, Edge)
-- JavaScript 활성화
-- 인터넷 연결 (일부 기능)
-
-## 🔧 개발 환경 설정
-
-### 로컬 개발 서버 실행
+### 1. Clone the Repository
 ```bash
-# 서버 디렉토리로 이동
+git clone <repository-url>
+cd viewer
+```
+
+### 2. Install Dependencies
+```bash
 cd src/server
-
-# 의존성 설치
 npm install
+```
 
-# 개발 서버 실행
+### 3. Environment Configuration
+```bash
+cp env.example .env
+```
+
+Edit `.env` file with your configuration:
+```env
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+NODE_ENV=production
+```
+
+### 4. Development
+```bash
+npm run dev
+```
+
+### 5. Production
+```bash
 npm start
 ```
 
-### 정적 파일 서빙
-```bash
-# Python을 사용한 간단한 서버
-python -m http.server 8000
+## 🚀 Deployment
 
-# 또는 Node.js http-server 사용
-npx http-server
+### Vercel Deployment
+1. Connect your repository to Vercel
+2. Configure environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
+
+### Manual Deployment
+```bash
+vercel --prod
 ```
 
-## 📚 문서
+## 📖 Usage Guide
 
-- [배포 가이드](docs/deployment-guide.md)
-- [서버 아키텍처](docs/server-architecture.md)
+### For Content Creators
 
-## 🤝 기여하기
+1. **Record Timestamps**
+   - Navigate to Recorder
+   - Create timestamps for your reaction video
+   - Export timestamp data
 
-1. 이 저장소를 포크합니다
-2. 새로운 기능 브랜치를 생성합니다 (`git checkout -b feature/amazing-feature`)
-3. 변경사항을 커밋합니다 (`git commit -m 'Add some amazing feature'`)
-4. 브랜치에 푸시합니다 (`git push origin feature/amazing-feature`)
-5. Pull Request를 생성합니다
+2. **Edit Timeline** (Optional)
+   - Use Timeline Editor for advanced editing
+   - Fine-tune synchronization points
+   - Preview your edits
 
-## 📄 라이선스
+3. **Create VE URL**
+   - Use VE URL Creator
+   - Configure settings and metadata
+   - Generate shareable URL
 
-이 프로젝트는 MIT 라이선스 하에 배포됩니다.
+4. **Share and View**
+   - Share the VE URL with your audience
+   - Viewers can watch synchronized content
 
-## 📞 문의
+### For Viewers
 
-프로젝트에 대한 문의사항이 있으시면 이슈를 생성해 주세요. 
+1. **Access VE URL**
+   - Click on shared VE URL
+   - Automatic loading of synchronized content
+
+2. **View Synchronized Content**
+   - Original and reaction videos play simultaneously
+   - Real-time synchronization maintained
+
+3. **Manual Resync** (if needed)
+   - Use Resync button for manual adjustment
+   - Pause → Play sequence for re-synchronization
+
+## 🔒 Copyright Safety
+
+VirtuEDIT Studio is designed with copyright safety in mind:
+
+- **No Content Storage**: Original videos are not stored on our servers
+- **YouTube Integration**: Uses YouTube's official API
+- **Fair Use Compliance**: Designed for legitimate reaction content
+- **Creator Control**: Content creators maintain full control over their work
+
+## 🎨 UI/UX Design
+
+- **Apple OS Style**: Clean, modern interface with dark mode
+- **Responsive Design**: Works on desktop and mobile devices
+- **Intuitive Navigation**: Easy-to-understand workflow
+- **Professional Aesthetics**: Suitable for content creators
+
+## 🔧 API Endpoints
+
+### VE URL Management
+- `POST /api/ve-urls/create` - Create new VE URL
+- `GET /api/ve-urls/:id` - Retrieve VE URL data
+- `DELETE /api/ve-urls/:id` - Delete VE URL (authenticated)
+
+### Authentication
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+
+### Analytics
+- `POST /api/analytics/view` - Track view events
+
+## 📊 Database Schema
+
+### VEUrl Collection
+```javascript
+{
+  ve_id: String,           // Unique identifier
+  title: String,           // URL title
+  description: String,     // URL description
+  reaction_url: String,    // Reaction video URL
+  original_url: String,    // Original video URL
+  timestamp_data: Array,   // Synchronization data
+  settings: Object,        // Viewer settings
+  metadata: {
+    created_at: Date,
+    view_count: Number,
+    user_info: {
+      nickname: String,
+      password: String,
+      password_length: Number
+    }
+  }
+}
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🆘 Support
+
+For support and questions:
+- Check the documentation
+- Review existing issues
+- Create a new issue with detailed information
+
+## 🔄 Version History
+
+- **v1.0.0** - Initial release with core functionality
+- **v1.1.0** - Added Apple OS-style UI redesign
+- **v1.2.0** - Enhanced synchronization and Resync feature
+- **v1.3.0** - Improved user authentication and metadata handling
+
+---
+
+**VirtuEDIT Studio** - Empowering content creators with copyright-safe virtual editing solutions. 
