@@ -72,14 +72,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const youtubeUrl = youtubeUrlInput.value.trim();
         
         if (!youtubeUrl) {
-            showAlert('Please enter a YouTube URL.', 'error');
+            showAlert('Please enter a valid YouTube URL to continue.', 'error');
             return;
         }
 
         // Extract YouTube video ID
         const videoId = extractYouTubeVideoId(youtubeUrl);
         if (!videoId) {
-            showAlert('Not a valid YouTube URL.', 'error');
+            showAlert('Invalid YouTube URL format. Please check and try again.', 'error');
             return;
         }
 
@@ -201,12 +201,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Start recording
     recordBtn.addEventListener('click', function() {
         if (!webcamStream) {
-            showAlert('Please activate webcam first.', 'error');
+            showAlert('Please enable your webcam first before starting recording.', 'error');
             return;
         }
         
         if (!youtubePlayer) {
-            showAlert('Please load a YouTube video first.', 'error');
+            showAlert('Please load a YouTube video first before starting recording.', 'error');
             return;
         }
         
@@ -679,7 +679,25 @@ function showAlert(text, type) {
     // Create alert element
     const alertElement = document.createElement('div');
     alertElement.className = `alert alert-${type}`;
-    alertElement.textContent = text;
+    
+    // Add icon based on type
+    let icon = '';
+    switch(type) {
+        case 'success':
+            icon = '✅ ';
+            break;
+        case 'error':
+            icon = '❌ ';
+            break;
+        case 'warning':
+            icon = '⚠️ ';
+            break;
+        case 'info':
+            icon = 'ℹ️ ';
+            break;
+    }
+    
+    alertElement.innerHTML = `<strong>${icon}${text}</strong>`;
     
     // Add to page
     document.body.appendChild(alertElement);
@@ -691,13 +709,19 @@ function showAlert(text, type) {
     alertElement.style.zIndex = '10000';
     alertElement.style.minWidth = '300px';
     alertElement.style.maxWidth = '400px';
+    alertElement.style.padding = '12px 16px';
+    alertElement.style.borderRadius = '8px';
+    alertElement.style.fontSize = '14px';
+    alertElement.style.fontWeight = '500';
+    alertElement.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+    alertElement.style.backdropFilter = 'blur(10px)';
     
-    // Auto remove after 3 seconds
+    // Auto remove after 4 seconds
     setTimeout(() => {
         if (alertElement.parentNode) {
             alertElement.parentNode.removeChild(alertElement);
         }
-    }, 3000);
+    }, 4000);
 }
 
 // Modal event listeners (이미 위에서 처리됨)
