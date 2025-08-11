@@ -4,265 +4,1282 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Reaction Video Recorder</title>
+    
+    <!-- 개발용: ui-system.css 참조 (로컬 개발 시에만 사용) -->
+    <!-- <link rel="stylesheet" href="../shared/constants/ui-system.css"> -->
+    
+    <!-- 배포용: 독립적인 스타일 (실제 배포 시 사용) -->
+    <!-- 
+        ✅ 이 파일은 ui-system.css에 의존하지 않는 독립적인 디자인입니다.
+        🎯 개발 시: 위의 주석을 해제하여 ui-system.css 참조
+        🚀 배포 시: 현재 상태로 독립적인 스타일 사용
+    -->
     <style>
+        :root {
+            /* 색상 시스템 */
+            --color-action: #c2291f;
+            --color-action-hover: #a81f18;
+            --color-action-light: rgba(194, 41, 31, 0.1);
+            --color-secondary: #4a4a4a;
+            --color-secondary-hover: #5a5a5a;
+            --color-success: #4caf50;
+            --color-warning: #ff9800;
+            --color-error: #f44336;
+            --color-info: #2196f3;
+            --color-bg-main: #1a1a1a;
+            --color-bg-card: rgba(42, 42, 42, 0.8);
+            --color-bg-input: rgba(58, 58, 58, 0.6);
+            --color-text-main: #ffffff;
+            --color-text-sub: #cccccc;
+            --color-text-muted: #888888;
+            --color-border: rgba(255, 255, 255, 0.1);
+            --color-border-focus: rgba(194, 41, 31, 0.3);
+            
+            /* 간격 */
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 1.5rem;
+            --space-lg: 2rem;
+            --space-xl: 3rem;
+            
+            /* 폰트 크기 */
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            --text-3xl: 2rem;
+            
+            /* 둥근 모서리 */
+            --radius-sm: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+            
+            /* 그림자 */
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.3);
+            --shadow-action: 0 4px 12px rgba(194, 41, 31, 0.3);
+            
+            /* 애니메이션 */
+            --transition: 0.2s ease;
+            --transition-slow: 0.3s ease;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-            color: #ffffff;
+            background: linear-gradient(135deg, var(--color-bg-main) 0%, #2a2a2a 100%);
+            color: var(--color-text-main);
             min-height: 100vh;
         }
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        header {
+
+        .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: var(--space-md);
+            padding: calc(var(--space-xl) * 1.5) 0 var(--space-sm) 0;
         }
-        h1 {
-            color: #ffffff;
-            font-size: 2.5em;
-            font-weight: 700;
-            margin-bottom: 10px;
-            letter-spacing: 0.05em;
+
+        .header h1 {
+            font-size: calc(var(--text-3xl) * 1.2);
+            margin: 0;
+            font-weight: 600;
         }
-        header p {
-            color: #cccccc;
-            font-size: 1.1em;
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            background-image: url('./whitered_mini.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .header h1 {
+            color: var(--color-text-main);
+            font-size: var(--text-3xl);
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.02em;
+        }
+
+        .header p {
+            color: var(--color-text-muted);
+            font-size: var(--text-base);
             margin: 0;
         }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .video-section {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-md);
+            margin-bottom: 0;
+            transition: all 0.3s ease;
+        }
+
+        .video-grid.expanded {
+            grid-template-columns: 0.3fr 0.7fr;
+        }
+
+        .video-grid.expanded .video-container {
+            min-height: 500px;
+        }
+
+        .video-grid:not(.expanded) .video-container {
+            min-height: 400px;
+        }
+
+        /* 컨테이너 높이 조정 - 웹캠 축소, YouTube 확장 */
+        .video-grid.expanded .video-container {
+            min-height: 400px;
+        }
+
+        .video-grid.expanded .video-card:first-child .video-container {
+            min-height: 300px; /* 웹캠 축소 */
+        }
+
+        .video-grid.expanded .video-card:first-child {
+            max-height: 350px; /* 웹캠 카드 전체 높이 제한 */
+        }
+
+        .video-grid.expanded .video-card:last-child .video-container {
+            min-height: 500px; /* YouTube 확장 */
+        }
+
+        .video-grid:not(.expanded) .video-container {
+            min-height: 400px;
+        }
+
+        /* 비디오 요소는 컨테이너에 맞춤 */
+        .video-container video,
+        .video-container iframe {
+            height: 100%;
+        }
+
         .video-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            margin-bottom: 30px;
-            gap: 20px;
-        }
-        .video-box {
-            flex: 1;
-            min-width: 300px;
-            background: rgba(42, 42, 42, 0.8);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-        .video-box video, .video-box iframe {
+            aspect-ratio: 16/9;
             width: 100%;
-            height: 360px;
-            background-color: #000;
         }
-        .video-title {
-            padding: 15px 20px;
-            font-weight: 600;
-            background: #c2291f;
-            color: white;
-            font-size: 1.1em;
-        }
-        .controls {
-            background: rgba(42, 42, 42, 0.8);
-            backdrop-filter: blur(20px);
-            padding: 30px;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-        .url-input {
-            margin-bottom: 20px;
-        }
-        .url-input label {
+
+        .video-container video,
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
             display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #ffffff;
+            object-fit: cover;
         }
-        .url-input input {
-            width: 100%;
-            padding: 12px 16px;
-            box-sizing: border-box;
-            background: rgba(58, 58, 58, 0.6);
+
+        /* YouTube 영상 비율 유지 */
+        .video-container iframe {
+            aspect-ratio: 16/9;
+            object-fit: contain;
+        }
+
+        .video-card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--color-border);
+        }
+
+        .video-header {
+            background: var(--color-action);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            font-size: 1em;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .url-input input:focus {
-            outline: none;
-            border-color: #c2291f;
-            box-shadow: 0 0 0 3px rgba(194, 41, 31, 0.2);
-        }
-        .button-group {
+            padding: 10px 12px;
+            font-weight: 500;
+            font-size: var(--text-base);
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
         }
-        button {
-            background: rgba(58, 58, 58, 0.6);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 12px 20px;
-            border-radius: 12px;
+
+        .header-main {
+            font-weight: 700;
+            font-size: var(--text-base);
+        }
+
+        .header-sub {
+            font-weight: 300;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-left: 4px;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-input {
+            display: none;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+
+        .toggle-slider {
+            position: relative;
+            width: 40px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            transition: var(--transition);
+        }
+
+        .toggle-slider:before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .toggle-text-on,
+        .toggle-text-off {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 8px;
+            font-weight: bold;
+            color: white;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .toggle-text-on {
+            left: 6px;
+            opacity: 0;
+        }
+
+        .toggle-text-off {
+            right: 6px;
+            opacity: 1;
+        }
+
+        .toggle-input:checked + .toggle-label .toggle-text-on {
+            opacity: 1;
+        }
+
+        .toggle-input:checked + .toggle-label .toggle-text-off {
+            opacity: 0;
+        }
+
+        .toggle-input:checked + .toggle-label .toggle-slider {
+            background: var(--color-action);
+        }
+
+        .toggle-input:checked + .toggle-label .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        .toggle-text {
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+
+
+        .video-container {
+            position: relative;
+            background-color: #000;
+            width: 100%;
+        }
+
+        .video-container video,
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* 웹캠 비디오 - 잘리지 않게 */
+        .video-container video {
+            object-fit: contain;
+        }
+
+        /* YouTube 영상 */
+        .video-container iframe {
+            object-fit: contain;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: var(--text-sm);
+            opacity: 0;
+            transition: var(--transition);
+            pointer-events: none;
+        }
+
+        .video-container:hover .video-overlay {
+            opacity: 1;
+        }
+
+        .control-panel {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--color-border);
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .control-section {
+            margin-bottom: var(--space-md);
+        }
+
+        .control-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: end;
+            gap: var(--space-md);
+        }
+
+        .section-title {
+            font-size: var(--text-base);
             font-weight: 600;
-            font-size: 0.95em;
-            backdrop-filter: blur(10px);
+            color: var(--color-text-main);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        button:hover {
-            transform: translateY(-2px) scale(1.02);
-            background: #c2291f;
-            border-color: #c2291f;
-            box-shadow: 0 8px 20px rgba(194, 41, 31, 0.3);
+
+        .help-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--color-secondary);
+            color: white;
+            border: none;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: var(--space-xs);
+            margin-top: 5px;
+            transition: var(--transition);
         }
-        button:disabled {
-            background: rgba(42, 42, 42, 0.4);
+
+        .help-btn:hover {
+            background: var(--color-action);
+            transform: scale(1.1);
+        }
+
+        .beta-tag {
+            background: var(--color-action);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: var(--space-xs);
+            margin-top: 5px;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: var(--space-sm);
+        }
+
+        .button-grid.full-width {
+            grid-template-columns: 1fr;
+        }
+
+        .recording-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: rgba(244, 67, 54, 0.1);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-sm);
+        }
+
+        .recording-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: var(--text-sm);
+        }
+
+        .recording-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--color-error);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .timer-display {
+            font-size: var(--text-lg);
+            font-weight: 400;
+            color: var(--color-text-main);
+            text-align: center;
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            min-width: 100px;
+            display: flex;
+            align-items: center;
+        }
+
+        .timestamp-panel {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            padding: var(--space-sm);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--color-border);
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: var(--space-md);
+        }
+
+        .timestamp-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: var(--space-xs);
+        }
+
+        .timestamp-item {
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text-sub);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            font-size: var(--text-sm);
+        }
+
+        .timestamp-item:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .timestamp-item:last-child {
+            border-bottom: none;
+        }
+
+        .timestamp-time {
+            font-weight: 600;
+            color: var(--color-text-main);
+            min-width: 60px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .timestamp-event {
+            background: var(--color-secondary);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .timestamp-youtube {
+            font-size: 11px;
+            color: var(--color-text-muted);
+        }
+
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--color-bg-card);
+            border-top: 1px solid var(--color-border);
+            padding: 8px var(--space-md);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+        }
+
+        .status-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .status-text {
+            color: var(--color-text-sub);
+            font-size: var(--text-sm);
+        }
+
+        .status-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: var(--space-lg);
+            padding: var(--space-md) 0;
+            border-top: 1px solid var(--color-border);
+            color: var(--color-text-muted);
+            font-size: var(--text-xs);
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 1024px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-sm);
+            }
+
+            .control-row {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+
+            .button-group {
+                justify-content: center;
+            }
+
+            .status-content {
+                flex-direction: column;
+                gap: 6px;
+                text-align: center;
+            }
+        }
+
+        /* 스크롤바 스타일링 */
+        .timestamp-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .timestamp-list::-webkit-scrollbar-track {
+            background: var(--color-bg-main);
+        }
+
+        .timestamp-list::-webkit-scrollbar-thumb {
+            background: var(--color-secondary);
+            border-radius: 3px;
+        }
+
+        .timestamp-list::-webkit-scrollbar-thumb:hover {
+            background: var(--color-secondary-hover);
+        }
+
+        /* 버튼 시스템 */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-xs);
+            padding: var(--space-sm) var(--space-md);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: var(--text-base);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+            min-height: 44px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            transition: all 0.2s ease;
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px var(--color-action-light);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
-        button.primary {
-            background: #c2291f;
-            border-color: #c2291f;
+
+        .btn-primary {
+            background: var(--color-action);
+            color: white;
         }
-        button.primary:hover {
-            background: #a81f18;
-            border-color: #a81f18;
+
+        .btn-primary:hover {
+            background: var(--color-action-hover);
+            box-shadow: var(--shadow-action);
         }
-        button.recording {
-            background: #ff0000;
-            border-color: #ff0000;
-            animation: pulse 1.5s infinite;
+
+        .btn-secondary {
+            background: var(--color-secondary);
+            color: white;
         }
-        @keyframes pulse {
-            0% { background: #ff0000; border-color: #ff0000; }
-            50% { background: #cc0000; border-color: #cc0000; }
-            100% { background: #ff0000; border-color: #ff0000; }
+
+        .btn-secondary:hover {
+            background: var(--color-secondary-hover);
         }
-        .status {
-            margin-top: 20px;
-            font-style: italic;
-            color: #cccccc;
+
+        .btn-danger {
+            background: var(--color-error);
+            color: white;
         }
-        .timer {
-            font-size: 1.4em;
-            font-weight: 700;
-            margin: 15px 0;
-            color: #ffffff;
+
+        .btn-warning {
+            background: var(--color-warning);
+            color: white;
         }
-        .message {
-            padding: 15px;
-            margin-top: 15px;
-            border-radius: 12px;
-            display: none;
+
+        .btn-info {
+            background: var(--color-info);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .btn-small {
+            padding: var(--space-xs) var(--space-sm);
+            font-size: var(--text-sm);
+            min-height: 36px;
+        }
+
+        /* 컴팩트한 버튼 스타일 */
+        .btn-compact {
+            padding: 4px 12px;
+            font-size: var(--text-sm);
+            min-height: 24px;
+        }
+
+        /* 녹화 버튼 전용 스타일 */
+        .recording-buttons .btn-compact {
+            padding: 8px 14px;
+            font-size: var(--text-base);
+            min-height: 32px;
+        }
+
+        /* 모달 스타일 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            max-width: 800px;
+            width: 90%;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--color-border);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-sm);
+            padding-bottom: var(--space-xs);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--color-text-main);
+            font-size: var(--text-base);
             font-weight: 600;
         }
-        .message.error {
-            background: rgba(194, 41, 31, 0.2);
-            color: #ff5555;
-            border: 1px solid rgba(194, 41, 31, 0.3);
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--color-text-muted);
+            font-size: var(--text-xl);
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: var(--color-secondary);
+            color: white;
+        }
+
+        .modal-body {
+            margin-bottom: var(--space-sm);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: var(--space-xs);
+            justify-content: flex-end;
+            margin-top: var(--space-sm);
+        }
+
+        .modal-actions .btn {
+            padding: 6px 12px;
+            font-size: var(--text-sm);
+            min-height: 28px;
+        }
+
+        .help-content h4 {
+            color: var(--color-text-main);
+            margin: var(--space-md) 0 var(--space-sm) 0;
+            font-size: var(--text-base);
+        }
+
+        .help-content ol,
+        .help-content ul {
+            margin: var(--space-sm) 0;
+            padding-left: var(--space-md);
+        }
+
+        .help-content li {
+            margin: var(--space-xs) 0;
+            color: var(--color-text-sub);
+            line-height: 1.5;
+        }
+
+        .help-content strong {
+            color: var(--color-text-main);
+        }
+
+        /* 입력 필드 스타일 조정 */
+        .input {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--color-bg-input);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text-main);
+            font-size: var(--text-base);
+            transition: var(--transition);
+            min-height: 36px;
+            box-sizing: border-box;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--color-action);
+            box-shadow: 0 0 0 3px var(--color-action-light);
+        }
+
+        .input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .input-group {
+            margin-bottom: var(--space-sm);
+        }
+
+        .input-label {
             display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--color-text-sub);
+            font-size: var(--text-sm);
+            font-weight: 500;
         }
-        .message.success {
-            background: rgba(0, 255, 0, 0.2);
-            color: #55ff55;
-            border: 1px solid rgba(0, 255, 0, 0.3);
-            display: block;
+
+        /* Step Progress Section */
+        .step-progress {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-sm);
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: var(--space-md);
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
         }
-        .timestamp-list {
-            background: rgba(42, 42, 42, 0.8);
-            backdrop-filter: blur(20px);
-            padding: 25px;
-            border-radius: 20px;
-            margin-bottom: 30px;
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm);
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
         }
-        .timestamp-list h3 {
-            margin-top: 0;
-            color: #c2291f;
-            font-size: 1.3em;
-            font-weight: 700;
+
+        .step-item.completed {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid var(--color-success);
         }
-        .timestamp-item {
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            color: #cccccc;
+
+        .step-item.active {
+            background: rgba(194, 41, 31, 0.1);
+            border: 1px solid var(--color-action);
         }
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 0.9em;
-            color: #888;
+
+        .step-item.locked {
+            background: var(--color-bg-input);
+            border: 1px solid var(--color-border);
+            opacity: 0.6;
         }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: var(--text-sm);
+        }
+
+        .step-item.completed .step-number {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .step-item.active .step-number {
+            background: var(--color-action);
+            color: white;
+        }
+
+        .step-item.locked .step-number {
+            background: var(--color-secondary);
+            color: white;
+        }
+
+        .step-content {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .step-title {
+            font-size: var(--text-base);
+            font-weight: 600;
+            color: var(--color-text-main);
+        }
+
+        .step-status {
+            font-size: var(--text-sm);
+            color: var(--color-text-muted);
+        }
+
+        .step-arrow {
+            color: var(--color-action);
+            font-weight: bold;
+            font-size: var(--text-lg);
+        }
+
+        /* 모바일 반응형 */
         @media (max-width: 768px) {
-            .video-box {
-                width: 100%;
-            }
-            .button-group {
+            .step-progress {
                 flex-direction: column;
+                gap: var(--space-sm);
             }
-            .container {
-                padding: 20px 15px;
+            
+            .step-arrow {
+                transform: rotate(90deg);
             }
+            
+            .video-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-sm);
+            }
+            
+            .recording-buttons {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+            
+            .button-group {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        /* Bottom Controls Section */
+        .bottom-controls {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            margin-top: var(--space-sm);
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .recording-buttons {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            justify-content: center;
+        }
+
+        /* Recording controls - 중앙 정렬 유지 */
+        .compact-controls {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            margin-top: var(--space-sm);
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 var(--space-sm);
+        }
+
+        .setup-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            justify-content: center;
+        }
+
+        .recording-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            justify-content: center;
+        }
+
+        .button-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .recording-status {
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            background: rgba(244, 67, 54, 0.1);
+            border-radius: var(--radius-sm);
+            font-size: var(--text-sm);
+            margin-right: var(--space-sm);
+        }
+
+        .recording-guide {
+            text-align: center;
+            margin: var(--space-sm) auto var(--space-md) auto;
+            max-width: 1400px;
+            padding: var(--space-sm);
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+        }
+
+        .recording-guide p {
+            color: var(--color-text-sub);
+            font-size: var(--text-base);
+            margin: 0;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .recording-guide .step-arrow {
+            color: var(--color-action);
+            font-weight: bold;
+            margin: 0 8px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>YouTube Reaction Video Recorder</h1>
-            <p>Record your reactions while watching YouTube videos and save timestamps</p>
+        <header class="header">
+            <div class="header-content">
+                <div class="header-logo"></div>
+                <h1>YouTube Reaction Recorder</h1>
+                <span class="beta-tag">Beta</span>
+                <button class="help-btn" id="main-help-btn" title="Learn more about this recorder">?</button>
+            </div>
         </header>
 
-        <div class="controls">
-            <div class="url-input">
-                <label for="youtube-url">YouTube URL:</label>
-                <input type="text" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
+                <div class="main-content">
+            <!-- Step Progress Section -->
+            <div class="step-progress">
+                <div class="step-item completed" id="step-1">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-title">Set YouTube URL</div>
+                        <button id="url-modal-btn" class="btn btn-primary btn-compact">Set URL</button>
+                    </div>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-item active" id="step-2">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-title">Enable Webcam</div>
+                        <button id="webcam-btn" class="btn btn-secondary btn-compact">Enable</button>
+                    </div>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-item locked" id="step-3">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-title">Start Recording</div>
+                        <button id="re-download-btn" class="btn btn-secondary btn-compact" disabled>
+                            Download
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="button-group">
-                <button id="load-btn" class="primary">Load Video</button>
-                <button id="webcam-btn">Enable Webcam</button>
-                <button id="record-btn" disabled>Start Recording</button>
-                <button id="pause-btn" disabled>Pause</button>
-                <button id="stop-btn" disabled>Stop Recording</button>
-                <button id="mark-btn" disabled>Add Timestamp</button>
+
+            <!-- Video Section -->
+            <div class="video-section">
+                <div class="video-grid">
+                    <div class="video-card">
+                        <div class="video-header">
+                            <span>📹</span>
+                            <span class="header-main">Webcam</span>
+                            <span class="header-sub">(Your Reaction Video)</span>
+                            <div class="toggle-switch" title="Toggle mirror mode">
+                                <input type="checkbox" id="mirror-toggle" class="toggle-input">
+                                <label for="mirror-toggle" class="toggle-label">
+                                    <span class="toggle-slider">
+                                        <span class="toggle-text-on">ON</span>
+                                        <span class="toggle-text-off">OFF</span>
+                                    </span>
+                                    <span class="toggle-text">Mirror Mode</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="video-container">
+                            <video id="webcam-video" autoplay muted></video>
+                        </div>
+                    </div>
+                    
+                    <div class="video-card">
+                        <div class="video-header">
+                            <span>🎬</span>
+                            <span class="header-main">YouTube</span>
+                            <span class="header-sub">(Original Video)</span>
+                            <div class="toggle-switch" title="Toggle expand mode">
+                                <input type="checkbox" id="layout-toggle" class="toggle-input">
+                                <label for="layout-toggle" class="toggle-label">
+                                    <span class="toggle-slider">
+                                        <span class="toggle-text-on">ON</span>
+                                        <span class="toggle-text-off">OFF</span>
+                                    </span>
+                                    <span class="toggle-text">YouTube Expand Mode</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="video-container">
+                            <div id="youtube-player"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="timer" id="timer">00:00:00</div>
-            <div class="status" id="status">Status: Ready</div>
-            <div class="message" id="message"></div>
+
+            <!-- Bottom Controls Section -->
+            <div class="bottom-controls">
+                <div class="recording-status" id="recording-status" style="display: none;">
+                    <div class="recording-indicator">
+                        <div class="recording-dot"></div>
+                        <span>Recording...</span>
+                    </div>
+                </div>
+                <div class="recording-buttons">
+                    <div class="timer-display" id="timer">00:00:00</div>
+                    <div class="button-group">
+                        <button id="record-btn" class="btn btn-danger btn-compact" disabled>
+                            Start
+                        </button>
+                        <button id="pause-btn" class="btn btn-secondary btn-compact" disabled>
+                            Pause
+                        </button>
+                        <button id="stop-btn" class="btn btn-secondary btn-compact" disabled>
+                            Stop
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="video-container">
-            <div class="video-box">
-                <div class="video-title">Webcam Video</div>
-                <video id="webcam-video" autoplay muted></video>
-            </div>
-            <div class="video-box">
-                <div class="video-title">YouTube Video</div>
-                <div id="youtube-player"></div>
+        <!-- Recording Guide -->
+        <div class="recording-guide">
+            <p><strong>📋 Quick Guide:</strong> <span class="step-arrow">→</span> <strong>1.</strong> Click <strong>"Start"</strong> <span class="step-arrow">→</span> <strong>2.</strong> Click <strong>YouTube video</strong> to watch and react <span class="step-arrow">→</span> <strong>3.</strong> Press <strong>"Stop"</strong> to download</p>
+        </div>
+
+            <!-- URL Modal -->
+            <div id="url-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Set YouTube URL</h3>
+                        <button class="modal-close" id="modal-close">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="input-group">
+                            <label class="input-label" for="youtube-url">YouTube URL</label>
+                            <input type="text" id="youtube-url" class="input" placeholder="https://www.youtube.com/watch?v=...">
+                        </div>
+                        <div class="modal-actions">
+                            <button id="modal-cancel" class="btn btn-secondary">Cancel</button>
+                            <button id="modal-confirm" class="btn btn-primary">Load Video</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="timestamp-list">
-            <h3>Timestamp List</h3>
-            <div id="timestamp-items"></div>
+        <!-- Help Modal -->
+        <div id="help-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>How to Use YouTube Reaction Recorder</h3>
+                    <button class="modal-close" id="help-modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="help-content">
+                        <h4>🎬 What is YouTube Reaction Recorder?</h4>
+                        <p>This recorder is part of a complete reaction video creation workflow. It captures your webcam reaction while you watch YouTube videos, automatically tracks timestamps, and provides synchronized video and timestamp files for easy editing in video editing software.</p>
+                        
+                        <h4>Step-by-Step Guide:</h4>
+                        <ol>
+                            <li><strong>Set YouTube URL:</strong> Click the "Set URL" button and enter a YouTube video URL</li>
+                            <li><strong>Enable Webcam:</strong> Click "Enable" to activate your camera and microphone</li>
+                            <li><strong>Start Recording:</strong> Click "Start" to begin capturing your reaction</li>
+                            <li><strong>Watch & React:</strong> Click on the YouTube video to start watching and react naturally</li>
+                            <li><strong>Stop Recording:</strong> Click "Stop" when finished to download your video and timestamps</li>
+                        </ol>
+                        
+                        <h4>Features:</h4>
+                        <ul>
+                            <li><strong>Mirror Mode:</strong> Toggle to flip your webcam horizontally</li>
+                            <li><strong>Expand YouTube:</strong> Toggle to make YouTube video larger</li>
+                            <li><strong>Timestamps:</strong> Automatically tracks when you start/stop YouTube video</li>
+                            <li><strong>Re-download:</strong> Download your video and timestamps again anytime</li>
+                        </ul>
+                        
+                        <h4>Tips:</h4>
+                        <ul>
+                            <li>Make sure your webcam and microphone are working before starting</li>
+                            <li>Click on the YouTube video to control playback</li>
+                            <li>Your reaction video will be saved with timestamps for easy editing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <footer>
-            <p>This application is designed to create reaction videos without copyright infringement.</p>
+        <div class="timestamp-panel">
+            <h3 class="section-title">
+                <span>⏱️</span>
+                Timestamps
+            </h3>
+            <div class="timestamp-list" id="timestamp-items">
+                <div style="text-align: center; color: var(--color-text-muted); padding: var(--space-md);">
+                    No timestamps yet. Start recording to add timestamps.
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Create reaction videos without copyright infringement</p>
         </footer>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-content">
+            <div class="status-text" id="status">Ready to start recording</div>
+            <div class="status-actions">
+                <button id="download-video-btn" class="btn btn-small btn-success" style="display: none;">
+                    Download Video
+                </button>
+                <button id="download-timestamp-btn" class="btn btn-small btn-info" style="display: none;">
+                    Download Timestamps
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- YouTube API -->

@@ -608,6 +608,16 @@ app.get('/src/recorder/recorder.js', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'recorder', 'recorder.js'));
 });
 
+// recorder에서 로고 접근을 위한 라우트
+app.get('/src/recorder/logo/(.*)', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'logo', req.params[0]));
+});
+
+// recorder 폴더의 로고 파일 서빙
+app.get('/src/recorder/whitered_mini.png', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'recorder', 'whitered_mini.png'));
+});
+
 // src/editor/ 경로의 파일들 서빙
 app.get('/src/editor/index.html', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'editor', 'index.html'));

@@ -1,5 +1,34 @@
 /* ===== 사용자 친화적 UI 시스템 ===== */
 /* 목적: 한눈에 들어오고 효율적인 버튼과 화면 배치 */
+/* 
+   ⚠️  개발 가이드라인 ⚠️
+   
+   이 파일은 AI와 개발자가 참고하기 위한 디자인 시스템 가이드입니다.
+   
+   🎯 사용 방법:
+   1. 개발 시: 각 HTML 파일에서 이 CSS를 참조하여 일관된 디자인 적용
+   2. 배포 시: 각 HTML 파일은 독립적인 스타일로 관리 (이 파일 참조하지 않음)
+   
+   📝 개발 워크플로우:
+   - 로컬 개발: ui-system.css 참조하여 빠른 개발
+   - 배포 전: 각 HTML에 독립적인 스타일 적용
+   - 최종 배포: ui-system.css 의존성 제거
+   
+   🔧 현재 독립화된 파일들:
+   - src/recorder/recorder.html ✅ (독립 스타일 적용됨)
+   - src/editor/index.html (아직 ui-system.css 의존)
+   - src/server/public/*.html (아직 ui-system.css 의존)
+   
+   📋 독립화 작업 체크리스트:
+   □ CSS 변수 정의 (:root)
+   □ 버튼 시스템 (.btn, .btn-*)
+   □ 입력 필드 시스템 (.input, .input-*)
+   □ 카드 시스템 (.card, .card-*)
+   □ 레이아웃 시스템 (.container, .grid, .flex)
+   □ 상태 표시 시스템 (.alert, .badge)
+   □ 반응형 디자인 (@media)
+   □ 접근성 개선 (focus, contrast)
+*/
 
 :root {
     /* ===== 직관적인 색상 시스템 ===== */
