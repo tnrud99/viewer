@@ -646,6 +646,23 @@ app.get('/assets/samples/test_data.json', (req, res) => {
     res.sendFile(path.join(__dirname, '..', '..', 'assets', 'samples', 'test_data.json'));
 });
 
+// 로고 파일들 서빙
+app.get('/logo/whitered_full.png', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'logo', 'whitered_full.png'));
+});
+
+app.get('/logo/whitered_mini.png', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'logo', 'whitered_mini.png'));
+});
+
+app.get('/logo/blackred_full.png', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'logo', 'blackred_full.png'));
+});
+
+app.get('/logo/blackred_mini.png', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'logo', 'blackred_mini.png'));
+});
+
 // 짧은 URL 라우트 추가
 app.get('/ve/:id', ensureMongoConnection, async (req, res) => {
     try {

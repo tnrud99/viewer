@@ -12,6 +12,10 @@
       "dest": "src/server/server.js"
     },
     {
+      "src": "/logo/(.*)",
+      "dest": "src/server/server.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "src/server/server.js"
     }
