@@ -597,7 +597,7 @@ app.get('/server-status.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'server-status.html'));
 });
 
-
+// src/viewer/ 경로의 파일들 서빙 (정리됨 - 실제로는 src/server/public/ 사용)
 
 // src/recorder/ 경로의 파일들 서빙
 app.get('/src/recorder/recorder.html', (req, res) => {
