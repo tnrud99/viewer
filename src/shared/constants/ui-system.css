@@ -744,12 +744,25 @@
 }
 
 /* ===== Header with Logo & Badges ===== */
+.header {
+    text-align: center;
+    margin-bottom: var(--space-md);
+    padding: calc(var(--space-xl) * 2) 0 var(--space-sm) 0;
+}
+
 .header-content {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-sm);
+    gap: var(--space-lg);
     position: relative;
+    width: 100%;
+}
+
+.header-center {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
 }
 
 .header-logo {
@@ -763,12 +776,14 @@
 .beta-tag {
     background: var(--color-action);
     color: white;
-    padding: 2px 8px;
-    border-radius: var(--radius-sm);
-    font-size: var(--text-xs);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
     font-weight: 600;
     text-transform: uppercase;
-    margin-left: var(--space-xs);
+    letter-spacing: 0.5px;
+    margin-left: 4px;
+    margin-top: 5px;
 }
 
 .help-btn {
@@ -788,7 +803,7 @@
 }
 
 .help-btn:hover {
-    background: var(--color-info);
+    background: var(--color-action);
     transform: scale(1.1);
 }
 
