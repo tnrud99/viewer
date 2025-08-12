@@ -450,14 +450,14 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Check for VE URL in the URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const veServer = urlParams.get('ve_server');
+        const veId = urlParams.get('ve');
         
-        if (veServer) {
-            console.log("VE Server mode detected:", veServer);
-            addDebugMessage(`VE Server mode detected: ${veServer}`);
+        if (veId) {
+            console.log("VE URL detected:", veId);
+            addDebugMessage(`VE URL detected: ${veId}`);
             
             // Load VE URL data from server
-            loadVEUrlFromServer(veServer);
+            loadVEUrlFromServer(veId);
         }
         
         // Element references
@@ -639,9 +639,9 @@
         loadBtn.addEventListener('click', function() {
             // Check if we're in VE server mode
             const urlParams = new URLSearchParams(window.location.search);
-            const veServer = urlParams.get('ve_server');
+            const veId = urlParams.get('ve');
             
-            if (veServer) {
+            if (veId) {
                 // In VE server mode, load button should just re-trigger auto-load
                 console.log("🔄 Re-triggering auto-load in VE server mode");
                 addDebugMessage("🔄 Re-triggering auto-load in VE server mode");
@@ -764,9 +764,9 @@
         playBtn.addEventListener('click', function() {
             // Check if we're in VE server mode
             const urlParams = new URLSearchParams(window.location.search);
-            const veServer = urlParams.get('ve_server');
+            const veId = urlParams.get('ve');
             
-            if (veServer) {
+            if (veId) {
                 // In VE server mode, check if data is loaded
                 if (!youtubeVideoId) {
                     showMessage('Please load videos first.', 'error');
@@ -1601,8 +1601,14 @@
         const serverUrl = window.location.origin;
         const apiUrl = `${serverUrl}/api/ve-urls/${veId}`;
         
+        console.log("🔗 API URL:", apiUrl);
+        addDebugMessage(`🔗 API URL: ${apiUrl}`);
+        
         fetch(apiUrl)
             .then(response => {
+                console.log("📥 Response status:", response.status);
+                addDebugMessage(`📥 Response status: ${response.status}`);
+                
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -1611,6 +1617,7 @@
             .then(data => {
                 console.log("✅ VE URL data loaded successfully:", data);
                 addDebugMessage("✅ VE URL data loaded successfully");
+                addDebugMessage(`📊 Data structure: ${JSON.stringify(data, null, 2)}`);
                 
                 // Setup viewer with server data
                 setupViewerWithServerData(data);
@@ -1734,6 +1741,56 @@
                 }
             }
             
+            // Apply server settings
+            if (veUrlData.settings) {
+                console.log("🔧 Applying server settings:", veUrlData.settings);
+                addDebugMessage("🔧 Applying server settings");
+                
+                // Apply overlay position
+                if (veUrlData.settings.overlay_position) {
+                    const overlayPositionSelect = document.getElementById('overlay-position');
+                    if (overlayPositionSelect) {
+                        overlayPositionSelect.value = veUrlData.settings.overlay_position;
+                        overlayPosition = veUrlData.settings.overlay_position;
+                        updateOverlayPosition();
+                    }
+                }
+                
+                // Apply overlay size
+                if (veUrlData.settings.overlay_size) {
+                    const overlaySizeSlider = document.getElementById('overlay-size');
+                    const overlaySizeValue = document.getElementById('overlay-size-value');
+                    if (overlaySizeSlider) {
+                        overlaySizeSlider.value = veUrlData.settings.overlay_size;
+                        overlaySizeValue.textContent = veUrlData.settings.overlay_size + '%';
+                        overlaySize = veUrlData.settings.overlay_size;
+                        updateOverlaySize();
+                    }
+                }
+                
+                // Apply YouTube volume
+                if (veUrlData.settings.youtube_volume) {
+                    const youtubeVolumeSlider = document.getElementById('youtube-volume');
+                    const youtubeVolumeValue = document.getElementById('youtube-volume-value');
+                    if (youtubeVolumeSlider) {
+                        youtubeVolumeSlider.value = veUrlData.settings.youtube_volume;
+                        youtubeVolumeValue.textContent = veUrlData.settings.youtube_volume + '%';
+                        youtubeVolume = veUrlData.settings.youtube_volume;
+                        updateYoutubeVolume();
+                    }
+                }
+                
+                // Apply hide overlay setting
+                if (veUrlData.settings.hide_overlay !== undefined) {
+                    isOverlayVisible = !veUrlData.settings.hide_overlay;
+                    updateOverlayVisibility();
+                    const toggleOverlayBtn = document.getElementById('toggle-overlay');
+                    if (toggleOverlayBtn) {
+                        toggleOverlayBtn.textContent = isOverlayVisible ? 'Hide Overlay' : 'Show Overlay';
+                    }
+                }
+            }
+            
             // Update status
             document.getElementById('status').textContent = 'Status: VE URL Loaded';
             enableControls(true);
@@ -1750,12 +1807,12 @@
     // Auto-load for VE server mode
     function autoLoadForVEServer() {
         const urlParams = new URLSearchParams(window.location.search);
-        const veServer = urlParams.get('ve_server');
+        const veId = urlParams.get('ve');
         
-        if (veServer) {
+        if (veId) {
             console.log("🔄 Auto-loading VE URL data");
             addDebugMessage("🔄 Auto-loading VE URL data");
-            loadVEUrlFromServer(veServer);
+            loadVEUrlFromServer(veId);
         }
     }
     </script>

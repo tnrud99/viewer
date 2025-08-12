@@ -4,416 +4,2149 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VE URL Creator - Enhanced Version</title>
+    
+    <!-- 독립적인 스타일 (ui-system.css 참조하지 않음) -->
     <style>
+        :root {
+            /* 색상 시스템 */
+            --color-action: #c2291f;
+            --color-action-hover: #a81f18;
+            --color-action-light: rgba(194, 41, 31, 0.1);
+            --color-secondary: #4a4a4a;
+            --color-secondary-hover: #5a5a5a;
+            --color-success: #4caf50;
+            --color-warning: #ff9800;
+            --color-error: #f44336;
+            --color-info: #2196f3;
+            --color-bg-main: #1a1a1a;
+            --color-bg-card: rgba(42, 42, 42, 0.8);
+            --color-bg-input: rgba(58, 58, 58, 0.6);
+            --color-text-main: #ffffff;
+            --color-text-sub: #cccccc;
+            --color-text-muted: #888888;
+            --color-border: rgba(255, 255, 255, 0.1);
+            --color-border-focus: rgba(194, 41, 31, 0.3);
+            
+            /* 간격 */
+            --space-xs: 0.5rem;
+            --space-sm: 0.75rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            
+            /* 폰트 크기 */
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            --text-3xl: 2rem;
+            
+            /* 둥근 모서리 */
+            --radius-sm: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+            
+            /* 그림자 */
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.3);
+            --shadow-action: 0 4px 12px rgba(194, 41, 31, 0.3);
+            
+            /* 애니메이션 */
+            --transition: 0.2s ease;
+            --transition-slow: 0.3s ease;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-            color: #ffffff;
+            background: linear-gradient(135deg, var(--color-bg-main) 0%, #2a2a2a 100%);
+            color: var(--color-text-main);
             min-height: 100vh;
         }
+
         .container {
             max-width: 900px;
             margin: 0 auto;
-            padding: 20px;
+            padding: var(--space-lg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transform: translateY(-60px);
         }
-        header {
+
+        /* Header with Logo & Badges */
+        .header {
             text-align: center;
-            margin-bottom: 40px;
-            padding: 20px;
-            background: rgba(255, 85, 85, 0.1);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 85, 85, 0.3);
+            margin-bottom: var(--space-lg);
+            padding: var(--space-lg) 0 var(--space-sm) 0;
         }
-        h1 {
-            color: #ff5555;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-        }
-        .subtitle {
-            color: #888;
-            font-size: 1.2em;
-            margin-bottom: 20px;
-        }
-        .form-section {
-            background: rgba(42, 42, 42, 0.8);
-            padding: 30px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-        }
-        .form-section h3 {
-            margin-top: 0;
-            color: #ff5555;
-            border-bottom: 2px solid #444;
-            padding-bottom: 15px;
-            font-size: 1.4em;
-        }
-        .input-group {
-            margin-bottom: 25px;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #ddd;
-            font-size: 1.1em;
-        }
-        .input-group input[type="text"],
-        .input-group input[type="password"],
-        .input-group input[type="email"],
-        .input-group input[type="file"],
-        .input-group select {
-            width: 100%;
-            padding: 15px;
-            box-sizing: border-box;
-            background-color: rgba(51, 51, 51, 0.8);
-            color: white;
-            border: 2px solid #444;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        .input-group input[type="text"]:focus,
-        .input-group input[type="password"]:focus,
-        .input-group input[type="email"]:focus,
-        .input-group select:focus {
-            outline: none;
-            border-color: #ff5555;
-            box-shadow: 0 0 0 3px rgba(255, 85, 85, 0.2);
-            background-color: rgba(51, 51, 51, 1);
-        }
-        .slider-container {
+
+        .header-content {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-top: 10px;
+            justify-content: center;
+            gap: var(--space-lg);
+            position: relative;
+            width: 100%;
         }
-        .slider-container input[type="range"] {
-            flex-grow: 1;
-            height: 8px;
-            background: #444;
-            border-radius: 4px;
-            outline: none;
-            -webkit-appearance: none;
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
         }
-        .slider-container input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
+
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            background-image: url('./logo/whitered_mini.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .header h1 {
+            color: var(--color-text-main);
+            font-size: var(--text-3xl);
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 0.02em;
+        }
+
+        .beta-tag {
+            background: var(--color-action);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: 4px;
+            margin-top: 5px;
+        }
+
+        .help-btn {
             width: 20px;
             height: 20px;
-            background: #ff5555;
             border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-        .slider-value {
-            min-width: 60px;
-            text-align: center;
-            font-weight: bold;
-            color: #ff5555;
-            font-size: 1.1em;
-        }
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-            justify-content: center;
-        }
-        button {
-            background: linear-gradient(135deg, #ff5555 0%, #ff7777 100%);
+            background: var(--color-secondary);
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 16px;
+            font-size: 12px;
             font-weight: bold;
-            min-width: 120px;
-            box-shadow: 0 4px 8px rgba(255, 85, 85, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: var(--space-xs);
+            margin-top: 5px;
+            transition: var(--transition);
+            z-index: 1000;
+            position: relative;
         }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(255, 85, 85, 0.4);
+
+        .help-btn:hover {
+            background: var(--color-action);
+            transform: scale(1.1);
         }
-        button:disabled {
-            background: #555;
+
+        .help-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Home Navigation Button */
+        .home-btn {
+            background: var(--color-bg-card);
+            color: white;
+            border: 1px solid var(--color-action);
+            border-radius: var(--radius-md);
+            padding: var(--space-xs) var(--space-sm);
+            font-size: var(--text-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(10px);
+        }
+
+        .home-btn:hover {
+            background: var(--color-action);
+            color: white;
+            transform: scale(1.02);
+            box-shadow: var(--shadow-md);
+        }
+
+        .home-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Card System */
+        .card {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-xl);
+            padding: var(--space-md);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+            margin-bottom: var(--space-md);
+        }
+
+        .card-header {
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .card-title {
+            font-size: var(--text-xl);
+            font-weight: 700;
+            color: var(--color-text-main);
+            margin: 0;
+        }
+
+        .card-subtitle {
+            font-size: var(--text-base);
+            color: var(--color-text-sub);
+            margin: var(--space-xs) 0 0 0;
+        }
+
+        /* Input System */
+        .input-group {
+            margin-bottom: var(--space-md);
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--color-text-main);
+            font-weight: 600;
+            font-size: var(--text-sm);
+        }
+
+        .input {
+            width: 100%;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--color-bg-input);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text-main);
+            font-size: var(--text-base);
+            transition: var(--transition);
+            min-height: 44px;
+            box-sizing: border-box;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--color-action);
+            box-shadow: 0 0 0 3px var(--color-action-light);
+        }
+
+        .input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Button System */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-xs);
+            padding: var(--space-xs) var(--space-sm);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: var(--text-sm);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+            min-height: 36px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
-        button.secondary {
-            background: linear-gradient(135deg, #5555ff 0%, #7777ff 100%);
-            box-shadow: 0 4px 8px rgba(85, 85, 255, 0.3);
+
+        .btn-primary {
+            background: var(--color-action);
+            color: white;
+            border-color: var(--color-action);
         }
-        button.secondary:hover {
-            box-shadow: 0 6px 12px rgba(85, 85, 255, 0.4);
+
+        .btn-primary:hover {
+            background: var(--color-action-hover);
+            color: white;
+            box-shadow: var(--shadow-action);
         }
-        .message {
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 8px;
-            display: none;
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-action);
+            border-color: var(--color-action);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-action);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .btn-info {
+            background: var(--color-info);
+            color: white;
+        }
+
+        /* Button Group */
+        .button-group {
+            display: flex;
+            gap: var(--space-sm);
+            margin-top: var(--space-lg);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Slider System */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-top: var(--space-sm);
+        }
+
+        .slider-container input[type="range"] {
+            flex-grow: 1;
+            height: 8px;
+            background: var(--color-secondary);
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--color-action);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .slider-value {
+            min-width: 60px;
+            text-align: center;
             font-weight: bold;
+            color: var(--color-action);
+            font-size: var(--text-lg);
         }
-        .message.error {
-            background-color: rgba(255, 0, 0, 0.2);
-            color: #ff5555;
-            display: block;
-            border: 1px solid rgba(255, 0, 0, 0.3);
-        }
-        .message.success {
-            background-color: rgba(0, 255, 0, 0.2);
-            color: #55ff55;
-            display: block;
-            border: 1px solid rgba(0, 255, 0, 0.3);
-        }
-        .link-section {
-            background: rgba(42, 42, 42, 0.8);
-            padding: 30px;
-            border-radius: 12px;
-            margin-top: 25px;
-            display: none;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+
+        /* Alert System */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
+            margin-top: var(--space-md);
+            display: none;
         }
+
+        .alert-success {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid var(--color-success);
+            color: var(--color-success);
+        }
+
+        .alert-error {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid var(--color-error);
+            color: var(--color-error);
+        }
+
+        .alert-warning {
+            background: rgba(255, 152, 0, 0.1);
+            border: 1px solid var(--color-warning);
+            color: var(--color-warning);
+        }
+
+        .alert-info {
+            background: rgba(33, 150, 243, 0.1);
+            border: 1px solid var(--color-info);
+            color: var(--color-info);
+        }
+
+        /* Generated Link Section */
+        .link-section {
+            background: var(--color-bg-card);
+            padding: var(--space-lg);
+            border-radius: var(--radius-xl);
+            margin-top: var(--space-md);
+            display: none;
+            border: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+        }
+
         .link-section h3 {
             margin-top: 0;
-            color: #55ff55;
+            color: var(--color-success);
             text-align: center;
+            font-size: var(--text-xl);
+            font-weight: 700;
         }
+
         .generated-link {
-            background-color: rgba(51, 51, 51, 0.8);
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
+            background: var(--color-bg-input);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            margin: var(--space-md) 0;
             word-break: break-all;
-            font-family: monospace;
-            font-size: 14px;
-            color: #55ff55;
-            border: 1px solid #444;
+            font-family: 'Courier New', monospace;
+            font-size: var(--text-sm);
+            color: var(--color-success);
+            border: 1px solid var(--color-border);
             text-align: center;
         }
-        .copy-button {
-            background: linear-gradient(135deg, #5555ff 0%, #7777ff 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            margin: 10px auto;
+
+        /* Modal System */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        /* Success Modal Styles */
+        .success-modal {
+            max-width: 600px;
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .success-icon {
+            background: var(--color-bg-secondary);
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--space-sm) auto;
+        }
+
+        .success-logo {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+
+        .success-message {
+            text-align: center;
+            font-size: var(--text-base);
+            color: var(--color-text-main);
+            margin-bottom: var(--space-md);
+            font-weight: 400;
+            line-height: 1.4;
+        }
+
+        .generated-url-container {
+            background: var(--color-bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            border: 1px solid var(--color-border);
+            margin: var(--space-md) 0;
+        }
+
+        .generated-url-container label {
             display: block;
+            margin-bottom: var(--space-sm);
+            font-weight: 600;
+            color: var(--color-text-main);
+        }
+
+        .url-input-group {
+            display: block;
+            margin-bottom: var(--space-md);
+        }
+
+        .url-input-group input {
+            width: 100%;
+            padding: var(--space-md);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background: var(--color-bg-input);
+            color: var(--color-text-main);
+            font-size: var(--text-sm);
+            font-family: 'Courier New', monospace;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
-        .copy-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(85, 85, 255, 0.3);
+
+        .url-input-group input:focus {
+            outline: none;
+            border-color: var(--color-action);
+            box-shadow: 0 0 0 2px var(--color-action-light);
         }
-        .user-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+
+        .url-input-group input.highlight {
+            border-color: var(--color-action);
+            box-shadow: 0 0 10px rgba(194, 41, 31, 0.3);
+            animation: urlGlow 2s ease-in-out infinite;
         }
-        .help-text {
-            font-size: 13px;
-            color: #888;
-            margin-top: 8px;
+
+        @keyframes urlGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(194, 41, 31, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(194, 41, 31, 0.5); }
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: var(--space-md);
+            justify-content: center;
+            margin-top: var(--space-md);
+        }
+
+        .modal-content {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .modal-title {
+            font-size: var(--text-xl);
+            font-weight: 700;
+            color: var(--color-text-main);
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--color-text-muted);
+            font-size: var(--text-xl);
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: var(--color-secondary);
+            color: white;
+        }
+
+        .modal-body {
+            margin-bottom: var(--space-lg);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: var(--space-sm);
+            justify-content: flex-end;
+        }
+
+        .modal-actions .btn {
+            min-width: 80px;
+        }
+
+        /* Form Field Styles */
+        .form-field {
+            margin-bottom: var(--space-md);
+        }
+
+        .form-field.wide {
+            width: 100%;
+        }
+
+        .form-field label {
+            font-size: var(--text-sm);
+            font-weight: 500;
+            color: var(--color-text-main);
+            margin-bottom: var(--space-xs);
+        }
+
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            width: 100%;
+            padding: var(--space-xs) var(--space-sm);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background: var(--color-bg-input);
+            color: var(--color-text-main);
+            font-size: var(--text-base);
+            transition: var(--transition);
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        
+        .form-field textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-field input:focus,
+        .form-field select:focus,
+        .form-field textarea:focus {
+            outline: none;
+            border-color: var(--color-action);
+            box-shadow: 0 0 0 3px var(--color-action-light);
+        }
+
+        .form-field input[type="file"] {
+            padding: var(--space-xs) var(--space-sm);
+            background: var(--color-bg-input);
+            border: 2px dashed var(--color-border);
+            cursor: pointer;
+        }
+
+        .form-field input[type="file"]:hover {
+            border-color: var(--color-action);
+        }
+
+        .input-hint {
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+            margin-top: var(--space-xs);
             font-style: italic;
         }
-        .required {
-            color: #ff5555;
+
+        /* Settings Section Styles */
+        .settings-section {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            border: 1px solid var(--color-border);
+            margin-bottom: var(--space-md);
         }
-        .optional {
-            color: #888;
-            font-size: 0.9em;
+
+        .settings-title {
+            font-size: var(--text-lg);
+            font-weight: 600;
+            color: var(--color-text-main);
+            margin: 0 0 var(--space-xs) 0;
         }
+
+        .settings-subtitle {
+            font-size: var(--text-sm);
+            color: var(--color-text-sub);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .settings-description {
+            font-size: var(--text-sm);
+            color: var(--color-text-sub);
+            margin: 0 0 var(--space-md) 0;
+            line-height: 1.5;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: var(--space-sm);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+
+        .settings-header:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .toggle-icon {
+            font-size: var(--text-xs);
+            color: var(--color-text-sub);
+            transition: var(--transition);
+        }
+
+        .settings-content {
+            display: block;
+            padding-top: var(--space-md);
+        }
+
+        .settings-content.collapsed {
+            display: none;
+        }
+
+        .settings-header.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        /* Settings Checkboxes Styles */
+        .settings-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .setting-checkbox {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            padding: var(--space-sm);
+            background: var(--color-bg-input);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text-main);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: var(--text-base);
+            font-weight: 500;
+        }
+
+        .setting-checkbox:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--color-action);
+        }
+
+        .setting-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--color-action);
+        }
+
+        .setting-checkbox .setting-text {
+            font-size: var(--text-base);
+            font-weight: 500;
+        }
+
+        /* Settings Panels Styles */
+        .settings-panels {
+            position: relative;
+        }
+
+        .setting-panel {
+            display: none;
+            padding: var(--space-md);
+            background: var(--color-bg-input);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+        }
+
+        .setting-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .panel-content {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .panel-content label {
+            font-size: var(--text-sm);
+            font-weight: 500;
+            color: var(--color-text-main);
+        }
+
+        .setting-description {
+            font-size: var(--text-xs);
+            color: var(--color-text-sub);
+            margin: 0;
+            font-style: italic;
+        }
+
+        /* Toggle Switch Styles */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--color-border);
+            transition: var(--transition);
+            border-radius: 20px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: var(--transition);
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--color-action);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        .setting-item label {
+            font-size: var(--text-sm);
+            font-weight: 500;
+            color: var(--color-text-main);
+        }
+
+        .setting-item .slider-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .setting-item .slider-container input[type="range"] {
+            flex: 1;
+        }
+
+        .setting-item .slider-value {
+            min-width: 50px;
+            text-align: right;
+            font-size: var(--text-sm);
+            color: var(--color-text-sub);
+        }
+
+
+
+        /* Field Label Styles */
+        .field-label {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            font-size: var(--text-sm);
+            font-weight: 500;
+            color: var(--color-text-main);
+            margin-bottom: var(--space-xs);
+        }
+
+        /* Tooltip Styles */
+        .tooltip {
+            position: relative;
+            cursor: help;
+            color: var(--color-action);
+            font-size: 14px;
+            font-weight: 600;
+            margin-left: var(--space-xs);
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-bg-card);
+            color: var(--color-text-main);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius-sm);
+            font-size: var(--text-xs);
+            white-space: nowrap;
+            z-index: 1000;
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            padding: var(--space-md);
+            color: var(--color-text-main);
+            font-size: var(--text-sm);
+        }
+
+        .loading-spinner.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--color-border);
+            border-top: 2px solid var(--color-action);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Enhanced Message Styles */
+        .alert {
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-md);
+            font-size: var(--text-sm);
+            font-weight: 500;
+            display: none;
+        }
+
+        .alert-success {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            color: #4caf50;
+        }
+
+        .alert-error {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            color: #f44336;
+        }
+
+        .alert-info {
+            background: rgba(33, 150, 243, 0.1);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            color: #2196f3;
+        }
+
+        /* Copy Success Popup */
+        .copy-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--color-bg-card);
+            border: 2px solid var(--color-success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            gap: var(--space-md);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: copyPopupSlideIn 0.3s ease-out;
+        }
+
+        .copy-popup.show {
+            display: flex;
+        }
+
+        @keyframes copyPopupSlideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .copy-popup-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--color-success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            animation: copyIconBounce 0.6s ease-out;
+        }
+
+        @keyframes copyIconBounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .copy-popup-text {
+            color: var(--color-text-main);
+            font-size: var(--text-lg);
+            font-weight: 600;
+        }
+
+        /* Info Button Styles */
+        .info-btn {
+            background: none;
+            border: none;
+            color: var(--color-text-sub);
+            font-size: 12px;
+            cursor: pointer;
+            padding: 2px;
+            margin-left: var(--space-xs);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .info-btn:hover {
+            background: var(--color-action);
+            color: white;
+        }
+
+        /* Step Progress Styles */
+        .step-progress {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: calc(var(--space-xl) + var(--space-md));
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: var(--space-md);
+            background: var(--color-bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            overflow-x: auto;
+            position: relative;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: var(--color-action) var(--color-bg-input);
+        }
+
+        /* Custom scrollbar for webkit browsers */
+        .step-progress::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .step-progress::-webkit-scrollbar-track {
+            background: var(--color-bg-input);
+            border-radius: 3px;
+        }
+
+        .step-progress::-webkit-scrollbar-thumb {
+            background: var(--color-action);
+            border-radius: 3px;
+        }
+
+        .step-progress::-webkit-scrollbar-thumb:hover {
+            background: var(--color-action-hover);
+        }
+
+
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+            min-width: 140px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+            transform: scale(1);
+        }
+
+        .step-item:hover {
+            transform: scale(1.05);
+        }
+
+        .step-arrow {
+            color: var(--color-action);
+            font-weight: bold;
+            font-size: var(--text-lg);
+            flex-shrink: 0;
+        }
+
+        .step-item.completed {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid var(--color-success);
+        }
+
+        .step-item.active {
+            background: rgba(194, 41, 31, 0.1);
+            border: 1px solid var(--color-action);
+        }
+
+        .step-item.locked {
+            background: var(--color-bg-input);
+            border: 1px solid var(--color-border);
+            opacity: 0.6;
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: var(--text-sm);
+            transition: all 0.3s ease;
+            transform: scale(1);
+        }
+
+        .step-item.active .step-number {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(194, 41, 31, 0.5);
+        }
+
+        .step-item.completed .step-number {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .step-item.active .step-number {
+            background: var(--color-action);
+            color: white;
+        }
+
+        .step-item.locked .step-number {
+            background: var(--color-secondary);
+            color: white;
+        }
+
+        .step-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .step-title {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--color-text-main);
+        }
+
+        .step-status {
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+        }
+
+
+
+
+
+        /* Step Forms Styles */
+        .step-forms {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .step-form {
+            display: none;
+            animation: fadeIn 0.3s ease;
+            margin-bottom: var(--space-lg);
+        }
+
+        .step-form.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-header {
+            text-align: center;
+            margin-bottom: var(--space-md);
+            padding-bottom: var(--space-sm);
+            border-bottom: 2px solid var(--color-action);
+        }
+
+        .step-header h3 {
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            color: var(--color-text-main);
+            margin: 0 0 var(--space-xs) 0;
+        }
+
+        .step-header p {
+            font-size: var(--text-base);
+            color: var(--color-text-sub);
+            margin: 0;
+        }
+
+        .step-header.compact {
+            margin-bottom: var(--space-md);
+        }
+
+        .step-header.compact h3 {
+            font-size: var(--text-xl);
+            margin-bottom: var(--space-xs);
+        }
+
+        .step-header.compact p {
+            font-size: var(--text-sm);
+        }
+
+        .step-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: var(--space-lg);
+            padding-top: var(--space-md);
+            border-top: 1px solid var(--color-border);
+            position: relative;
+        }
+
+
+
+        .nav-buttons {
+            display: flex;
+            gap: var(--space-sm);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: var(--space-sm);
+            align-items: center;
+        }
+
+        .btn-large {
+            padding: var(--space-sm) var(--space-md);
+            font-size: var(--text-base);
+            font-weight: 600;
+        }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--color-text-main);
+            border: 1px solid var(--color-border);
+            padding: var(--space-sm) var(--space-md);
+            font-size: var(--text-sm);
+            font-weight: 500;
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--color-text-main);
+            border-color: var(--color-action);
+            box-shadow: 0 0 0 1px var(--color-action);
+        }
+
+        /* Share Option Styles */
+        .share-section {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            border: 1px solid var(--color-border);
+            margin-bottom: var(--space-md);
+        }
+
+        .share-option {
+            background: var(--color-bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            border: 1px solid var(--color-border);
+            margin-bottom: var(--space-md);
+        }
+
+        .checkbox-label.large {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-md);
+            cursor: pointer;
+            font-size: var(--text-base);
+            color: var(--color-text-main);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+
+        .checkbox-label.large:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .checkbox-label.compact {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            cursor: pointer;
+            font-size: var(--text-base);
+            color: var(--color-text-main);
+            padding: var(--space-sm);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+
+        .checkbox-label.compact:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .checkbox-text {
+            font-weight: 500;
+        }
+
+        .checkbox-content {
+            flex: 1;
+        }
+
+        .checkbox-title {
+            font-size: var(--text-lg);
+            font-weight: 600;
+            color: var(--color-text-main);
+            margin-bottom: var(--space-xs);
+        }
+
+        .checkbox-description {
+            font-size: var(--text-sm);
+            color: var(--color-text-sub);
+            line-height: 1.5;
+        }
+
+        .info-message {
+            margin-top: var(--space-sm);
+            padding: var(--space-sm);
+            background: rgba(33, 150, 243, 0.1);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            border-radius: var(--radius-md);
+            font-size: var(--text-sm);
+            color: var(--color-text-main);
+        }
+
+        .info-message p {
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .info-message.compact {
+            padding: var(--space-sm);
+            margin-top: var(--space-sm);
+        }
+
+        .info-message.compact p {
+            font-size: var(--text-xs);
+        }
+
+        .compact-form-row {
+            display: flex;
+            gap: var(--space-md);
+            margin-bottom: var(--space-sm);
+        }
+
+        .compact-form-row .form-field {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .access-controls {
+            background: var(--color-bg-input);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            border: 1px solid var(--color-border);
+            margin-top: var(--space-sm);
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Checkbox Styles */
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            cursor: pointer;
+            font-size: var(--text-sm);
+            color: var(--color-text-main);
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            display: none;
+        }
+
+        .checkmark {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background: var(--color-bg-main);
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .checkbox-label input[type="checkbox"]:checked + .checkmark {
+            background: var(--color-action);
+            border-color: var(--color-action);
+        }
+
+        .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+
+
+        /* Responsive Design */
         @media (max-width: 768px) {
             .container {
-                padding: 15px;
+            padding: var(--space-md);
+        }
+
+            .step-progress {
+                flex-direction: column;
+                gap: var(--space-sm);
+            padding: var(--space-sm);
             }
+            
+            .step-arrow {
+                transform: rotate(90deg);
+            }
+            
+
+            
+            .step-item {
+                min-width: auto;
+                width: 100%;
+            }
+            
+            .step-actions {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+            
+            .nav-buttons,
+            .action-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .step-actions .btn {
+                width: 100%;
+            }
+
+            .settings-buttons {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--space-xs);
+            }
+
+            .setting-checkbox {
+                padding: var(--space-xs);
+                font-size: var(--text-sm);
+            }
+            
+            .settings-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-md);
+            }
+            
+            .settings-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-md);
+            }
+            
             .button-group {
                 flex-direction: column;
             }
-            .user-info {
-                grid-template-columns: 1fr;
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+            
+            .share-option {
+                padding: var(--space-md);
+            }
+            
+            .share-section {
+                padding: var(--space-sm);
+            }
+            
+            .compact-form-row {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+            
+            .checkbox-label.large {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-sm);
+            }
+            
+            .checkbox-label.compact {
+                padding: var(--space-xs);
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>🎬 VE URL Creator</h1>
-            <p class="subtitle">Create and share synchronized reaction video experiences</p>
+        <header class="header">
+            <div class="header-content">
+                <div class="header-center">
+                    <div class="header-logo"></div>
+                    <h1>Multi-Window-Viewer URL Creator</h1>
+                    <span class="beta-tag">Beta</span>
+                    <button class="help-btn" id="main-help-btn" title="Learn more about this tool">?</button>
+                </div>
+                <a href="/" class="home-btn" title="Return to main studio">
+                    Back to Studio
+                </a>
+            </div>
+
+        </header>
         </header>
 
-        <!-- User Information Section -->
-        <div class="form-section">
-            <h3>👤 User Information</h3>
+        <!-- Compact Main Form -->
+        <div class="card">
+            <!-- Step Progress Bar -->
+            <div class="step-progress">
+                <div class="step-item active" id="step-1">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-title">Basic Info</div>
+                        <div class="step-status">Enter nickname</div>
+                    </div>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-item locked" id="step-2">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-title">Video & Timestamp</div>
+                        <div class="step-status">Upload files</div>
+                    </div>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-item locked" id="step-3">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-title">Share & Access</div>
+                        <div class="step-status">Choose sharing & credentials</div>
+                    </div>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-item locked" id="step-4">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <div class="step-title">Advanced Settings</div>
+                        <div class="step-status">Optional</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step Forms -->
+            <div class="step-forms">
+                <!-- Step 1: Basic Information -->
+                <div class="step-form active" id="step-form-1">
+                    <div class="step-header">
+                        <h3>📝 Basic Information</h3>
+                        <p>Enter your nickname for the video creator (English only, 3-20 characters)</p>
+                    </div>
+                        <div class="form-field wide">
+                            <label for="username" class="field-label">
+                                Nickname *
+                            <span class="tooltip" data-tooltip="English letters, numbers, and underscores only (3-20 characters)">ⓘ</span>
+                            </label>
+                        <input type="text" id="username" placeholder="Your nickname (English only)" 
+                               pattern="[a-zA-Z0-9_]{3,20}" 
+                               title="English letters, numbers, and underscores only (3-20 characters)"
+                               maxlength="20" required>
+                        <div class="input-hint">English letters, numbers, and underscores only (3-20 characters)</div>
+                    </div>
+                    <div class="step-actions">
+                        <div class="nav-buttons"></div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" id="next-step-1">Next →</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Video & Timestamp -->
+                <div class="step-form" id="step-form-2">
+                    <div class="step-header">
+                        <h3>🎬 Video & Timestamp</h3>
+                        <p>Upload your reaction video and timestamp file</p>
+                    </div>
+                        <div class="form-field wide">
+                            <label for="reactionUrl" class="field-label">
+                                Reaction Video URL *
+                            </label>
+                            <input type="text" id="reactionUrl" placeholder="https://www.youtube.com/watch?v=..." required>
+                        <small class="input-hint">Enter the URL of your reaction video (not the original video)</small>
+                        </div>
+                        <div class="form-field wide">
+                            <label for="timestampFile" class="field-label">
+                                Timestamp File *
+                                <span class="tooltip" data-tooltip="JSON file with synchronized timestamps">ⓘ</span>
+                            </label>
+                            <input type="file" id="timestampFile" accept=".json" required>
+                        </div>
+                    <div class="step-actions">
+                        <div class="nav-buttons">
+                            <button class="btn btn-ghost" id="prev-step-2">← Previous</button>
+                    </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" id="next-step-2">Next →</button>
+                </div>
+                        </div>
+                        </div>
+
+                <!-- Step 3: Share & Access -->
+                <div class="step-form" id="step-form-3">
+                    <div class="step-header compact">
+                        <h3>🌐 Share & Access</h3>
+                        <p>Choose sharing options and set up access credentials</p>
+                    </div>
+                    
+                    <div class="share-section">
+                        <label class="checkbox-label compact">
+                                <input type="checkbox" id="publicConsent">
+                                <span class="checkmark"></span>
+                            <span class="checkbox-text">Make URL public and share on React Central</span>
+                            <span class="tooltip" data-tooltip="React Central: A reaction video URL platform (coming soon) for sharing and discovering synchronized reaction videos with timestamp data.">ⓘ</span>
+                            </label>
+                        
+                        <div class="access-controls" id="accessControls" style="display: none;">
+                            <div class="compact-form-row">
+                                <div class="form-field">
+                                    <label for="email" class="field-label">Email *</label>
+                                    <input type="email" id="email" placeholder="your@email.com" required>
+                        </div>
+                                <div class="form-field">
+                                    <label for="accessPassword" class="field-label">Password *</label>
+                                    <input type="password" id="accessPassword" placeholder="min 4 characters" minlength="4" required>
+                    </div>
+                            </div>
+                            <div class="info-message compact">
+                                <p>📝 Remember your credentials for React Central Upload management <span class="tooltip" data-tooltip="Beta service - Official registration system will be available upon launch">ⓘ</span></p>
+                        </div>
+                </div>
+            </div>
             
-            <div class="user-info">
-                <div class="input-group">
-                    <label for="username">Nickname <span class="required">*</span></label>
-                    <input type="text" id="username" placeholder="Enter your nickname">
-                    <div class="help-text">This will be displayed in your profile</div>
+                    <div class="step-actions">
+                        <div class="nav-buttons">
+                            <button class="btn btn-ghost" id="prev-step-3">← Previous</button>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" id="next-step-3">Next →</button>
+            </div>
+        </div>
                 </div>
                 
-                <div class="input-group">
-                    <label for="password">Password <span class="required">*</span></label>
-                    <input type="password" id="password" placeholder="Enter your password">
-                    <div class="help-text">Minimum 4 characters required</div>
-                </div>
+                <!-- Step 4: Advanced Settings -->
+                <div class="step-form" id="step-form-4">
+                    <div class="step-header">
+                        <h3>⚙️ Advanced Settings (Optional)</h3>
             </div>
             
-            <div class="input-group">
-                <label for="email">Email <span class="optional">(Optional)</span></label>
-                <input type="email" id="email" placeholder="Enter your email (optional)">
-                <div class="help-text">Only for users who want to manage their content later</div>
+                    <div class="settings-section">
+                        <div class="settings-header" id="playbackSettingsToggle">
+                            <h4 class="settings-title">🎬 Original Video Playback Settings</h4>
+                            <p class="settings-subtitle">Configure how the original video will be displayed and played (viewers can adjust individually)</p>
+                            <span class="toggle-icon">▼</span>
             </div>
+                        <div class="settings-content" id="playbackSettingsContent">
+                        
+                        <div class="settings-buttons">
+                            <label class="setting-checkbox">
+                                <input type="checkbox" id="positionEnabled" data-setting="position">
+                                <span class="setting-text">Position</span>
+                                <span class="tooltip" data-tooltip="Choose where the original video appears on screen during playback">ⓘ</span>
+                            </label>
+                            <label class="setting-checkbox">
+                                <input type="checkbox" id="sizeEnabled" data-setting="size">
+                                <span class="setting-text">Size</span>
+                                <span class="tooltip" data-tooltip="Control the size of the original video overlay (10-60% of screen)">ⓘ</span>
+                            </label>
+                            <label class="setting-checkbox">
+                                <input type="checkbox" id="volumeEnabled" data-setting="volume">
+                                <span class="setting-text">Volume</span>
+                                <span class="tooltip" data-tooltip="Set the default volume for the original video (50-100%)">ⓘ</span>
+                            </label>
+                            <label class="setting-checkbox">
+                                <input type="checkbox" id="hideEnabled" data-setting="hide">
+                                <span class="setting-text">Hide</span>
+                                <span class="tooltip" data-tooltip="Hide overlay for BGM-only mode">ⓘ</span>
+                            </label>
         </div>
 
-        <!-- Video Information Section -->
-        <div class="form-section">
-            <h3>📹 Video Information</h3>
-            
-            <div class="input-group">
-                <label for="reaction-url">Reaction YouTube Video URL <span class="required">*</span></label>
-                <input type="text" id="reaction-url" placeholder="https://www.youtube.com/watch?v=..." value="https://www.youtube.com/watch?v=niYgb0IfP4U">
-                <div class="help-text">Enter the YouTube link for the reaction video</div>
-            </div>
-            
-            <div class="input-group">
-                <label for="original-url">Original YouTube Video URL <span class="required">*</span></label>
-                <input type="text" id="original-url" placeholder="https://www.youtube.com/watch?v=..." value="https://www.youtube.com/watch?v=AbZH7XWDW_k">
-                <div class="help-text">Enter the YouTube link for the original video</div>
-            </div>
-            
-            <div class="input-group">
-                <label for="timestamp-file">Timestamp File <span class="required">*</span></label>
-                <input type="file" id="timestamp-file" accept=".json">
-                <div class="help-text">Select a JSON file containing synchronization information</div>
-            </div>
-        </div>
-
-        <!-- Settings Section -->
-        <div class="form-section">
-            <h3>⚙️ Viewer Settings</h3>
-            
-            <div class="input-group">
-                <label for="overlay-position">Overlay Position</label>
-                <select id="overlay-position">
+                        <div class="settings-panels">
+                            <div class="setting-panel" id="position-panel">
+                                <div class="panel-content">
+                        <label for="overlayPosition">Overlay Position</label>
+                        <select id="overlayPosition" class="input">
                     <option value="top-right">Top Right</option>
                     <option value="top-left">Top Left</option>
                     <option value="bottom-right">Bottom Right</option>
                     <option value="bottom-left">Bottom Left</option>
                 </select>
-                <div class="help-text">Select where the original video will be displayed</div>
+                                </div>
             </div>
             
-            <div class="input-group">
-                <label for="overlay-size">Overlay Size</label>
+                            <div class="setting-panel" id="size-panel">
+                                <div class="panel-content">
+                        <label>Overlay Size</label>
                 <div class="slider-container">
-                    <input type="range" id="overlay-size" min="10" max="60" value="50">
-                    <span id="overlay-size-value" class="slider-value">50%</span>
+                            <input type="range" id="overlaySizeSlider" min="10" max="60" value="50">
+                            <span class="slider-value" id="overlaySizeValue">50%</span>
+                                    </div>
                 </div>
-                <div class="help-text">Adjust the size of the original video (10% - 60%)</div>
             </div>
             
-            <div class="input-group">
-                <label for="youtube-volume">Original Video Volume</label>
+                            <div class="setting-panel" id="volume-panel">
+                                <div class="panel-content">
+                        <label>Original Video Volume</label>
                 <div class="slider-container">
-                    <input type="range" id="youtube-volume" min="0" max="100" value="100">
-                    <span id="youtube-volume-value" class="slider-value">100%</span>
+                                        <input type="range" id="volumeSlider" min="50" max="100" value="100">
+                            <span class="slider-value" id="volumeValue">100%</span>
+                                    </div>
                 </div>
-                <div class="help-text">Adjust the volume of the original video (0% - 100%)</div>
             </div>
             
-            <div class="input-group">
-                <label for="access-control">Access Control</label>
-                <select id="access-control">
-                    <option value="public">Public (Anyone can access)</option>
-                    <option value="private">Private (Password required)</option>
-                </select>
-                <div class="help-text">Set access permissions for the generated link</div>
+                            <div class="setting-panel" id="hide-panel">
+                                <div class="panel-content">
+                                    <label>Hide Overlay (BGM Mode)</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="hideOverlayEnabled">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <p class="setting-description">Hide the original video overlay for BGM-only playback</p>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
             </div>
             
-            <div class="input-group" id="password-control" style="display: none;">
-                <label for="access-password">Access Password</label>
-                <input type="password" id="access-password" placeholder="Password for link access">
-                <div class="help-text">Password required for private link access</div>
+                    <div class="settings-section">
+                        <div class="settings-header" id="titleSettingsToggle">
+                            <h4 class="settings-title">📝 URL Title & Description</h4>
+                            <p class="settings-subtitle">Set a custom title and description for your VE URL. These will be displayed when sharing the link. If not set, your reaction video's title and description will be used.</p>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div class="settings-content" id="titleSettingsContent">
+                        
+                        <div class="settings-buttons">
+                            <label class="setting-checkbox">
+                                <input type="checkbox" id="titleEnabled" data-setting="title">
+                                <span class="setting-text">Custom Title</span>
+                                <span class="tooltip" data-tooltip="Set a custom title for your VE URL that will appear when sharing">ⓘ</span>
+                            </label>
+                            <label class="setting-checkbox">
+                                <input type="checkbox" id="descriptionEnabled" data-setting="description">
+                                <span class="setting-text">Custom Description</span>
+                                <span class="tooltip" data-tooltip="Add a description that explains what this reaction video is about">ⓘ</span>
+                            </label>
+                </div>
+                        
+                        <div class="settings-panels">
+                            <div class="setting-panel" id="title-panel">
+                                <div class="panel-content">
+                                    <div class="form-field">
+                                        <label for="customTitle">Title</label>
+                                        <input type="text" id="customTitle" placeholder="Enter custom title..." maxlength="100">
+                                        <small>Maximum 100 characters</small>
+            </div>
+                                </div>
+                            </div>
+                            <div class="setting-panel" id="description-panel">
+                                <div class="panel-content">
+                                    <div class="form-field">
+                                        <label for="customDescription">Description</label>
+                                        <textarea id="customDescription" placeholder="Enter custom description..." maxlength="500" rows="3"></textarea>
+                                        <small>Maximum 500 characters</small>
+                                    </div>
+                                </div>
+                            </div>
+            </div>
+            </div>
+        </div>
+                    
+
+                    
+                    <div class="step-actions">
+                        <div class="nav-buttons">
+                            <button class="btn btn-ghost" id="prev-step-4">← Previous</button>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-large" id="generateBtn">Create VE URL</button>
+                            <button class="btn btn-ghost" id="previewBtn">Preview</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner"></div>
+                <span>Creating URL...</span>
+            </div>
+            
+            <div id="message" class="alert"></div>
+        </div>
+            
+        <div id="linkSection" class="link-section">
+            <h3>Generated Multi-Window-Viewer URL</h3>
+            <div id="generatedLink" class="generated-link"></div>
+            <div class="button-group">
+                <button id="copyBtn" class="btn btn-success">Copy URL</button>
+                <button id="testBtn" class="btn btn-info">Test URL</button>
+            </div>
             </div>
         </div>
 
-        <div class="button-group">
-            <button id="preview-btn" class="secondary">Preview</button>
-            <button id="create-btn" class="primary">Create VE URL</button>
+
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Multi-Window-Viewer URL Creator Help</h3>
+                <button class="modal-close" id="closeHelpBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h4 style="margin-bottom: var(--space-md);">🎯 Role in the Complete Process:</h4>
+                <p style="margin-bottom: var(--space-md);">This URL Creator is <strong>Step 3</strong> in the reaction video workflow:</p>
+                <div style="background: var(--color-bg-card); border-radius: var(--radius-md); padding: var(--space-md); margin: var(--space-md) 0; border: 1px solid var(--color-border);">
+                    <div style="padding: var(--space-sm); margin-bottom: var(--space-sm); border-radius: var(--radius-sm); background: var(--color-bg-main); color: var(--color-text-sub); font-size: var(--text-sm);">
+                        <strong>Step 1: Record</strong> - Use the Recorder to capture your reaction video with synchronized timestamps
+                    </div>
+                    <div style="padding: var(--space-sm); margin-bottom: var(--space-sm); border-radius: var(--radius-sm); background: var(--color-bg-main); color: var(--color-text-sub); font-size: var(--text-sm);">
+                        <strong>Step 2: Edit Timestamps</strong> - If you've edited your reaction video externally, you can readjust timestamps for perfect synchronization
+                    </div>
+                    <div style="padding: var(--space-sm); margin-bottom: var(--space-sm); border-radius: var(--radius-sm); background: rgba(244, 67, 54, 0.1); border-left: 3px solid var(--color-action); color: var(--color-text-main); font-size: var(--text-sm);">
+                        <strong>Step 3: Create URL</strong> - Upload your reaction video and timestamp file to generate a synchronized viewer URL
+                    </div>
+                    <div style="padding: var(--space-sm); margin-bottom: var(--space-sm); border-radius: var(--radius-sm); background: var(--color-bg-main); color: var(--color-text-sub); font-size: var(--text-sm);">
+                        <strong>Step 4: Share</strong> - Share the generated URL for others to watch your synchronized reaction
+                    </div>
+                    </div>
         </div>
 
-        <div id="message" class="message"></div>
+        </div>
+    </div>
 
-        <div id="link-section" class="link-section">
-            <h3>✅ VE URL Created Successfully!</h3>
-            <p style="text-align: center; margin-bottom: 20px;">Copy the link below to share with others:</p>
-            <div id="generated-link" class="generated-link"></div>
-            <button id="copy-link-btn" class="copy-button">Copy Link</button>
-            <div id="data-size-info" style="margin-top: 15px; text-align: center; font-size: 14px; color: #888;"></div>
-            <div style="margin-top: 25px; text-align: center;">
-                <p><strong>How to use:</strong></p>
-                <ul style="text-align: left; display: inline-block;">
-                    <li>Click the link to open the synchronized viewer</li>
-                    <li>Reaction video and original video will be automatically synchronized</li>
-                    <li>Use play/pause buttons in the viewer to control playback</li>
-                    <li>Anyone can watch online without additional setup</li>
-                </ul>
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content success-modal">
+            <div class="modal-header">
+                <h3 style="text-align: center; margin: 0; font-size: 1.5rem; font-weight: 600;">🎉 URL Created Successfully!</h3>
+                <button class="modal-close" id="closeSuccessBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="success-icon">
+                    <img src="logo/whitered_mini.png" alt="VE Logo" class="success-logo">
+                </div>
+                <p class="success-message">Your synchronized reaction video URL has been created!</p>
+                
+                <div class="generated-url-container">
+                    <label for="modalGeneratedLink">Generated URL:</label>
+                    <div class="url-input-group">
+                        <input type="text" id="modalGeneratedLink" readonly>
+            </div>
+            <div class="modal-actions">
+                        <button class="btn btn-success" id="modalCopyBtn">Copy URL</button>
+                        <button class="btn btn-info" id="modalTestBtn">Test URL</button>
+                    </div>
+                </div>
+                
+
             </div>
         </div>
+    </div>
+
+    <!-- Copy Success Popup -->
+    <div class="copy-popup" id="copyPopup">
+        <div class="copy-popup-icon">✓</div>
+        <div class="copy-popup-text">Copied!</div>
     </div>
 
     <script>
         // DOM elements
         const usernameInput = document.getElementById('username');
         const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const confirmPasswordInput = document.getElementById('confirm-password');
-        const reactionUrlInput = document.getElementById('reaction-url');
-        const originalUrlInput = document.getElementById('original-url');
-        const timestampFileInput = document.getElementById('timestamp-file');
-        const overlayPositionSelect = document.getElementById('overlay-position');
-        const overlaySizeSlider = document.getElementById('overlay-size');
-        const overlaySizeValue = document.getElementById('overlay-size-value');
-        const youtubeVolumeSlider = document.getElementById('youtube-volume');
-        const youtubeVolumeValue = document.getElementById('youtube-volume-value');
-        const accessControlSelect = document.getElementById('access-control');
-        const passwordControl = document.getElementById('password-control');
-        const accessPasswordInput = document.getElementById('access-password');
-        const previewBtn = document.getElementById('preview-btn');
-        const createBtn = document.getElementById('create-btn');
-        const messageElement = document.getElementById('message');
-        const linkSection = document.getElementById('link-section');
-        const generatedLinkElement = document.getElementById('generated-link');
-        const copyLinkBtn = document.getElementById('copy-link-btn');
-        const dataSizeInfoElement = document.getElementById('data-size-info');
+        const reactionUrlInput = document.getElementById('reactionUrl');
+        const timestampFileInput = document.getElementById('timestampFile');
+        const overlayPositionSelect = document.getElementById('overlayPosition');
+        const overlaySizeSlider = document.getElementById('overlaySizeSlider');
+        const overlaySizeValue = document.getElementById('overlaySizeValue');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        const accessPasswordInput = document.getElementById('accessPassword');
+        const publicConsentCheckbox = document.getElementById('publicConsent');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const reactCentralInfo = document.getElementById('reactCentralInfo');
+        const generateBtn = document.getElementById('generateBtn');
+        const messageDiv = document.getElementById('message');
+        const linkSection = document.getElementById('linkSection');
+        const generatedLink = document.getElementById('generatedLink');
+        const copyBtn = document.getElementById('copyBtn');
+        const testBtn = document.getElementById('testBtn');
+        const previewBtn = document.getElementById('previewBtn');
+        const helpBtn = document.getElementById('main-help-btn');
+        const helpModal = document.getElementById('helpModal');
+        const closeHelpBtn = document.getElementById('closeHelpBtn');
+        const successModal = document.getElementById('successModal');
+        const closeSuccessBtn = document.getElementById('closeSuccessBtn');
+        const modalGeneratedLink = document.getElementById('modalGeneratedLink');
+        const modalCopyBtn = document.getElementById('modalCopyBtn');
+        const modalTestBtn = document.getElementById('modalTestBtn');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const copyPopup = document.getElementById('copyPopup');
+
+
+
+        // Step navigation elements
+        const stepItems = document.querySelectorAll('.step-item');
+        const stepForms = document.querySelectorAll('.step-form');
+        const nextButtons = document.querySelectorAll('[id^="next-step-"]');
+        const prevButtons = document.querySelectorAll('[id^="prev-step-"]');
+
+        // Current step tracking
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        // Step navigation functions
+        function updateStepProgress() {
+            stepItems.forEach((item, index) => {
+                const stepNumber = index + 1;
+                item.classList.remove('active', 'completed', 'locked');
+                
+                if (stepNumber < currentStep) {
+                    item.classList.add('completed');
+                } else if (stepNumber === currentStep) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.add('locked');
+                }
+            });
+        }
+
+        function showStep(stepNumber) {
+            stepForms.forEach((form, index) => {
+                form.classList.remove('active');
+                if (index + 1 === stepNumber) {
+                    form.classList.add('active');
+                }
+            });
+            currentStep = stepNumber;
+            updateStepProgress();
+            
+            // Add animation to step progress
+            animateStepProgress(stepNumber);
+        }
+
+        function animateStepProgress(stepNumber) {
+            // Animate the active step
+            const activeStep = document.getElementById(`step-${stepNumber}`);
+            if (activeStep) {
+                activeStep.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    activeStep.style.transform = 'scale(1)';
+                }, 300);
+            }
+            
+            // Scroll to active step if not visible
+            scrollToActiveStep(stepNumber);
+        }
+
+        function scrollToActiveStep(stepNumber) {
+            const stepProgress = document.querySelector('.step-progress');
+            const activeStep = document.getElementById(`step-${stepNumber}`);
+            
+            if (stepProgress && activeStep) {
+                // Calculate scroll position to center the active step
+                const stepProgressWidth = stepProgress.offsetWidth;
+                const activeStepLeft = activeStep.offsetLeft;
+                const activeStepWidth = activeStep.offsetWidth;
+                
+                // Center the active step in the visible area
+                const scrollLeft = activeStepLeft - (stepProgressWidth / 2) + (activeStepWidth / 2);
+                
+                stepProgress.scrollTo({
+                    left: Math.max(0, scrollLeft),
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        function validateStep(stepNumber) {
+            switch(stepNumber) {
+                case 1:
+                    const username = usernameInput.value.trim();
+                    return username !== '' && /^[a-zA-Z0-9_]{3,20}$/.test(username);
+                case 2:
+                    const reactionUrl = reactionUrlInput.value.trim();
+                    return reactionUrl !== '' && extractYouTubeVideoId(reactionUrl) && timestampFileInput.files[0];
+                case 3:
+                    if (publicConsentCheckbox.checked) {
+                        return emailInput.value.trim() !== '' && accessPasswordInput.value.trim() !== '';
+                    }
+                    return true;
+                case 4:
+                    return true; // Advanced settings are optional
+                default:
+                    return true;
+            }
+        }
+
+        function goToNextStep() {
+            if (validateStep(currentStep)) {
+                if (currentStep < totalSteps) {
+                    showStep(currentStep + 1);
+                    // Clear any existing error messages when proceeding
+                    hideMessage();
+                }
+            } else {
+                let errorMessage = 'Please complete all required fields before proceeding.';
+                if (currentStep === 1) {
+                    errorMessage = 'Please enter a valid nickname (English letters, numbers, and underscores only, 3-20 characters).';
+                } else if (currentStep === 3 && publicConsentCheckbox.checked) {
+                    errorMessage = 'Please enter both email and password for React Central access.';
+                }
+                showMessage(errorMessage, 'error');
+            }
+        }
+
+        function goToPrevStep() {
+            if (currentStep > 1) {
+                showStep(currentStep - 1);
+            }
+        }
+
+        // React Central checkbox event listener
+        publicConsentCheckbox.addEventListener('change', function() {
+            const accessControls = document.getElementById('accessControls');
+            if (this.checked) {
+                accessControls.style.display = 'block';
+                emailInput.setAttribute('required', 'required');
+                accessPasswordInput.setAttribute('required', 'required');
+            } else {
+                accessControls.style.display = 'none';
+                emailInput.removeAttribute('required');
+                accessPasswordInput.removeAttribute('required');
+                emailInput.value = '';
+                accessPasswordInput.value = '';
+            }
+        });
+
+        // Step navigation event listeners
+        nextButtons.forEach(button => {
+            button.addEventListener('click', goToNextStep);
+        });
+
+        prevButtons.forEach(button => {
+            button.addEventListener('click', goToPrevStep);
+        });
+
+        // Username input validation
+        usernameInput.addEventListener('input', function() {
+            const value = this.value;
+            const isValid = /^[a-zA-Z0-9_]{0,20}$/.test(value);
+            
+            if (value.length > 0 && !isValid) {
+                this.value = value.replace(/[^a-zA-Z0-9_]/g, '');
+            }
+            
+            if (value.length > 20) {
+                this.value = value.substring(0, 20);
+            }
+        });
 
         // Slider event listeners
         overlaySizeSlider.addEventListener('input', function() {
             overlaySizeValue.textContent = this.value + '%';
         });
 
-        youtubeVolumeSlider.addEventListener('input', function() {
-            youtubeVolumeValue.textContent = this.value + '%';
+        volumeSlider.addEventListener('input', function() {
+            volumeValue.textContent = this.value + '%';
         });
 
-        // Access control change event
-        accessControlSelect.addEventListener('change', function() {
-            if (this.value === 'private') {
-                passwordControl.style.display = 'block';
-            } else {
-                passwordControl.style.display = 'none';
-            }
-        });
+
 
         // YouTube URL validation function
         function extractYouTubeVideoId(url) {
@@ -438,7 +2171,7 @@
             try {
                 const optimizedData = {
                     reactionUrl: data.reactionUrl,
-                    originalUrl: data.originalUrl,
+                    originalUrl: `https://www.youtube.com/watch?v=${data.youtube_video_id}`,
                     timestampData: {
                         sync_points: data.timestampData.sync_points.map(point => ({
                             rt: point.reaction_time,
@@ -456,17 +2189,8 @@
                 
                 const jsonString = JSON.stringify(optimizedData);
                 
-                if (dataSizeInfoElement) {
-                    dataSizeInfoElement.textContent = `Data size: ${jsonString.length} characters (${Math.round(jsonString.length / 1024 * 100) / 100} KB)`;
-                }
-                
                 if (jsonString.length > 15000) {
                     console.warn('VE URL data is large');
-                    if (dataSizeInfoElement) {
-                        dataSizeInfoElement.style.color = '#ffaa55';
-                    }
-                } else if (dataSizeInfoElement) {
-                    dataSizeInfoElement.style.color = '#888';
                 }
                 
                 const encoded = safeBase64Encode(jsonString);
@@ -488,13 +2212,17 @@
                 showMessage('Please enter your nickname.', 'error');
                 return false;
             }
-            if (!passwordInput.value.trim()) {
-                showMessage('Please enter your password.', 'error');
+
+            // Check React Central requirements
+            if (publicConsentCheckbox.checked) {
+                if (!emailInput.value.trim()) {
+                    showMessage('Email is required when sharing on React Central.', 'error');
                 return false;
             }
-            if (passwordInput.value.length < 4) {
-                showMessage('Password must be at least 4 characters long.', 'error');
+                if (!accessPasswordInput.value.trim()) {
+                    showMessage('Password is required when sharing on React Central.', 'error');
                 return false;
+                }
             }
 
             const reactionUrl = reactionUrlInput.value.trim();
@@ -507,23 +2235,8 @@
                 return false;
             }
 
-            const originalUrl = originalUrlInput.value.trim();
-            if (!originalUrl) {
-                showMessage('Please enter the original video URL.', 'error');
-                return false;
-            }
-            if (!extractYouTubeVideoId(originalUrl)) {
-                showMessage('Please enter a valid original video YouTube URL.', 'error');
-                return false;
-            }
-
             if (!timestampFileInput.files[0]) {
                 showMessage('Please select a timestamp file.', 'error');
-                return false;
-            }
-
-            if (accessControlSelect.value === 'private' && !accessPasswordInput.value.trim()) {
-                showMessage('Please enter an access password for private links.', 'error');
                 return false;
             }
 
@@ -532,17 +2245,66 @@
 
         // Message display function
         function showMessage(text, type) {
-            messageElement.textContent = text;
-            messageElement.className = 'message ' + type;
+            messageDiv.textContent = text;
+            messageDiv.className = `alert alert-${type}`;
+            messageDiv.style.display = 'block';
             
             if (type === 'success') {
                 setTimeout(() => {
-                    if (messageElement.textContent === text) {
-                        messageElement.className = 'message';
-                        messageElement.textContent = '';
+                    if (messageDiv.textContent === text) {
+                        messageDiv.style.display = 'none';
                     }
                 }, 5000);
             }
+        }
+
+        function hideMessage() {
+            messageDiv.style.display = 'none';
+        }
+
+        // Get video title from custom input or use default
+        async function getVideoTitle() {
+            const titleEnabled = document.getElementById('titleEnabled');
+            const customTitle = document.getElementById('customTitle');
+            
+            // If custom title is enabled and has value, use it
+            if (titleEnabled?.checked && customTitle?.value.trim()) {
+                return customTitle.value.trim();
+            }
+            
+            // If custom title is enabled but empty, return null (will use default in server)
+            if (titleEnabled?.checked) {
+                return null;
+            }
+            
+            // Fallback to default
+            return 'Synchronized Reaction Video';
+        }
+
+        // Get video description from custom input or use default
+        async function getVideoDescription() {
+            const descriptionEnabled = document.getElementById('descriptionEnabled');
+            const customDescription = document.getElementById('customDescription');
+            
+            // If custom description is enabled and has value, use it
+            if (descriptionEnabled?.checked && customDescription?.value.trim()) {
+                return customDescription.value.trim();
+            }
+            
+            // If custom description is enabled but empty, return null (will use default in server)
+            if (descriptionEnabled?.checked) {
+                return null;
+            }
+            
+            // Fallback to default
+            return 'Reaction video synchronized with original video';
+        }
+
+        // Extract YouTube video ID from URL
+        function extractYouTubeVideoId(url) {
+            const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
         }
 
         // VE URL creation function
@@ -550,6 +2312,10 @@
             if (!validateRequiredFields()) {
                 return;
             }
+
+            // Show loading spinner
+            loadingSpinner.classList.add('show');
+            generateBtn.disabled = true;
 
             const timestampFile = timestampFileInput.files[0];
             
@@ -559,34 +2325,44 @@
                 try {
                     const timestampData = JSON.parse(e.target.result);
                     
-                    // VE URL data structure
+                    // VE URL data structure (optimized)
                     const veUrlData = {
                         reactionUrl: reactionUrlInput.value.trim(),
-                        originalUrl: originalUrlInput.value.trim(),
-                        timestampData: timestampData,
+                        originalUrl: `https://www.youtube.com/watch?v=${timestampData.youtube_video_id}`,
+                        // Only send essential timestamp data to reduce payload size
+                        timestampData: {
+                            youtube_video_id: timestampData.youtube_video_id,
+                            sync_points: timestampData.sync_points || [],
+                            // Removed unnecessary metadata to optimize transfer
+                            // - created_at: already in VE URL metadata
+                            // - description: already in VE URL metadata  
+                            // - creator: already in userInfo
+                            // - version: not needed
+                            // - total_duration: can be calculated from sync_points
+                            // - sync_points_count: can be calculated from sync_points.length
+                        },
                         settings: {
-                            overlayPosition: overlayPositionSelect.value,
-                            overlaySize: parseInt(overlaySizeSlider.value),
-                            youtubeVolume: parseInt(youtubeVolumeSlider.value)
+                            overlay_position: overlayPositionSelect.value,
+                            overlay_size: parseInt(overlaySizeSlider.value),
+                            youtube_volume: parseInt(volumeSlider.value),
+                            hide_overlay: document.getElementById('hideOverlayEnabled')?.checked || false
                         },
                         metadata: {
-                            title: 'Synchronized Reaction Video',
-                            description: 'Reaction video synchronized with original video',
+                            title: await getVideoTitle(),
+                            description: await getVideoDescription(),
                             createdAt: new Date().toISOString()
                         },
                         userInfo: {
-                            username: usernameInput.value.trim(),
-                            email: emailInput.value.trim() || null
-                        },
-                        accessControl: {
-                            isPublic: accessControlSelect.value === 'public',
-                            password: accessControlSelect.value === 'private' ? accessPasswordInput.value.trim() : null
+                            nickname: usernameInput.value.trim(),
+                            email: emailInput.value.trim() || null,
+                            password: accessPasswordInput.value.trim() || null,
+                            isPublic: publicConsentCheckbox.checked // React Central 체크 = 공개
                         }
                     };
 
                     // Show debug info
                     console.log('📤 Sending data to server:', veUrlData);
-                    showMessage('🔄 Uploading data to server...', 'success');
+                    showMessage('🔄 Creating synchronized URL...', 'info');
 
                     // Try server upload
                     try {
@@ -599,30 +2375,29 @@
                         });
 
                         console.log('📥 Server response status:', response.status);
-                        console.log('📥 Server response headers:', response.headers);
 
                         if (response.ok) {
                             const result = await response.json();
                             console.log('✅ Server response data:', result);
                             
-                            const veUrl = result.ve_url.full_url;
-                            generatedLinkElement.textContent = veUrl;
-                            linkSection.style.display = 'block';
-                            showMessage('✅ VE URL created successfully on server!', 'success');
+                            // Hide loading spinner
+                            loadingSpinner.classList.remove('show');
+                            generateBtn.disabled = false;
                             
-                            // Show server info
-                            dataSizeInfoElement.innerHTML = `
-                                <div style="margin-top: 10px; padding: 10px; background: rgba(0,255,0,0.1); border-radius: 5px;">
-                                    <strong>✅ Server Upload Successful!</strong><br>
-                                    • User: ${veUrlData.userInfo.username}<br>
-                                    • Email: ${veUrlData.userInfo.email || 'Not provided'}<br>
-                                    • Reaction URL: ${veUrlData.reactionUrl.substring(0, 50)}...<br>
-                                    • Original URL: ${veUrlData.originalUrl.substring(0, 50)}...<br>
-                                    • Timestamp points: ${veUrlData.timestampData.sync_points.length}<br>
-                                    • Server ID: ${result.ve_url.ve_id}<br>
-                                    • Created at: ${new Date().toLocaleString()}
-                                </div>
-                            `;
+                            const veUrl = result.ve_url.full_url;
+                            
+                            // Hide existing link section and show success modal
+                            linkSection.style.display = 'none';
+                            
+                            // Show success modal with highlight effect
+                            modalGeneratedLink.value = veUrl;
+                            successModal.classList.add('show');
+                            modalGeneratedLink.classList.add('highlight');
+                            
+                            // Remove highlight after animation
+                            setTimeout(() => {
+                                modalGeneratedLink.classList.remove('highlight');
+                            }, 3000);
                         } else {
                             const errorText = await response.text();
                             console.error('❌ Server error response:', errorText);
@@ -631,15 +2406,28 @@
                     } catch (error) {
                         console.error('❌ Server upload error:', error);
                         showMessage('⚠️ Server upload failed, using local mode...', 'error');
+                        
+                        // Hide loading spinner
+                        loadingSpinner.classList.remove('show');
+                        generateBtn.disabled = false;
+                        
                         // Fallback to local mode
                         createLocalVEUrl(veUrlData);
                     }
                 } catch (error) {
                     showMessage('Error reading timestamp file: ' + error.message, 'error');
+                    
+                    // Hide loading spinner
+                    loadingSpinner.classList.remove('show');
+                    generateBtn.disabled = false;
                 }
             };
             reader.onerror = function() {
                 showMessage('Error reading file.', 'error');
+                
+                // Hide loading spinner
+                loadingSpinner.classList.remove('show');
+                generateBtn.disabled = false;
             };
             reader.readAsText(timestampFile);
         }
@@ -650,22 +2438,20 @@
                 const encodedData = encodeVEUrlData(veUrlData);
                 const veUrl = `${window.location.origin}/viewer.html?ve=${encodedData}`;
                 
-                generatedLinkElement.textContent = veUrl;
-                linkSection.style.display = 'block';
+                // Hide existing link section and show success modal
+                linkSection.style.display = 'none';
+                
+                // Show success modal with highlight effect
+                modalGeneratedLink.value = veUrl;
+                successModal.classList.add('show');
+                modalGeneratedLink.classList.add('highlight');
+                
+                // Remove highlight after animation
+                setTimeout(() => {
+                    modalGeneratedLink.classList.remove('highlight');
+                }, 3000);
                 
                 showMessage('🔄 VE URL created in local mode!', 'success');
-                
-                // Show local mode info
-                dataSizeInfoElement.innerHTML = `
-                    <div style="margin-top: 10px; padding: 10px; background: rgba(255,165,0,0.1); border-radius: 5px;">
-                        <strong>🔄 Local Mode (Server Unavailable)</strong><br>
-                        • User: ${veUrlData.userInfo.username}<br>
-                        • Email: ${veUrlData.userInfo.email || 'Not provided'}<br>
-                        • Data encoded in URL parameter<br>
-                        • Works offline but not shareable<br>
-                        • Data size: ${encodedData.length} characters
-                    </div>
-                `;
             } catch (error) {
                 if (error.message.includes('too large')) {
                     showMessage('Timestamp data is too large. Please reduce timestamps or metadata.', 'error');
@@ -676,22 +2462,213 @@
         }
 
         // Event listeners
-        createBtn.addEventListener('click', createVEUrl);
+        generateBtn.addEventListener('click', createVEUrl);
+
+
 
         // Copy link button
-        copyLinkBtn.addEventListener('click', function() {
-            const linkText = generatedLinkElement.textContent;
+        copyBtn.addEventListener('click', function() {
+            const linkText = generatedLink.textContent;
             navigator.clipboard.writeText(linkText).then(() => {
-                showMessage('Link copied to clipboard!', 'success');
+                // Show copy success popup
+                copyPopup.classList.add('show');
+                
+                // Hide popup after 2 seconds
+                setTimeout(() => {
+                    copyPopup.classList.remove('show');
+                }, 2000);
             }).catch(() => {
                 showMessage('Failed to copy link. Please copy manually.', 'error');
             });
         });
 
-        // Preview button (placeholder for future feature)
-        previewBtn.addEventListener('click', function() {
-            showMessage('Preview feature is under development.', 'error');
+        // Test URL
+        testBtn.addEventListener('click', function() {
+            const url = generatedLink.textContent;
+            window.open(url, '_blank');
         });
+
+        // Preview button
+        previewBtn.addEventListener('click', function() {
+            showMessage('Preview feature is under development. Please create a URL link to test the functionality.', 'info');
+        });
+
+        // Settings toggle functionality
+        const settingsToggle = document.getElementById('settingsToggle');
+        const settingsContent = document.getElementById('settingsContent');
+        
+        if (settingsToggle && settingsContent) {
+            settingsToggle.addEventListener('click', function() {
+                settingsContent.classList.toggle('collapsed');
+                settingsToggle.classList.toggle('collapsed');
+            });
+        }
+
+        // Playback Settings toggle functionality
+        const playbackSettingsToggle = document.getElementById('playbackSettingsToggle');
+        const playbackSettingsContent = document.getElementById('playbackSettingsContent');
+        
+        if (playbackSettingsToggle && playbackSettingsContent) {
+            playbackSettingsToggle.addEventListener('click', function() {
+                playbackSettingsContent.classList.toggle('collapsed');
+                playbackSettingsToggle.classList.toggle('collapsed');
+            });
+        }
+
+        // Title & Description settings toggle functionality
+        const titleSettingsToggle = document.getElementById('titleSettingsToggle');
+        const titleSettingsContent = document.getElementById('titleSettingsContent');
+        
+        if (titleSettingsToggle && titleSettingsContent) {
+            titleSettingsToggle.addEventListener('click', function() {
+                titleSettingsContent.classList.toggle('collapsed');
+                titleSettingsToggle.classList.toggle('collapsed');
+            });
+        }
+
+        // Help modal event listeners
+        helpBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Help button clicked');
+            helpModal.classList.add('show');
+        });
+
+        closeHelpBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            helpModal.classList.remove('show');
+        });
+
+
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === helpModal) {
+                helpModal.classList.remove('show');
+            }
+        });
+
+        // Close modals with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                helpModal.classList.remove('show');
+                if (successModal.classList.contains('show')) {
+                    successModal.classList.remove('show');
+                    // Restore the original link section
+                    generatedLink.textContent = modalGeneratedLink.value;
+                    linkSection.style.display = 'block';
+                }
+            }
+        });
+
+        helpModal.addEventListener('click', function(e) {
+            if (e.target === helpModal) {
+                helpModal.classList.remove('show');
+            }
+        });
+
+        // Success modal event listeners
+        closeSuccessBtn.addEventListener('click', function() {
+            successModal.classList.remove('show');
+            // Restore the original link section
+            generatedLink.textContent = modalGeneratedLink.value;
+            linkSection.style.display = 'block';
+        });
+
+        successModal.addEventListener('click', function(e) {
+            if (e.target === successModal) {
+                successModal.classList.remove('show');
+                // Restore the original link section
+                generatedLink.textContent = modalGeneratedLink.value;
+                linkSection.style.display = 'block';
+            }
+        });
+
+        modalCopyBtn.addEventListener('click', function() {
+            const urlText = modalGeneratedLink.value;
+            navigator.clipboard.writeText(urlText).then(() => {
+                // Show copy success popup
+                copyPopup.classList.add('show');
+                
+                // Hide popup after 2 seconds
+                setTimeout(() => {
+                    copyPopup.classList.remove('show');
+                }, 2000);
+            }).catch(() => {
+                showMessage('Failed to copy URL. Please copy manually.', 'error');
+            });
+        });
+
+        modalTestBtn.addEventListener('click', function() {
+            const url = modalGeneratedLink.value;
+            window.open(url, '_blank');
+        });
+
+
+
+        // Initialize step progress
+        updateStepProgress();
+        
+        // Initialize settings as collapsed
+        if (settingsContent) {
+            settingsContent.classList.add('collapsed');
+            settingsToggle.classList.add('collapsed');
+        }
+        
+        if (titleSettingsContent) {
+            titleSettingsContent.classList.add('collapsed');
+            titleSettingsToggle.classList.add('collapsed');
+        }
+
+        // Settings checkbox functionality
+        const settingCheckboxes = document.querySelectorAll('.setting-checkbox input[type="checkbox"]');
+        const settingPanels = document.querySelectorAll('.setting-panel');
+
+        settingCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const setting = this.getAttribute('data-setting');
+                const panel = document.getElementById(`${setting}-panel`);
+                
+                if (this.checked) {
+                    panel.classList.add('active');
+                } else {
+                    panel.classList.remove('active');
+                }
+            });
+        });
+
+        // Title & Description checkbox functionality
+        const titleEnabled = document.getElementById('titleEnabled');
+        const descriptionEnabled = document.getElementById('descriptionEnabled');
+        
+        if (titleEnabled) {
+            titleEnabled.addEventListener('change', function() {
+                const titlePanel = document.getElementById('title-panel');
+                if (titlePanel) {
+                    if (this.checked) {
+                        titlePanel.classList.add('active');
+                    } else {
+                        titlePanel.classList.remove('active');
+                    }
+                }
+            });
+        }
+        
+        if (descriptionEnabled) {
+            descriptionEnabled.addEventListener('change', function() {
+                const descriptionPanel = document.getElementById('description-panel');
+                if (descriptionPanel) {
+                    if (this.checked) {
+                        descriptionPanel.classList.add('active');
+                    } else {
+                        descriptionPanel.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+
     </script>
 </body>
 </html> 

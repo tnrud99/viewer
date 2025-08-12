@@ -107,10 +107,24 @@ const detectUserRegion = async (req) => {
     }
 };
 
-// 사용자 정보 검증 및 처리 함수
-const processUserInfo = (userInfo) => {
-    try {
-        const { nickname, password } = userInfo;
+// YouTube URL에서 video ID 추출
+const extractYouTubeVideoId = (url) => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+};
+
+// VE ID 생성 함수
+const generateVEId = () => {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 8);
+    return `ve_${timestamp}_${random}`;
+};
+
+        // 사용자 정보 검증 및 처리 함수
+        const processUserInfo = (userInfo) => {
+            try {
+                const { nickname, email, password, isPublic } = userInfo;
         
         // 닉네임 검증 (영어만 허용)
         if (!nickname || nickname.trim().length === 0) {
@@ -130,6 +144,16 @@ const processUserInfo = (userInfo) => {
             throw new Error('Nickname must be between 1 and 20 characters');
         }
         
+        // 이메일 검증 (선택사항이지만 제공된 경우 유효성 검사)
+        let processedEmail = null;
+        if (email && email.trim().length > 0) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.trim())) {
+                throw new Error('Invalid email format');
+            }
+            processedEmail = email.trim();
+        }
+        
         // 비밀번호 길이 검증 (4자리 이상)
         if (password && password.length < 4) {
             throw new Error('Password must be at least 4 characters long');
@@ -137,8 +161,10 @@ const processUserInfo = (userInfo) => {
         
         return {
             nickname: trimmedNickname,
+            email: processedEmail,
             password: password || '',
-            password_length: password ? password.length : 0
+            password_length: password ? password.length : 0,
+            isPublic: isPublic !== false // Default to true if not specified
         };
     } catch (error) {
         console.error('❌ User info validation error:', error);
@@ -200,24 +226,21 @@ const veUrlSchema = new mongoose.Schema({
     settings: {
         overlay_position: { type: String, default: 'top-right' },
         overlay_size: { type: Number, default: 50 },
-        youtube_volume: { type: Number, default: 100 }
+        youtube_volume: { type: Number, default: 100 },
+        hide_overlay: { type: Boolean, default: false }
     },
     metadata: {
         created_at: { type: Date, default: Date.now },
         view_count: { type: Number, default: 0 },
-        is_public: { type: Boolean, default: true },
-        region: { type: String, default: 'KR' },
-        user_info: {
-            nickname: { type: String },
-            password: { type: String },
-            password_length: { type: Number, default: 0 }
-        }
+        region: { type: String, default: 'KR' }
     },
-    access_control: {
-        is_public: { type: Boolean, default: true },
-        allowed_users: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        password: { type: String }
-    }
+    creator_info: {
+        nickname: { type: String, required: true },
+        email: { type: String },
+        password: { type: String }, // 개발용 - 직접 저장
+        is_public: { type: Boolean, default: true }
+    },
+
 });
 
 const User = mongoose.model('User', userSchema);
@@ -322,16 +345,10 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-// VE URL 라우트 - 인증 없이도 작동하도록 수정
+// VE URL 생성 엔드포인트 (최적화됨)
 app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
     try {
-        console.log('📥 Received VE URL creation request:', req.body);
-        console.log('👤 User Info:', {
-            nickname: req.body.userInfo?.nickname,
-            password: req.body.userInfo?.password,
-            password_length: req.body.userInfo?.password?.length,
-            email: req.body.userInfo?.email
-        });
+        console.log('📥 Received VE URL creation request');
         
         const {
             reactionUrl,
@@ -339,119 +356,113 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
             timestampData,
             settings,
             metadata,
-            userInfo,
-            accessControl
+            userInfo
         } = req.body;
 
-        // 필수 필드 검증
+        // 필수 필드 검증 (최적화된 검증)
         if (!reactionUrl || !originalUrl || !timestampData || !userInfo) {
-            return res.status(400).json({ 
-                error: 'Missing required fields: reactionUrl, originalUrl, timestampData, userInfo' 
+            return res.status(400).json({
+                error: 'Missing required fields',
+                required: ['reactionUrl', 'originalUrl', 'timestampData', 'userInfo']
             });
         }
 
-        // 고유 VE ID 생성
-        const ve_id = 've_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-
-        // 사용자 정보 검증 및 처리
+        // 사용자 정보 처리 (이메일 포함)
         let processedUserInfo;
         try {
             processedUserInfo = processUserInfo(userInfo);
         } catch (error) {
             return res.status(400).json({ error: error.message });
         }
-        
-        // 지역 자동 감지
-        const detectedRegion = await detectUserRegion(req);
-        
-        // 사용자 정보 처리 (인증 없이도 작동)
-        let creator_id = null;
-        if (userInfo && userInfo.email) {
-            // 기존 사용자 확인 또는 새 사용자 생성
-            let user = await User.findOne({ email: userInfo.email });
-            if (!user) {
-                // 새 사용자 생성 (직접 저장)
-                user = new User({
-                    username: processedUserInfo.nickname,
-                    email: userInfo.email,
-                    password_hash: bcrypt.hashSync(processedUserInfo.password, 10) // 사용자 테이블용으로만 해시
-                });
-                await user.save();
-            }
-            creator_id = user._id;
-        } else {
-            // 사용자 정보가 없는 경우 익명 사용자 생성 또는 null 허용
-            console.log('No user info provided, creating VE URL without creator_id');
+
+        // YouTube URL 검증
+        const youtubeVideoId = extractYouTubeVideoId(originalUrl);
+        if (!youtubeVideoId) {
+            return res.status(400).json({ error: 'Invalid YouTube URL' });
         }
 
-        const veUrlData = {
-            ve_id,
+        // VE ID 생성 (최적화: 더 짧은 ID)
+        const veId = generateVEId();
+
+        // 기본 설정값 적용 (최적화: 서버에서 기본값 설정)
+        const defaultSettings = {
+            overlay_position: 'top-right',
+            overlay_size: 50,
+            youtube_volume: 100,
+            hide_overlay: false
+        };
+
+        const finalSettings = { ...defaultSettings, ...settings };
+
+        // 메타데이터 최적화
+        const finalMetadata = {
             title: metadata?.title || 'Synchronized Reaction Video',
             description: metadata?.description || 'Reaction video synchronized with original video',
+            created_at: new Date(),
+            view_count: 0
+        };
+
+        // VE URL 문서 생성 (최적화된 구조)
+        const veUrlDoc = new VEUrl({
+            ve_id: veId,
+            title: finalMetadata.title,
+            description: finalMetadata.description,
             reaction_url: reactionUrl,
             original_url: originalUrl,
-            timestamp_data: timestampData,
-            settings: settings || {
-                overlay_position: 'top-right',
-                overlay_size: 50,
-                youtube_volume: 100
+            timestamp_data: timestampData, // 이미 최적화된 데이터
+            settings: finalSettings,
+            metadata: finalMetadata,
+            creator_info: {
+                nickname: processedUserInfo.nickname,
+                email: processedUserInfo.email,
+                password: processedUserInfo.password || null, // 개발용 - 직접 저장
+                is_public: processedUserInfo.isPublic
             },
-            access_control: accessControl || {
-                is_public: true,
-                allowed_users: [],
-                password: null
+
+        });
+
+        // 데이터베이스 저장
+        await veUrlDoc.save();
+        console.log('✅ VE URL saved to database:', veId);
+
+        // 응답 데이터 최적화 (필요한 정보만 반환)
+        const responseData = {
+            ve_url: {
+                id: veId,
+                full_url: `${req.protocol}://${req.get('host')}/viewer.html?ve=${veId}`,
+                title: finalMetadata.title,
+                created_at: finalMetadata.created_at
             },
-            metadata: {
-                created_at: new Date(),
-                view_count: 0,
-                is_public: true,
-                region: detectedRegion,
-                user_info: {
-                    nickname: processedUserInfo.nickname,
-                    password: processedUserInfo.password,
-                    password_length: processedUserInfo.password_length
-                }
+            creator: {
+                nickname: processedUserInfo.nickname
             }
         };
 
-        // creator_id가 있는 경우에만 추가
-        if (creator_id) {
-            veUrlData.creator_id = creator_id;
-        }
+        res.status(200).json(responseData);
+        console.log('✅ VE URL creation completed successfully');
 
-        const veUrl = new VEUrl(veUrlData);
-
-        await veUrl.save();
-        console.log('✅ VE URL saved to database:', veUrl.ve_id);
-
-        // 사용자가 있는 경우 ve_urls 배열에 추가
-        if (creator_id) {
-            await User.findByIdAndUpdate(
-                creator_id,
-                { $push: { ve_urls: veUrl._id } }
-            );
-        }
-
-        const fullUrl = `${req.protocol}://${req.get('host')}/viewer.html?ve_server=${veUrl.ve_id}`;
-        
-        res.status(201).json({
-            message: 'VE URL created successfully',
-            ve_url: {
-                id: veUrl._id,
-                ve_id: veUrl.ve_id,
-                title: veUrl.title,
-                share_url: `${req.protocol}://${req.get('host')}/ve/${veUrl.ve_id}`,
-                full_url: fullUrl,
-                user_info: {
-                    nickname: veUrl.metadata.user_info.nickname,
-                    password: veUrl.metadata.user_info.password,
-                    password_length: veUrl.metadata.user_info.password_length
-                }
-            }
-        });
     } catch (error) {
         console.error('❌ VE URL creation error:', error);
-        res.status(500).json({ error: 'Server error: ' + error.message });
+        
+        // 더 구체적인 에러 메시지
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({
+                error: 'Data validation failed',
+                details: Object.values(error.errors).map(e => e.message)
+            });
+        }
+        
+        if (error.code === 11000) {
+            return res.status(409).json({
+                error: 'VE URL already exists',
+                details: 'Please try again with different settings'
+            });
+        }
+
+        res.status(500).json({
+            error: 'Internal server error',
+            details: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+        });
     }
 });
 

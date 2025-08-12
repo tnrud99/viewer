@@ -694,7 +694,7 @@
                     const data = await response.json();
 
                     if (response.ok) {
-                        const shareUrl = `${window.location.origin}/viewer.html?ve_server=${data.ve_url.ve_id}`;
+                        const shareUrl = `${window.location.origin}/viewer.html?ve=${data.ve_url.ve_id}`;
                         generatedLinkElement.textContent = shareUrl;
                         serverInfoElement.textContent = `VE ID: ${data.ve_url.ve_id} | Created by: ${currentUser ? currentUser.username : 'Guest'}`;
                         linkSection.style.display = 'block';
