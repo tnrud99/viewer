@@ -21,6 +21,11 @@ app.use('/src', express.static(path.join(__dirname, '..')));
 app.use('/assets', express.static(path.join(__dirname, '..', '..', 'assets')));
 app.use('/', express.static(path.join(__dirname, '..', '..')));
 
+// Favicon 직접 서빙
+app.get('/favicon.ico', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'favicon.ico'));
+});
+
 // MongoDB 연결
 const connectToMongoDB = async () => {
     try {
@@ -144,14 +149,27 @@ const generateVEId = () => {
             throw new Error('Nickname must be between 1 and 20 characters');
         }
         
-        // 이메일 검증 (선택사항이지만 제공된 경우 유효성 검사)
-        let processedEmail = null;
-        if (email && email.trim().length > 0) {
+        // 이메일 검증 (공개 설정 시 필수)
+        let processedEmail = '';
+        if (isPublic) {
+            // 공개 설정 시 이메일 필수
+            if (!email || email.trim().length === 0) {
+                throw new Error('Email is required for public sharing');
+            }
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email.trim())) {
                 throw new Error('Invalid email format');
             }
             processedEmail = email.trim();
+        } else {
+            // 비공개 설정 시 이메일 선택사항
+            if (email && email.trim().length > 0) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email.trim())) {
+                    throw new Error('Invalid email format');
+                }
+                processedEmail = email.trim();
+            }
         }
         
         // 비밀번호 길이 검증 (4자리 이상)

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VE URL Creator - Enhanced Version</title>
+    <link rel="icon" href="favicon.ico">
+
     
     <!-- 독립적인 스타일 (ui-system.css 참조하지 않음) -->
     <style>
@@ -1697,10 +1699,12 @@
                                 <div class="form-field">
                                     <label for="email" class="field-label">Email *</label>
                                     <input type="email" id="email" placeholder="your@email.com" required>
+                                    <small class="input-hint">English characters only (e.g., user@example.com)</small>
                         </div>
                                 <div class="form-field">
                                     <label for="accessPassword" class="field-label">Password *</label>
                                     <input type="password" id="accessPassword" placeholder="min 4 characters" minlength="4" required>
+                                    <small class="input-hint">English characters only, minimum 4 characters</small>
                     </div>
                             </div>
                             <div class="info-message compact">
@@ -2137,6 +2141,57 @@
             }
         });
 
+        // Email input validation (English only + format check)
+        emailInput.addEventListener('input', function() {
+            const value = this.value;
+            // 영어, 숫자, 특수문자만 허용 (이메일 형식)
+            const englishOnly = /^[a-zA-Z0-9@._-]*$/.test(value);
+            
+            if (!englishOnly) {
+                this.value = value.replace(/[^a-zA-Z0-9@._-]/g, '');
+            }
+            
+            // 이메일 형식 검증
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (value.length > 0) {
+                if (!emailRegex.test(value)) {
+                    this.style.borderColor = '#ff3b30';
+                    this.title = 'Please enter a valid email format (e.g., user@example.com)';
+                } else {
+                    this.style.borderColor = '#4CAF50';
+                    this.title = '';
+                }
+            } else {
+                this.style.borderColor = '';
+                this.title = '';
+            }
+        });
+
+        // Password input validation (English only + length check)
+        accessPasswordInput.addEventListener('input', function() {
+            const value = this.value;
+            // 영어, 숫자, 특수문자만 허용
+            const englishOnly = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/.test(value);
+            
+            if (!englishOnly) {
+                this.value = value.replace(/[^a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, '');
+            }
+            
+            // 길이 검증
+            if (value.length > 0) {
+                if (value.length < 4) {
+                    this.style.borderColor = '#ff3b30';
+                    this.title = 'Password must be at least 4 characters long';
+                } else {
+                    this.style.borderColor = '#4CAF50';
+                    this.title = '';
+                }
+            } else {
+                this.style.borderColor = '';
+                this.title = '';
+            }
+        });
+
         // Slider event listeners
         overlaySizeSlider.addEventListener('input', function() {
             overlaySizeValue.textContent = this.value + '%';
@@ -2217,11 +2272,25 @@
             if (publicConsentCheckbox.checked) {
                 if (!emailInput.value.trim()) {
                     showMessage('Email is required when sharing on React Central.', 'error');
-                return false;
-            }
+                    return false;
+                }
+                
+                // Email format validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(emailInput.value.trim())) {
+                    showMessage('Please enter a valid email format (e.g., user@example.com).', 'error');
+                    return false;
+                }
+                
                 if (!accessPasswordInput.value.trim()) {
                     showMessage('Password is required when sharing on React Central.', 'error');
-                return false;
+                    return false;
+                }
+                
+                // Password length validation
+                if (accessPasswordInput.value.trim().length < 4) {
+                    showMessage('Password must be at least 4 characters long.', 'error');
+                    return false;
                 }
             }
 
@@ -2354,8 +2423,8 @@
                         },
                         userInfo: {
                             nickname: usernameInput.value.trim(),
-                            email: emailInput.value.trim() || null,
-                            password: accessPasswordInput.value.trim() || null,
+                            email: emailInput.value.trim(),
+                            password: accessPasswordInput.value.trim(),
                             isPublic: publicConsentCheckbox.checked // React Central 체크 = 공개
                         }
                     };
