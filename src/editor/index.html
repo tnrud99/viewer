@@ -7,33 +7,56 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- Development Notice Banner -->
+    <div class="dev-banner">
+        <div class="dev-banner-content">
+            <span class="dev-icon">🚧</span>
+            <span class="dev-text">Under Development - UI Preview Only</span>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>Timestamp Editor</h1>
-            <p>Synchronize reaction video timestamps with original video</p>
+            <div class="header-content">
+                <div class="header-center">
+                    <div class="header-logo"></div>
+                    <h1>Timestamp Editor</h1>
+                    <span class="beta-tag">Beta</span>
+                    <button class="help-btn" id="main-help-btn" title="Learn more about this editor" disabled>?</button>
+                </div>
+                <a href="/" class="home-btn" title="Return to main studio">
+                    Back to Studio
+                </a>
+            </div>
         </header>
 
-        <!-- Input Section -->
-        <section class="input-section">
-            <div class="input-group">
-                <label for="youtube-url">Original YouTube URL:</label>
-                <input type="text" id="youtube-url" placeholder="https://www.youtube.com/watch?v=..." value="https://www.youtube.com/watch?v=AbZH7XWDW_k">
+        <!-- Step Progress Section -->
+        <div class="step-progress">
+            <div class="step-item active" id="step-1">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">Set Information</div>
+                    <button id="info-modal-btn" class="btn btn-primary btn-compact" disabled>Set Info</button>
+                </div>
             </div>
-            
-            <div class="input-group">
-                <label for="reaction-url">Edited Reaction Video URL:</label>
-                <input type="text" id="reaction-url" placeholder="Reaction video URL" value="https://www.youtube.com/watch?v=niYgb0IfP4U">
-                <input type="file" id="reaction-video" accept="video/*" style="display: none;">
+            <div class="step-arrow">→</div>
+            <div class="step-item locked" id="step-2">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">Edit Timestamps</div>
+                    <button id="edit-btn" class="btn btn-secondary btn-compact" disabled>Edit</button>
+                </div>
             </div>
-            
-            <div class="input-group">
-                <label for="timestamp-file">Timestamp File:</label>
-                <input type="file" id="timestamp-file" accept=".json">
+            <div class="step-arrow">→</div>
+            <div class="step-item locked" id="step-3">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-title">Export</div>
+                    <button id="export-btn" class="btn btn-secondary btn-compact" disabled>Export</button>
+                </div>
             </div>
-            
-            <button id="load-btn" class="load-btn">Load</button>
-        </section>
+        </div>
 
         <!-- Media Section -->
         <section class="media-section">
@@ -51,8 +74,7 @@
             
             <!-- Playback Controls -->
             <div class="playback-controls">
-                <button id="play-pause-btn">Play</button>
-                <button id="resync-btn" class="resync-btn" title="YouTube 비디오를 현재 시간에 맞게 재동기화 (Ctrl+R)">🔄 Resync</button>
+                <button id="play-pause-btn" disabled>Play</button>
                 <span id="current-time">00:00</span> / <span id="total-time">00:00</span>
             </div>
         </section>
@@ -60,14 +82,14 @@
         <!-- Timeline Editing Section -->
         <section class="timeline-section">
             <div class="timeline-controls">
-                <button id="ripple-toggle" class="toggle-btn active" title="Linked Move: 블록 이동 시 뒤의 모든 블록도 함께 이동\nIndividual Move: 선택된 블록만 이동">Linked Move</button>
-                <button id="add-timestamp-btn">Add Timestamp</button>
-                <button id="undo-btn">Undo</button>
-                <button id="redo-btn">Redo</button>
-                <button id="zoom-in" title="확대 (Ctrl + +)">
+                <button id="ripple-toggle" class="toggle-btn active" title="Linked Move: 블록 이동 시 뒤의 모든 블록도 함께 이동\nIndividual Move: 선택된 블록만 이동" disabled>Linked Move</button>
+                <button id="add-timestamp-btn" disabled>Add Timestamp</button>
+                <button id="undo-btn" disabled>Undo</button>
+                <button id="redo-btn" disabled>Redo</button>
+                <button id="zoom-in" title="확대 (Ctrl + +)" disabled>
                     <span class="icon">🔍+</span>
                 </button>
-                <button id="zoom-out" title="축소 (Ctrl + -)">
+                <button id="zoom-out" title="축소 (Ctrl + -)" disabled>
                     <span class="icon">🔍-</span>
                 </button>
             </div>
@@ -91,11 +113,63 @@
                 </div>
             </div>
         </section>
+    </div>
 
-        <!-- Output Section -->
-        <section class="output-section">
-            <button id="export-btn" class="export-btn">Export Modified Timestamps</button>
-        </section>
+    <!-- Information Modal -->
+    <div id="info-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Set Video Information</h3>
+                <button class="modal-close" id="info-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label class="input-label" for="modal-reaction-url">Edited Reaction Video URL</label>
+                    <input type="text" id="modal-reaction-url" class="input" placeholder="Reaction video URL" value="https://www.youtube.com/watch?v=niYgb0IfP4U" disabled>
+                    <input type="file" id="modal-reaction-video" accept="video/*" style="display: none;" disabled>
+                </div>
+                <div class="input-group">
+                    <label class="input-label" for="modal-timestamp-file">Timestamp File</label>
+                    <input type="file" id="modal-timestamp-file" class="input" accept=".json" disabled>
+                </div>
+                <div class="modal-actions">
+                    <button id="info-modal-cancel" class="btn btn-secondary" disabled>Cancel</button>
+                    <button id="info-modal-confirm" class="btn btn-primary" disabled>Load Files</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>How to Use Timestamp Editor</h3>
+                <button class="modal-close" id="help-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="help-content">
+                    <h4>🎬 What is Timestamp Editor?</h4>
+                    <p>This editor allows you to synchronize reaction video timestamps with the original video. You can load timestamp files from the recorder and edit them to match your edited reaction video.</p>
+                    
+                    <h4>Step-by-Step Guide:</h4>
+                    <ol>
+                        <li><strong>Set Information:</strong> Click "Set Info" to configure video URLs</li>
+                        <li><strong>Load Files:</strong> Upload your timestamp file and reaction video</li>
+                        <li><strong>Edit Timestamps:</strong> Use the timeline to adjust timestamps</li>
+                        <li><strong>Export:</strong> Download the modified timestamps</li>
+                    </ol>
+                    
+                    <h4>Features:</h4>
+                    <ul>
+                        <li><strong>Timeline Editing:</strong> Drag and drop timestamp blocks</li>
+                        <li><strong>Linked Move:</strong> Move blocks together or individually</li>
+                        <li><strong>Zoom Controls:</strong> Zoom in/out for precise editing</li>
+                        <li><strong>Undo/Redo:</strong> Track your changes</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- YouTube IFrame API -->

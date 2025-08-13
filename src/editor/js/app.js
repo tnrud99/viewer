@@ -21,6 +21,7 @@ class TimestampEditor {
     init() {
         this.setupEventListeners();
         this.setupDragAndDrop();
+        this.setupModals();
         
         // 고급 편집 기능 초기화
         if (typeof AdvancedEditingFeatures !== 'undefined') {
@@ -62,19 +63,13 @@ class TimestampEditor {
     }
     
     setupEventListeners() {
-        // 파일 로딩
-        document.getElementById('load-btn').addEventListener('click', () => this.loadFiles());
-        
-        // 파일 업로드 관련 이벤트 리스너 제거
+        // 파일 로딩 - 모달에서 처리하므로 제거
+        // document.getElementById('load-btn').addEventListener('click', () => this.loadFiles());
         
         // 재생 컨트롤
         document.getElementById('play-pause-btn').addEventListener('click', () => this.togglePlayback());
         
-        // Resync 버튼 이벤트 리스너 추가
-        const resyncBtn = document.getElementById('resync-btn');
-        if (resyncBtn) {
-            resyncBtn.addEventListener('click', () => this.resyncYouTubeVideo());
-        }
+        // Resync 버튼 제거됨
         
         // 타임라인 컨트롤
         document.getElementById('ripple-toggle').addEventListener('click', () => this.toggleRippleMode());
@@ -119,29 +114,111 @@ class TimestampEditor {
         document.addEventListener('keydown', (e) => this.handleKeyboard(e));
     }
     
-    async loadFiles() {
-        const youtubeUrl = document.getElementById('youtube-url').value;
-        const reactionUrl = document.getElementById('reaction-url').value;
-        const timestampFile = document.getElementById('timestamp-file').files[0];
+    setupModals() {
+        // Info Modal
+        const infoModalBtn = document.getElementById('info-modal-btn');
+        const infoModal = document.getElementById('info-modal');
+        const infoModalClose = document.getElementById('info-modal-close');
+        const infoModalCancel = document.getElementById('info-modal-cancel');
+        const infoModalConfirm = document.getElementById('info-modal-confirm');
         
-        console.log('Loading files with:', {
-            youtubeUrl,
+        if (infoModalBtn) {
+            infoModalBtn.addEventListener('click', () => {
+                this.showInfoModal();
+            });
+        }
+        
+        if (infoModalClose) {
+            infoModalClose.addEventListener('click', () => {
+                this.hideInfoModal();
+            });
+        }
+        
+        if (infoModalCancel) {
+            infoModalCancel.addEventListener('click', () => {
+                this.hideInfoModal();
+            });
+        }
+        
+        if (infoModalConfirm) {
+            infoModalConfirm.addEventListener('click', () => {
+                this.saveInfoModal();
+            });
+        }
+        
+        // Help Modal
+        const helpBtn = document.getElementById('main-help-btn');
+        const helpModal = document.getElementById('help-modal');
+        const helpModalClose = document.getElementById('help-modal-close');
+        
+        if (helpBtn) {
+            helpBtn.addEventListener('click', () => {
+                this.showHelpModal();
+            });
+        }
+        
+        if (helpModalClose) {
+            helpModalClose.addEventListener('click', () => {
+                this.hideHelpModal();
+            });
+        }
+        
+        // Modal backdrop click to close
+        if (infoModal) {
+            infoModal.addEventListener('click', (e) => {
+                if (e.target === infoModal) {
+                    this.hideInfoModal();
+                }
+            });
+        }
+        
+        if (helpModal) {
+            helpModal.addEventListener('click', (e) => {
+                if (e.target === helpModal) {
+                    this.hideHelpModal();
+                }
+            });
+        }
+    }
+    
+    showInfoModal() {
+        const modal = document.getElementById('info-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+    
+    hideInfoModal() {
+        const modal = document.getElementById('info-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+    
+    async saveInfoModal() {
+        const reactionUrlElement = document.getElementById('modal-reaction-url');
+        const timestampFileElement = document.getElementById('modal-timestamp-file');
+        
+        if (!reactionUrlElement || !timestampFileElement) {
+            this.showToast('Modal elements not found. Please try again.', 'error');
+            return;
+        }
+        
+        const reactionUrl = reactionUrlElement.value;
+        const timestampFile = timestampFileElement.files[0];
+        
+        console.log('Loading files from modal with:', {
             reactionUrl,
             timestampFile: timestampFile ? timestampFile.name : 'none'
         });
         
-        if (!youtubeUrl) {
-            alert('Please enter a YouTube URL.');
-            return;
-        }
-        
         if (!reactionUrl) {
-            alert('Please enter a reaction video URL.');
+            this.showToast('Please enter a reaction video URL.', 'error');
             return;
         }
         
         if (!timestampFile) {
-            alert('Please select a timestamp file.');
+            this.showToast('Please select a timestamp file.', 'error');
             return;
         }
         
@@ -149,9 +226,25 @@ class TimestampEditor {
             // Show loading state
             this.setLoading(true);
             
-            // Load timestamp file first
+            // Load timestamp file first to extract YouTube video ID
             console.log('Loading timestamp file...');
             await this.loadTimestampFile(timestampFile);
+            
+            // Extract YouTube URL from timestamp data
+            let youtubeUrl = null;
+            console.log('Timestamp data:', this.timestampData);
+            if (this.timestampData && this.timestampData.youtube_video_id) {
+                youtubeUrl = `https://www.youtube.com/watch?v=${this.timestampData.youtube_video_id}`;
+                console.log('Extracted YouTube URL from timestamp:', youtubeUrl);
+            } else {
+                console.log('No youtube_video_id found in timestamp data');
+            }
+            
+            if (!youtubeUrl) {
+                this.showToast('Could not extract YouTube video ID from timestamp file.', 'error');
+                this.setLoading(false);
+                return;
+            }
             
             // Load YouTube player
             console.log('Loading YouTube player...');
@@ -168,16 +261,80 @@ class TimestampEditor {
             // Start sync check
             this.startSyncCheck();
             
+            // Update step progress
+            this.updateStepProgress(1, 'completed');
+            this.updateStepProgress(2, 'active');
+            
             this.setLoading(false);
+            this.hideInfoModal();
+            
             console.log('All files loaded successfully');
-            alert('Files loaded successfully.');
+            this.showToast('Files loaded successfully!', 'success');
             
         } catch (error) {
             console.error('Error loading files:', error);
-            alert('Error loading files: ' + error.message);
+            this.showToast('Error loading files: ' + error.message, 'error');
             this.setLoading(false);
         }
     }
+    
+    showHelpModal() {
+        const modal = document.getElementById('help-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+    
+    hideHelpModal() {
+        const modal = document.getElementById('help-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+    
+    updateStepProgress(stepNumber, status) {
+        const stepElement = document.getElementById(`step-${stepNumber}`);
+        if (stepElement) {
+            // Remove all status classes
+            stepElement.classList.remove('completed', 'active', 'locked');
+            // Add new status class
+            stepElement.classList.add(status);
+            
+            // Update button states
+            const button = stepElement.querySelector('button');
+            if (button) {
+                if (status === 'completed') {
+                    button.disabled = false;
+                    button.textContent = 'Completed';
+                    button.classList.remove('btn-primary', 'btn-secondary');
+                    button.classList.add('btn-success');
+                } else if (status === 'active') {
+                    button.disabled = false;
+                    button.textContent = 'Continue';
+                    button.classList.remove('btn-secondary', 'btn-success');
+                    button.classList.add('btn-primary');
+                } else if (status === 'locked') {
+                    button.disabled = true;
+                    button.classList.remove('btn-primary', 'btn-success');
+                    button.classList.add('btn-secondary');
+                }
+            }
+        }
+    }
+    
+    showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+    
+    // loadFiles 메서드는 이제 saveInfoModal에서 처리됨
+    // async loadFiles() { ... } - 제거됨
     
     loadYouTubePlayer(url) {
         return new Promise((resolve, reject) => {
@@ -316,7 +473,6 @@ class TimestampEditor {
                 events: {
                     'onReady': () => {
                         console.log('리액션 YouTube 플레이어 준비 완료');
-                        this.reactionVideo = this.reactionPlayer;
                         this.duration = this.reactionPlayer.getDuration();
                         this.setupVideoEvents();
                         resolve();
@@ -416,15 +572,29 @@ class TimestampEditor {
     }
     
     syncOriginalVideoPause() {
-        if (!this.autoSync) return; // 자동 동기화가 꺼져있으면 무시
+        console.log('🔄 syncOriginalVideoPause 호출됨, autoSync:', this.autoSync);
+        
+        if (!this.autoSync) {
+            console.log('⏭️ 자동 동기화가 꺼져있어서 무시');
+            return; // 자동 동기화가 꺼져있으면 무시
+        }
         
         if (this.youtubePlayer && this.youtubePlayer.pauseVideo) {
             try {
-                this.youtubePlayer.pauseVideo();
-                console.log('Original video paused due to reaction video pause');
+                const playerState = this.youtubePlayer.getPlayerState();
+                console.log('🎬 YouTube 플레이어 상태:', playerState, '(1=재생, 2=일시정지, 0=종료)');
+                
+                if (playerState === 1) { // 재생 중일 때만 일시정지
+                    this.youtubePlayer.pauseVideo();
+                    console.log('✅ Original video paused due to reaction video pause');
+                } else {
+                    console.log('⏭️ 이미 일시정지 상태이므로 건너뛰기');
+                }
             } catch (error) {
-                console.error('Failed to pause original video:', error);
+                console.error('❌ Failed to pause original video:', error);
             }
+        } else {
+            console.log('❌ YouTube 플레이어가 없거나 pauseVideo 메서드가 없음');
         }
     }
     
@@ -1000,7 +1170,12 @@ class TimestampEditor {
     
     updatePlayButton() {
         const btn = document.getElementById('play-pause-btn');
-        btn.textContent = this.isPlaying ? '일시정지' : '재생';
+        if (btn) {
+            btn.textContent = this.isPlaying ? 'Pause' : 'Play';
+            console.log('🎮 버튼 텍스트 업데이트:', btn.textContent);
+        } else {
+            console.log('❌ play-pause-btn을 찾을 수 없습니다');
+        }
     }
     
     handleTimestampEvents() {
@@ -1012,6 +1187,12 @@ class TimestampEditor {
             return Math.abs(point.reaction_time - this.currentTime) < tolerance;
         });
         
+        // 디버깅: 현재 시간과 이벤트 정보 출력
+        if (currentEvents.length > 0) {
+            console.log('🔍 현재 시간:', this.currentTime, '초');
+            console.log('🔍 감지된 이벤트:', currentEvents);
+        }
+        
         // 이미 처리된 이벤트 중복 방지
         if (!this.processedEvents) {
             this.processedEvents = new Set();
@@ -1021,34 +1202,46 @@ class TimestampEditor {
             const eventKey = `${event.reaction_time}_${event.event}`;
             
             // 이미 처리된 이벤트는 건너뛰기
-            if (this.processedEvents.has(eventKey)) return;
+            if (this.processedEvents.has(eventKey)) {
+                console.log('⏭️ 이미 처리된 이벤트 건너뛰기:', eventKey);
+                return;
+            }
             
             try {
+                const playerState = this.youtubePlayer.getPlayerState();
+                console.log('🎬 YouTube 플레이어 상태:', playerState, '(1=재생, 2=일시정지, 0=종료)');
+                
                 if (event.event === 'youtube_play') {
                     const youtubeTime = event.youtube_time || event.relative_youtube_time || 0;
                     
                     // YouTube 플레이어 상태 확인
-                    if (this.youtubePlayer.getPlayerState() !== 1) { // 1 = PLAYING
+                    if (playerState !== 1) { // 1 = PLAYING
                         this.youtubePlayer.seekTo(youtubeTime, true);
                         this.youtubePlayer.playVideo();
                         console.log('✅ YouTube 재생:', youtubeTime);
+                    } else {
+                        console.log('⏭️ 이미 재생 중이므로 건너뛰기');
                     }
                     
                 } else if (event.event === 'youtube_pause') {
                     
                     // YouTube 플레이어 상태 확인
-                    if (this.youtubePlayer.getPlayerState() === 1) { // 1 = PLAYING
+                    if (playerState === 1) { // 1 = PLAYING
                         this.youtubePlayer.pauseVideo();
                         console.log('✅ YouTube 일시정지');
+                    } else {
+                        console.log('⏭️ 이미 일시정지 상태이므로 건너뛰기');
                     }
                 }
                 
                 // 처리된 이벤트로 마킹
                 this.processedEvents.add(eventKey);
+                console.log('✅ 이벤트 처리 완료:', eventKey);
                 
                 // 일정 시간 후 처리된 이벤트 목록에서 제거 (재활성화를 위해)
                 setTimeout(() => {
                     this.processedEvents.delete(eventKey);
+                    console.log('🔄 이벤트 재활성화:', eventKey);
                 }, 1000);
                 
             } catch (error) {
@@ -1132,25 +1325,42 @@ class TimestampEditor {
     }
     
     togglePlayback() {
-        if (!this.reactionVideo) {
-            return; // 알림 제거
-        }
+        console.log('🎮 togglePlayback 호출됨');
+        console.log('📹 reactionPlayer:', !!this.reactionPlayer);
+        console.log('📹 reactionVideo:', !!this.reactionVideo);
+        console.log('▶️ isPlaying:', this.isPlaying);
         
+        // YouTube 플레이어가 있는 경우
         if (this.reactionPlayer) {
-            // YouTube iframe API 사용
+            console.log('🎬 YouTube 플레이어 사용');
             if (this.isPlaying) {
+                console.log('⏸️ YouTube 일시정지');
                 this.reactionPlayer.pauseVideo();
             } else {
+                console.log('▶️ YouTube 재생');
                 this.reactionPlayer.playVideo();
             }
-        } else {
-            // 일반 HTML5 비디오 엘리먼트
+        }
+        // HTML5 비디오가 있는 경우
+        else if (this.reactionVideo) {
+            console.log('🎬 HTML5 비디오 사용');
             if (this.isPlaying) {
+                console.log('⏸️ HTML5 일시정지');
                 this.reactionVideo.pause();
             } else {
+                console.log('▶️ HTML5 재생');
                 this.reactionVideo.play();
             }
         }
+        // 플레이어가 없는 경우
+        else {
+            console.log('❌ 비디오 플레이어가 없습니다');
+            this.showToast('비디오 플레이어가 로드되지 않았습니다.', 'error');
+            return;
+        }
+        
+        // 버튼 텍스트 업데이트
+        this.updatePlayButton();
     }
     
 
@@ -1355,7 +1565,7 @@ class TimestampEditor {
     
     exportTimestamp() {
         if (!this.timestampData) {
-            alert('타임스탬프 데이터가 없습니다.');
+            this.showToast('타임스탬프 데이터가 없습니다.', 'error');
             return;
         }
         
@@ -1374,7 +1584,10 @@ class TimestampEditor {
         // 내보내기 통계 표시
         this.showExportStats();
         
-        alert(`타임스탬프 파일이 ${fileName}으로 다운로드되었습니다.`);
+        // Update step progress
+        this.updateStepProgress(3, 'completed');
+        
+        this.showToast(`타임스탬프 파일이 ${fileName}으로 다운로드되었습니다.`, 'success');
     }
     
     // CSV와 TXT 내보내기 기능 제거 - JSON만 사용
@@ -1571,16 +1784,20 @@ class TimestampEditor {
     
     setLoading(loading) {
         const container = document.querySelector('.container');
-        const loadBtn = document.getElementById('load-btn');
+        const loadBtn = document.getElementById('info-modal-confirm');
         
         if (loading) {
             container.classList.add('loading');
-            loadBtn.disabled = true;
-            loadBtn.textContent = '로딩 중...';
+            if (loadBtn) {
+                loadBtn.disabled = true;
+                loadBtn.textContent = 'Loading...';
+            }
         } else {
             container.classList.remove('loading');
-            loadBtn.disabled = false;
-            loadBtn.textContent = '로드';
+            if (loadBtn) {
+                loadBtn.disabled = false;
+                loadBtn.textContent = 'Load Files';
+            }
         }
     }
     
