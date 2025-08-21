@@ -189,4 +189,16 @@ export class PreviewManager {
     getOriginalPlayer() {
         return this.originalPreviewPlayer;
     }
+
+    updateReactionVideoUrl(url) {
+        this.reactionVideoUrl = url;
+        
+        // URL에서 video ID 추출
+        const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        if (videoIdMatch && this.reactionPreviewPlayer) {
+            const videoId = videoIdMatch[1];
+            this.reactionPreviewPlayer.loadVideoById(videoId);
+            console.log('Reaction video updated to:', videoId);
+        }
+    }
 }

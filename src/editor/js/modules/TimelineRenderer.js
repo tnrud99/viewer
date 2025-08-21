@@ -236,17 +236,123 @@ export class TimelineRenderer {
             tooltip.style.opacity = '0';
         });
 
-        point.addEventListener('click', (e) => {
+        // 길게 누르기 및 클릭 이벤트
+        let longPressTimer = null;
+        let isLongPress = false;
+
+        point.addEventListener('mousedown', (e) => {
             e.stopPropagation();
-            this.selectPoint(point);
             
-            // 프리뷰 시작
-            if (window.simpleEditor && window.simpleEditor.startSmartPreview) {
-                window.simpleEditor.startSmartPreview(timestamp);
+            // 길게 누르기 타이머 시작 (500ms)
+            longPressTimer = setTimeout(() => {
+                isLongPress = true;
+                this.handleLongPress(point, timestamp, index, e);
+            }, 500);
+        });
+
+        point.addEventListener('mouseup', (e) => {
+            // 타이머 취소
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            
+            const dragManager = window.simpleEditor?.getDragDropManager();
+            
+            // 드래그 중이면 드래그 종료
+            if (dragManager?.getIsDragging()) {
+                dragManager.forceEndDrag();
+                isLongPress = false;
+                return;
+            }
+            
+            // 드래그 중이 아니고 짧은 클릭인 경우 프리뷰 시작
+            if (!isLongPress) {
+                e.stopPropagation();
+                this.selectPoint(point);
+                
+                // 프리뷰 시작
+                if (window.simpleEditor && window.simpleEditor.startSmartPreview) {
+                    window.simpleEditor.startSmartPreview(timestamp);
+                }
+            }
+            
+            isLongPress = false;
+        });
+
+        point.addEventListener('mouseleave', () => {
+            tooltip.style.opacity = '0';
+            
+            // 마우스가 벗어나면 길게 누르기 취소
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
             }
         });
 
         this.container.appendChild(point);
+    }
+
+    handleLongPress(point, timestamp, pointIndex, event) {
+        // PLAY/PAUSE 점에서 해당 세그먼트 찾기
+        const segment = this.findSegmentByPoint(timestamp, pointIndex);
+        
+        if (segment) {
+            // 길게 누르기 시각적 피드백
+            point.style.transform = 'scale(0.9)';
+            point.style.opacity = '0.8';
+            point.style.cursor = 'grabbing';
+            
+            // 세그먼트도 시각적 피드백
+            const segmentElement = this.container.querySelector(`[data-play-index="${segment.playIndex}"]`);
+            if (segmentElement) {
+                segmentElement.style.transform = 'scale(1.05)';
+                segmentElement.style.opacity = '0.8';
+                segmentElement.style.cursor = 'grabbing';
+            }
+            
+            // DragDropManager에게 세그먼트 드래그 시작 알림
+            if (window.simpleEditor && window.simpleEditor.getDragDropManager) {
+                const dragDropManager = window.simpleEditor.getDragDropManager();
+                dragDropManager.startSegmentDrag(segment.playIndex, event);
+            }
+        }
+    }
+
+    findSegmentByPoint(timestamp, pointIndex) {
+        const timestamps = this.timestamps;
+        
+        // PLAY 점인 경우
+        if (timestamp.event === 'youtube_play') {
+            // 다음 PAUSE 점 찾기
+            for (let i = pointIndex + 1; i < timestamps.length; i++) {
+                if (timestamps[i].event === 'youtube_pause') {
+                    return {
+                        playIndex: pointIndex,
+                        pauseIndex: i,
+                        playTimestamp: timestamp,
+                        pauseTimestamp: timestamps[i]
+                    };
+                }
+            }
+        }
+        
+        // PAUSE 점인 경우
+        if (timestamp.event === 'youtube_pause') {
+            // 이전 PLAY 점 찾기
+            for (let i = pointIndex - 1; i >= 0; i--) {
+                if (timestamps[i].event === 'youtube_play') {
+                    return {
+                        playIndex: i,
+                        pauseIndex: pointIndex,
+                        playTimestamp: timestamps[i],
+                        pauseTimestamp: timestamp
+                    };
+                }
+            }
+        }
+        
+        return null;
     }
 
     selectSegment(segment) {

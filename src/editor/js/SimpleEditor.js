@@ -5,6 +5,7 @@ import { ZoomController } from './modules/ZoomController.js';
 import { PreviewManager } from './modules/PreviewManager.js';
 import { AdvancedEditor } from './modules/AdvancedEditor.js';
 import { FileManager } from './modules/FileManager.js';
+import { HistoryManager } from './modules/HistoryManager.js';
 
 class SimpleEditor {
     constructor() {
@@ -39,10 +40,15 @@ class SimpleEditor {
         this.previewManager = new PreviewManager();
         this.advancedEditor = new AdvancedEditor(this.timelineRenderer);
         this.fileManager = new FileManager(this.timelineRenderer);
+        this.historyManager = new HistoryManager();
 
         // 이벤트 리스너 설정
         this.setupEventListeners();
         this.setupResizeHandler();
+        this.setupHistoryControls();
+        
+        // 모든 초기화 완료 후 샘플 데이터 로드
+        this.fileManager.loadSampleData();
     }
 
     setupEventListeners() {
@@ -74,10 +80,31 @@ class SimpleEditor {
     handleKeyboardEvent(e) {
         switch (e.key) {
             case 'Escape':
-                this.timelineRenderer.clearSelection();
+                // 드래그 중이면 드래그 종료
+                if (this.dragDropManager.getIsDragging()) {
+                    this.dragDropManager.forceEndDrag();
+                } else {
+                    this.timelineRenderer.clearSelection();
+                }
                 break;
             case 'Delete':
                 // 선택된 세그먼트 삭제 (필요시 구현)
+                break;
+            case 'z':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    if (e.shiftKey) {
+                        this.handleRedo(); // Ctrl+Shift+Z 또는 Cmd+Shift+Z
+                    } else {
+                        this.handleUndo(); // Ctrl+Z 또는 Cmd+Z
+                    }
+                }
+                break;
+            case 'y':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    this.handleRedo(); // Ctrl+Y 또는 Cmd+Y
+                }
                 break;
         }
     }
@@ -165,16 +192,116 @@ class SimpleEditor {
     getDragDropManager() {
         return this.dragDropManager;
     }
+
+    getHistoryManager() {
+        return this.historyManager;
+    }
+
+    getPreviewManager() {
+        return this.previewManager;
+    }
+
+    // 히스토리 컨트롤 설정
+    setupHistoryControls() {
+        console.log('Setting up history controls...');
+        const undoBtn = document.getElementById('undo-btn');
+        const redoBtn = document.getElementById('redo-btn');
+        const resetBtn = document.getElementById('reset-btn');
+
+        console.log('History control buttons found:', {
+            undoBtn: !!undoBtn,
+            redoBtn: !!redoBtn,
+            resetBtn: !!resetBtn
+        });
+
+        if (undoBtn) {
+            undoBtn.addEventListener('click', () => this.handleUndo());
+            console.log('Undo button event listener added');
+        } else {
+            console.log('ERROR: Undo button not found in setupHistoryControls');
+        }
+        if (redoBtn) {
+            redoBtn.addEventListener('click', () => this.handleRedo());
+            console.log('Redo button event listener added');
+        } else {
+            console.log('ERROR: Redo button not found in setupHistoryControls');
+        }
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.handleReset());
+            console.log('Reset button event listener added');
+        } else {
+            console.log('ERROR: Reset button not found in setupHistoryControls');
+        }
+    }
+
+    // Undo 처리
+    handleUndo() {
+        console.log('handleUndo called');
+        const previousState = this.historyManager.undo();
+        console.log('Undo result:', !!previousState);
+        if (previousState) {
+            this.timelineRenderer.setTimestamps(previousState);
+            this.timelineRenderer.renderTimeline();
+            this.updateTimelineInfo();
+            this.updateButtons();
+            console.log('Undo completed successfully');
+        } else {
+            console.log('Undo failed - no previous state');
+        }
+    }
+
+    // Redo 처리
+    handleRedo() {
+        console.log('handleRedo called');
+        const nextState = this.historyManager.redo();
+        console.log('Redo result:', !!nextState);
+        if (nextState) {
+            this.timelineRenderer.setTimestamps(nextState);
+            this.timelineRenderer.renderTimeline();
+            this.updateTimelineInfo();
+            this.updateButtons();
+            console.log('Redo completed successfully');
+        } else {
+            console.log('Redo failed - no next state');
+        }
+    }
+
+    // Reset 처리
+    handleReset() {
+        console.log('handleReset called');
+        if (confirm('Are you sure you want to reset to the original file? This will discard all changes.')) {
+            const originalState = this.historyManager.reset();
+            console.log('Reset result:', !!originalState);
+            if (originalState) {
+                this.timelineRenderer.setTimestamps(originalState);
+                this.timelineRenderer.renderTimeline();
+                this.updateTimelineInfo();
+                this.updateButtons();
+                console.log('Reset completed successfully');
+            } else {
+                console.log('Reset failed - no original state');
+            }
+        } else {
+            console.log('Reset cancelled by user');
+        }
+    }
+
+    // 타임라인 변경사항을 히스토리에 추가
+    addToHistory() {
+        const currentTimestamps = this.timelineRenderer.timestamps;
+        if (currentTimestamps) {
+            this.historyManager.addState(currentTimestamps);
+        }
+    }
 }
 
 // 전역 변수로 설정 (HTML에서 접근 가능하도록)
-let simpleEditor;
 window.simpleEditor = new SimpleEditor();
 
 // 타임라인 정보 업데이트를 위한 인터벌 설정
 setInterval(() => {
-    if (simpleEditor) {
-        simpleEditor.updateTimelineInfo();
-        simpleEditor.updateButtons();
+    if (window.simpleEditor) {
+        window.simpleEditor.updateTimelineInfo();
+        window.simpleEditor.updateButtons();
     }
 }, 100);

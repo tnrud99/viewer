@@ -7,13 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Development Notice Banner -->
-    <div class="dev-banner">
-        <div class="dev-banner-content">
-            <span class="dev-icon">🚀</span>
-            <span class="dev-text">Simple Timestamp Editor - 샘플 데이터 모드</span>
-        </div>
-    </div>
+
 
     <div class="container">
         <!-- Header -->
@@ -22,7 +16,7 @@
                 <div class="header-center">
                     <div class="header-logo"></div>
                     <h1>Simple Timestamp Editor</h1>
-                    <span class="beta-tag">Sample Mode</span>
+
                 </div>
                 <a href="/" class="home-btn" title="Return to main studio">
                     Back to Studio
@@ -32,32 +26,27 @@
 
         <!-- Simple Editor Section -->
         <section class="simple-editor">
-            <!-- Development Info Section -->
-            <div class="dev-info-section">
-                <h3>🔧 샘플 데이터 정보</h3>
-                <div class="dev-info-grid">
-                    <div class="info-item">
-                        <label>Reaction Video:</label>
-                        <span id="reaction-url-display">https://www.youtube.com/watch?v=niYgb0IfP4U</span>
-                    </div>
-                    <div class="info-item">
-                        <label>Original Video:</label>
-                        <span id="youtube-url-display">https://www.youtube.com/watch?v=AbZH7XWDW_k</span>
-                    </div>
-                    <div class="info-item">
-                        <label>타임스탬프 파일:</label>
-                        <span id="file-name">timestamp_1751179878134.json (샘플 데이터)</span>
-                    </div>
-                </div>
-            </div>
+
 
             <!-- File Load Section -->
             <div class="file-section">
                 <h3>📁 Load Timestamp File</h3>
                 <div class="file-controls">
-                    <input type="file" id="timestamp-file" accept=".json" style="display: none;">
+                    <input type="file" id="timestamp-file" accept=".json" class="visually-hidden" aria-label="Select timestamp JSON file">
                     <button id="load-btn" class="btn btn-primary">Choose File</button>
-                    <span class="file-note">(샘플 데이터가 자동으로 로드됩니다)</span>
+                    <span class="file-note">JSON timestamp files supported</span>
+                </div>
+                
+                <!-- Reaction Video URL Input -->
+                <div class="reaction-url-section">
+                    <h4>🎥 Reaction Video URL</h4>
+                    <div class="url-input-group">
+                        <input type="url" id="reaction-video-url" placeholder="Enter YouTube URL for reaction video" class="url-input">
+                        <button id="set-reaction-url-btn" class="btn btn-secondary">Set URL</button>
+                    </div>
+                    <div class="url-info">
+                        <span id="current-reaction-url" class="current-url">No reaction video URL set</span>
+                    </div>
                 </div>
             </div>
 
@@ -94,20 +83,25 @@
                 <div class="timeline-header">
                     <h3>⏰ Timeline Editor</h3>
                     <div class="timeline-controls">
-                        <div class="zoom-controls">
-                            <button id="zoomOutBtn" class="btn btn-secondary">-</button>
-                            <span id="zoomLevel">100%</span>
-                            <button id="zoomInBtn" class="btn btn-secondary">+</button>
-                            <span class="zoom-hint">(Ctrl+휠)</span>
+                                                <div class="zoom-controls">
+                        <button id="zoomOutBtn" class="btn btn-secondary" aria-label="Zoom Out">-</button>
+                            <span id="zoomLevel" aria-live="polite">100%</span>
+                            <button id="zoomInBtn" class="btn btn-secondary" aria-label="Zoom In">+</button>
+                            <span class="zoom-hint">(Ctrl+Wheel)</span>
                         </div>
-                       <button id="advanced-edit-btn" class="btn btn-secondary">⚙️ Advanced Edit</button>
-           <button id="export-btn" class="btn btn-primary">Export JSON</button>
+                        <div class="history-controls">
+                            <button id="undo-btn" class="btn btn-secondary btn-small" aria-label="Undo" disabled>↶ Undo</button>
+                            <button id="redo-btn" class="btn btn-secondary btn-small" aria-label="Redo" disabled>↷ Redo</button>
+                            <button id="reset-btn" class="btn btn-warning btn-small" aria-label="Reset to Original">🔄 Reset</button>
+                        </div>
+                        <button id="advanced-edit-btn" class="btn btn-secondary" aria-label="Open Advanced Editor">⚙️ Advanced Editor</button>
+                        <button id="export-btn" class="btn btn-primary" aria-label="Export Timestamps">Export JSON</button>
                     </div>
                 </div>
                 
-                <div class="timeline-container">
+                <div class="timeline-container" role="application" aria-label="Timeline Editor">
                     <div class="timeline-track">
-                        <div class="timeline-content">
+                        <div class="timeline-content" tabindex="0" aria-label="Timeline Content - Use arrow keys to navigate">
                             <!-- Time ruler will be rendered here -->
                             <!-- Points and segments will be rendered here -->
                         </div>
@@ -123,50 +117,46 @@
     </div>
 
     <!-- Simple Help Modal -->
-    <div id="help-modal" class="modal" style="display: none;">
+    <div id="help-modal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="help-modal-title">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>How to Use Simple Editor</h3>
-                <button class="modal-close" id="help-modal-close">&times;</button>
+                <h3 id="help-modal-title">How to Use Timestamp Editor</h3>
+                <button class="modal-close" id="help-modal-close" aria-label="Close Help Modal">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="help-content">
-                    <h4>🎯 Simple Timestamp Editor</h4>
-                    <p>Load your timestamp file and edit timestamps by dragging blocks on the timeline.</p>
+                    <h4>🎯 Timestamp Editor</h4>
+                    <p>Load your timestamp file and edit timestamps by dragging segments on the timeline.</p>
                     
                     <h4>Quick Guide:</h4>
                     <ol>
                         <li><strong>Load File:</strong> Click "Choose File" to load your timestamp JSON</li>
-                        <li><strong>Edit Timestamps:</strong> Drag blocks to adjust timing</li>
-                        <li><strong>Add/Delete:</strong> Use buttons to add new timestamps or delete selected ones</li>
+                        <li><strong>Edit Timestamps:</strong> Long press on PLAY/PAUSE points to drag segments</li>
+                        <li><strong>Preview:</strong> Click on points to preview synchronized videos</li>
+                        <li><strong>Advanced Edit:</strong> Use Advanced Editor for precise timing adjustments</li>
                         <li><strong>Export:</strong> Download the edited timestamps as JSON</li>
                     </ol>
                     
-                    <h4>Keyboard Shortcuts:</h4>
+                    <h4>Features:</h4>
                     <ul>
-                        <li><strong>Delete:</strong> Delete selected timestamp</li>
-                        <li><strong>Ctrl+A:</strong> Add new timestamp</li>
-                        <li><strong>Escape:</strong> Deselect timestamp</li>
+                        <li><strong>Smart Preview:</strong> Synchronized video playback</li>
+                        <li><strong>Segment Dragging:</strong> Move PLAY-PAUSE pairs together</li>
+                        <li><strong>Zoom Controls:</strong> Timeline zoom with mouse wheel</li>
+                        <li><strong>Advanced Editing:</strong> Precise numerical input</li>
                     </ul>
                     
-                    <h4>샘플 데이터 정보:</h4>
-                    <ul>
-                        <li><strong>YouTube URL:</strong> https://www.youtube.com/watch?v=niYgb0IfP4U</li>
-                        <li><strong>기본 파일:</strong> timestamp_1751179878134.json</li>
-                        <li><strong>자동 로드:</strong> 페이지 로드 시 샘플 데이터 자동 로드</li>
-                        <li><strong>CORS 해결:</strong> 파일 직접 열기 가능 (fetch 없이)</li>
-                    </ul>
+
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Advanced Edit Modal -->
-    <div id="advanced-edit-modal" class="modal">
+    <div id="advanced-edit-modal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="advanced-modal-title">
         <div class="modal-content large-modal">
             <div class="modal-header">
-                <h2>Advanced Timestamp Editor</h2>
-                <span class="close" id="close-advanced-modal">&times;</span>
+                <h2 id="advanced-modal-title">Advanced Timestamp Editor</h2>
+                <button class="close" id="close-advanced-modal" aria-label="Close Advanced Editor">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="table-controls">
@@ -206,7 +196,7 @@
     </div>
 
     <!-- Help Button -->
-    <button id="help-btn" class="help-btn" title="Help">?</button>
+    <button id="help-btn" class="help-btn" aria-label="Open Help" title="Help">?</button>
 
     <!-- YouTube API -->
     <script src="https://www.youtube.com/iframe_api"></script>
@@ -214,10 +204,8 @@
     <!-- Scripts -->
     <script type="module" src="js/SimpleEditor.js"></script>
     <script>
-        // Initialize Simple Editor
+        // DOM 이벤트 처리
         document.addEventListener('DOMContentLoaded', function() {
-            window.simpleEditor = new SimpleEditor();
-            
             // Help modal
             const helpBtn = document.getElementById('help-btn');
             const helpModal = document.getElementById('help-modal');
@@ -225,20 +213,23 @@
             
             if (helpBtn) {
                 helpBtn.addEventListener('click', () => {
-                    helpModal.style.display = 'flex';
+                    helpModal.classList.add('show');
+                    helpModal.setAttribute('aria-hidden', 'false');
                 });
             }
             
             if (helpModalClose) {
                 helpModalClose.addEventListener('click', () => {
-                    helpModal.style.display = 'none';
+                    helpModal.classList.remove('show');
+                    helpModal.setAttribute('aria-hidden', 'true');
                 });
             }
             
             if (helpModal) {
                 helpModal.addEventListener('click', (e) => {
                     if (e.target === helpModal) {
-                        helpModal.style.display = 'none';
+                        helpModal.classList.remove('show');
+                        helpModal.setAttribute('aria-hidden', 'true');
                     }
                 });
             }

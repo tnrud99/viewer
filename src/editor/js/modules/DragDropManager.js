@@ -25,10 +25,20 @@ export class DragDropManager {
             }
         });
 
-        // 드래그 종료
-        document.addEventListener('mouseup', () => {
+        // 드래그 중 마우스가 화면을 벗어날 때 처리
+        document.addEventListener('mouseleave', () => {
             if (this.isDragging) {
                 this.handleDragEnd();
+            }
+        });
+
+        // 전역 mouseup으로 세그먼트 드래그 종료
+        document.addEventListener('mouseup', (e) => {
+            if (this.isDragging) {
+                // 점에서 시작된 드래그가 아닌 경우에만 처리
+                if (!e.target.closest('.timeline-point')) {
+                    this.handleDragEnd();
+                }
             }
         });
     }
@@ -38,13 +48,24 @@ export class DragDropManager {
         if (!segment) return;
 
         e.preventDefault();
-        this.isDragging = true;
-        this.draggedSegment = segment;
-        this.dragStartX = e.clientX;
         
         const playIndex = parseInt(segment.dataset.playIndex);
         const pauseIndex = parseInt(segment.dataset.pauseIndex);
         this.draggedSegmentIndex = playIndex;
+        
+        // 드래그 시작 전 현재 상태를 히스토리에 추가
+        if (window.simpleEditor && window.simpleEditor.getHistoryManager) {
+            const timestamps = this.timelineRenderer.timestamps;
+            console.log('Adding initial state to history before segment drag start. Timestamps:', timestamps.length);
+            window.simpleEditor.getHistoryManager().addState(timestamps);
+            console.log('Initial state added to history before segment drag start');
+        } else {
+            console.log('Cannot add to history: simpleEditor or historyManager not available (segment drag)');
+        }
+        
+        this.isDragging = true;
+        this.draggedSegment = segment;
+        this.dragStartX = e.clientX;
         
         // 드래그 시작 시간 저장
         const timestamps = this.timelineRenderer.timestamps;
@@ -71,12 +92,33 @@ export class DragDropManager {
     handleDragEnd() {
         if (!this.isDragging) return;
 
+        const wasActuallyDragging = this.draggedSegment !== null;
         this.isDragging = false;
         
         if (this.draggedSegment) {
             this.draggedSegment.style.cursor = 'grab';
             this.draggedSegment.style.opacity = '1';
+            this.draggedSegment.style.transform = '';
         }
+
+        // 모든 점의 길게 누르기 스타일 해제
+        const points = this.container.querySelectorAll('.timeline-point');
+        points.forEach(point => {
+            point.style.transform = '';
+            point.style.opacity = '';
+            point.style.cursor = 'pointer';
+        });
+
+        // 모든 세그먼트의 스타일 해제
+        const segments = this.container.querySelectorAll('.timeline-segment');
+        segments.forEach(segment => {
+            segment.style.transform = '';
+            segment.style.opacity = '';
+            segment.style.cursor = 'grab';
+        });
+
+        // 드래그 시작 시 이미 히스토리에 추가했으므로 여기서는 추가하지 않음
+        console.log('Drag ended, wasActuallyDragging:', wasActuallyDragging);
 
         this.draggedSegment = null;
         this.draggedSegmentIndex = -1;
@@ -98,6 +140,8 @@ export class DragDropManager {
 
         // 타임라인 다시 렌더링
         this.timelineRenderer.renderTimeline();
+        
+        // 실시간 렌더링만 수행, 히스토리는 드래그 종료 시에 추가
     }
 
     // 외부에서 호출할 수 있는 메서드들
@@ -108,4 +152,47 @@ export class DragDropManager {
     getDraggedSegment() {
         return this.draggedSegment;
     }
+
+    // 강제로 드래그 종료 (ESC 키나 오류 상황에서 사용)
+    forceEndDrag() {
+        if (this.isDragging) {
+            this.handleDragEnd();
+        }
+    }
+
+    // 점에서 세그먼트 드래그 시작
+    startSegmentDrag(playIndex, event) {
+        // 해당 세그먼트 찾기
+        const segmentElement = this.container.querySelector(`[data-play-index="${playIndex}"]`);
+        if (!segmentElement) return;
+
+        // 드래그 시작 전 현재 상태를 히스토리에 추가 (첫 번째 변경사항 보존)
+        if (window.simpleEditor && window.simpleEditor.getHistoryManager) {
+            const timestamps = this.timelineRenderer.timestamps;
+            console.log('Adding initial state to history before drag start. Timestamps:', timestamps.length);
+            window.simpleEditor.getHistoryManager().addState(timestamps);
+            console.log('Initial state added to history before drag start');
+        } else {
+            console.log('Cannot add to history: simpleEditor or historyManager not available');
+        }
+
+        // 기존 드래그 상태 설정
+        this.isDragging = true;
+        this.draggedSegment = segmentElement;
+        this.dragStartX = event.clientX;
+        this.draggedSegmentIndex = playIndex;
+        
+        // 드래그 시작 시간 저장
+        const timestamps = this.timelineRenderer.timestamps;
+        if (timestamps[playIndex]) {
+            this.dragStartTime = timestamps[playIndex].reaction_time;
+        }
+
+        // 드래그 중 스타일 적용
+        segmentElement.style.cursor = 'grabbing';
+        segmentElement.style.opacity = '0.8';
+        
+        console.log(`Started segment drag from point, playIndex: ${playIndex}`);
+    }
 }
+

@@ -373,6 +373,11 @@ export class AdvancedEditor {
         // 타임라인 다시 렌더링
         this.timelineRenderer.renderTimeline();
         
+        // 히스토리에 변경사항 추가
+        if (window.simpleEditor && window.simpleEditor.getHistoryManager) {
+            window.simpleEditor.getHistoryManager().addState(this.timelineRenderer.timestamps);
+        }
+        
         // 모달 닫기
         this.closeAdvancedEditModal();
         
