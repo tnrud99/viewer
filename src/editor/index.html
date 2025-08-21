@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timestamp Editor</title>
+    <title>Simple Timestamp Editor</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <!-- Development Notice Banner -->
     <div class="dev-banner">
         <div class="dev-banner-content">
-            <span class="dev-icon">🚧</span>
-            <span class="dev-text">Under Development - UI Preview Only</span>
+            <span class="dev-icon">🚀</span>
+            <span class="dev-text">Simple Timestamp Editor - 샘플 데이터 모드</span>
         </div>
     </div>
 
@@ -21,9 +21,8 @@
             <div class="header-content">
                 <div class="header-center">
                     <div class="header-logo"></div>
-                    <h1>Timestamp Editor</h1>
-                    <span class="beta-tag">Beta</span>
-                    <button class="help-btn" id="main-help-btn" title="Learn more about this editor" disabled>?</button>
+                    <h1>Simple Timestamp Editor</h1>
+                    <span class="beta-tag">Sample Mode</span>
                 </div>
                 <a href="/" class="home-btn" title="Return to main studio">
                     Back to Studio
@@ -31,153 +30,222 @@
             </div>
         </header>
 
-        <!-- Step Progress Section -->
-        <div class="step-progress">
-            <div class="step-item active" id="step-1">
-                <div class="step-number">1</div>
-                <div class="step-content">
-                    <div class="step-title">Set Information</div>
-                    <button id="info-modal-btn" class="btn btn-primary btn-compact" disabled>Set Info</button>
+        <!-- Simple Editor Section -->
+        <section class="simple-editor">
+            <!-- Development Info Section -->
+            <div class="dev-info-section">
+                <h3>🔧 샘플 데이터 정보</h3>
+                <div class="dev-info-grid">
+                    <div class="info-item">
+                        <label>Reaction Video:</label>
+                        <span id="reaction-url-display">https://www.youtube.com/watch?v=niYgb0IfP4U</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Original Video:</label>
+                        <span id="youtube-url-display">https://www.youtube.com/watch?v=AbZH7XWDW_k</span>
+                    </div>
+                    <div class="info-item">
+                        <label>타임스탬프 파일:</label>
+                        <span id="file-name">timestamp_1751179878134.json (샘플 데이터)</span>
+                    </div>
                 </div>
             </div>
-            <div class="step-arrow">→</div>
-            <div class="step-item locked" id="step-2">
-                <div class="step-number">2</div>
-                <div class="step-content">
-                    <div class="step-title">Edit Timestamps</div>
-                    <button id="edit-btn" class="btn btn-secondary btn-compact" disabled>Edit</button>
-                </div>
-            </div>
-            <div class="step-arrow">→</div>
-            <div class="step-item locked" id="step-3">
-                <div class="step-number">3</div>
-                <div class="step-content">
-                    <div class="step-title">Export</div>
-                    <button id="export-btn" class="btn btn-secondary btn-compact" disabled>Export</button>
-                </div>
-            </div>
-        </div>
 
-        <!-- Media Section -->
-        <section class="media-section">
-            <div class="video-container">
-                <div class="video-player">
-                    <h3>Reaction Video (YouTube)</h3>
-                    <div id="reaction-player"></div>
+            <!-- File Load Section -->
+            <div class="file-section">
+                <h3>📁 Load Timestamp File</h3>
+                <div class="file-controls">
+                    <input type="file" id="timestamp-file" accept=".json" style="display: none;">
+                    <button id="load-btn" class="btn btn-primary">Choose File</button>
+                    <span class="file-note">(샘플 데이터가 자동으로 로드됩니다)</span>
+                </div>
+            </div>
+
+            <!-- Smart Preview Section -->
+            <div class="preview-section">
+                <div class="preview-header">
+                    <h3>🎬 Smart Preview</h3>
                 </div>
                 
-                <div class="video-player">
-                    <h3>Original YouTube Video</h3>
-                    <div id="youtube-player"></div>
-                </div>
-            </div>
-            
-            <!-- Playback Controls -->
-            <div class="playback-controls">
-                <button id="play-pause-btn" disabled>Play</button>
-                <span id="current-time">00:00</span> / <span id="total-time">00:00</span>
-            </div>
-        </section>
-
-        <!-- Timeline Editing Section -->
-        <section class="timeline-section">
-            <div class="timeline-controls">
-                <button id="ripple-toggle" class="toggle-btn active" title="Linked Move: 블록 이동 시 뒤의 모든 블록도 함께 이동\nIndividual Move: 선택된 블록만 이동" disabled>Linked Move</button>
-                <button id="add-timestamp-btn" disabled>Add Timestamp</button>
-                <button id="undo-btn" disabled>Undo</button>
-                <button id="redo-btn" disabled>Redo</button>
-                <button id="zoom-in" title="확대 (Ctrl + +)" disabled>
-                    <span class="icon">🔍+</span>
-                </button>
-                <button id="zoom-out" title="축소 (Ctrl + -)" disabled>
-                    <span class="icon">🔍-</span>
-                </button>
-            </div>
-            
-            <div class="timeline-container">
-                <!-- Time Ruler -->
-                <div class="time-ruler"></div>
-                
-                <!-- Reaction Video Track -->
-                <div class="track reaction-track">
-                    <div class="track-label">Reaction Video</div>
-                    <div class="track-content">
-                        <div class="playhead" id="playhead"></div>
+                <div class="preview-container">
+                    <!-- Reaction Video -->
+                    <div class="reaction-video-container">
+                        <div class="video-title">Reaction Video</div>
+                        <div id="reaction-preview-player"></div>
+                    </div>
+                    
+                    <!-- Original Video Overlay -->
+                    <div id="original-overlay" class="original-overlay">
+                        <div class="video-title">Original Video</div>
+                        <div id="original-preview-player"></div>
                     </div>
                 </div>
                 
-                <!-- Timestamp Track -->
-                <div class="track timestamp-track">
-                    <div class="track-label">Timestamps</div>
-                    <div class="track-content" id="timestamp-blocks"></div>
+                <!-- Preview Info -->
+                <div class="preview-info">
+                    <span>Reaction: <span id="reaction-time">00:00</span></span>
+                    <span>Original: <span id="original-time">00:00</span></span>
+                    <span>Duration: <span id="preview-duration">5s</span></span>
+                </div>
+            </div>
+
+            <!-- Timeline Section -->
+            <div class="timeline-section">
+                <div class="timeline-header">
+                    <h3>⏰ Timeline Editor</h3>
+                    <div class="timeline-controls">
+                        <div class="zoom-controls">
+                            <button id="zoomOutBtn" class="btn btn-secondary">-</button>
+                            <span id="zoomLevel">100%</span>
+                            <button id="zoomInBtn" class="btn btn-secondary">+</button>
+                            <span class="zoom-hint">(Ctrl+휠)</span>
+                        </div>
+                       <button id="advanced-edit-btn" class="btn btn-secondary">⚙️ Advanced Edit</button>
+           <button id="export-btn" class="btn btn-primary">Export JSON</button>
+                    </div>
+                </div>
+                
+                <div class="timeline-container">
+                    <div class="timeline-track">
+                        <div class="timeline-content">
+                            <!-- Time ruler will be rendered here -->
+                            <!-- Points and segments will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="timeline-info">
+                    <span>Total Duration: <span id="total-duration">00:00</span></span>
+                    <span>Selected: <span id="selected-info">None</span></span>
                 </div>
             </div>
         </section>
     </div>
 
-    <!-- Information Modal -->
-    <div id="info-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Set Video Information</h3>
-                <button class="modal-close" id="info-modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="input-group">
-                    <label class="input-label" for="modal-reaction-url">Edited Reaction Video URL</label>
-                    <input type="text" id="modal-reaction-url" class="input" placeholder="Reaction video URL" value="https://www.youtube.com/watch?v=niYgb0IfP4U" disabled>
-                    <input type="file" id="modal-reaction-video" accept="video/*" style="display: none;" disabled>
-                </div>
-                <div class="input-group">
-                    <label class="input-label" for="modal-timestamp-file">Timestamp File</label>
-                    <input type="file" id="modal-timestamp-file" class="input" accept=".json" disabled>
-                </div>
-                <div class="modal-actions">
-                    <button id="info-modal-cancel" class="btn btn-secondary" disabled>Cancel</button>
-                    <button id="info-modal-confirm" class="btn btn-primary" disabled>Load Files</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Help Modal -->
+    <!-- Simple Help Modal -->
     <div id="help-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>How to Use Timestamp Editor</h3>
+                <h3>How to Use Simple Editor</h3>
                 <button class="modal-close" id="help-modal-close">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="help-content">
-                    <h4>🎬 What is Timestamp Editor?</h4>
-                    <p>This editor allows you to synchronize reaction video timestamps with the original video. You can load timestamp files from the recorder and edit them to match your edited reaction video.</p>
+                    <h4>🎯 Simple Timestamp Editor</h4>
+                    <p>Load your timestamp file and edit timestamps by dragging blocks on the timeline.</p>
                     
-                    <h4>Step-by-Step Guide:</h4>
+                    <h4>Quick Guide:</h4>
                     <ol>
-                        <li><strong>Set Information:</strong> Click "Set Info" to configure video URLs</li>
-                        <li><strong>Load Files:</strong> Upload your timestamp file and reaction video</li>
-                        <li><strong>Edit Timestamps:</strong> Use the timeline to adjust timestamps</li>
-                        <li><strong>Export:</strong> Download the modified timestamps</li>
+                        <li><strong>Load File:</strong> Click "Choose File" to load your timestamp JSON</li>
+                        <li><strong>Edit Timestamps:</strong> Drag blocks to adjust timing</li>
+                        <li><strong>Add/Delete:</strong> Use buttons to add new timestamps or delete selected ones</li>
+                        <li><strong>Export:</strong> Download the edited timestamps as JSON</li>
                     </ol>
                     
-                    <h4>Features:</h4>
+                    <h4>Keyboard Shortcuts:</h4>
                     <ul>
-                        <li><strong>Timeline Editing:</strong> Drag and drop timestamp blocks</li>
-                        <li><strong>Linked Move:</strong> Move blocks together or individually</li>
-                        <li><strong>Zoom Controls:</strong> Zoom in/out for precise editing</li>
-                        <li><strong>Undo/Redo:</strong> Track your changes</li>
+                        <li><strong>Delete:</strong> Delete selected timestamp</li>
+                        <li><strong>Ctrl+A:</strong> Add new timestamp</li>
+                        <li><strong>Escape:</strong> Deselect timestamp</li>
+                    </ul>
+                    
+                    <h4>샘플 데이터 정보:</h4>
+                    <ul>
+                        <li><strong>YouTube URL:</strong> https://www.youtube.com/watch?v=niYgb0IfP4U</li>
+                        <li><strong>기본 파일:</strong> timestamp_1751179878134.json</li>
+                        <li><strong>자동 로드:</strong> 페이지 로드 시 샘플 데이터 자동 로드</li>
+                        <li><strong>CORS 해결:</strong> 파일 직접 열기 가능 (fetch 없이)</li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- YouTube IFrame API -->
+    <!-- Advanced Edit Modal -->
+    <div id="advanced-edit-modal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2>Advanced Timestamp Editor</h2>
+                <span class="close" id="close-advanced-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="table-controls">
+                    <button type="button" class="btn btn-secondary" id="add-timestamp-row">+ Add PLAY-PAUSE Set</button>
+                    <label class="auto-adjust-toggle">
+                        <input type="checkbox" id="auto-adjust-toggle" checked>
+                        <span>Auto-adjust Original End based on Duration</span>
+                    </label>
+                    <span class="timestamp-count">Total <span id="timestamp-count">0</span> sets</span>
+                </div>
+                
+                <div class="table-container">
+                    <table id="timestamps-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>PLAY Time</th>
+                                <th>PAUSE Time</th>
+                                <th>Original Start</th>
+                                <th>Original End</th>
+                                <th>Duration</th>
+                                <th>Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timestamps-table-body">
+                            <!-- Dynamically generated -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" id="save-all-timestamps">Save All Changes</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-advanced-edit">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Button -->
+    <button id="help-btn" class="help-btn" title="Help">?</button>
+
+    <!-- YouTube API -->
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="js/app.js"></script>
-    <script src="js/drag-drop.js"></script>
-    <script src="js/advanced-editing.js"></script>
-    <script src="js/timeline-controls.js"></script>
+    
+    <!-- Scripts -->
+    <script src="js/SimpleEditor.js"></script>
+    <script>
+        // Initialize Simple Editor
+        document.addEventListener('DOMContentLoaded', function() {
+            window.simpleEditor = new SimpleEditor();
+            
+            // Help modal
+            const helpBtn = document.getElementById('help-btn');
+            const helpModal = document.getElementById('help-modal');
+            const helpModalClose = document.getElementById('help-modal-close');
+            
+            if (helpBtn) {
+                helpBtn.addEventListener('click', () => {
+                    helpModal.style.display = 'flex';
+                });
+            }
+            
+            if (helpModalClose) {
+                helpModalClose.addEventListener('click', () => {
+                    helpModal.style.display = 'none';
+                });
+            }
+            
+            if (helpModal) {
+                helpModal.addEventListener('click', (e) => {
+                    if (e.target === helpModal) {
+                        helpModal.style.display = 'none';
+                    }
+                });
+            }
+            
+            console.log('Simple Timestamp Editor loaded successfully!');
+        });
+    </script>
 </body>
 </html>
 
