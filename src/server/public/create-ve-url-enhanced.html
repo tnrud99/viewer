@@ -1930,7 +1930,7 @@
                 <div class="generated-url-container">
                     <label for="modalGeneratedLink">Generated URL:</label>
                     <div class="url-input-group">
-                        <input type="text" id="modalGeneratedLink" readonly>
+                        <textarea id="modalGeneratedLink" readonly rows="3" style="width: 100%; resize: none; font-family: 'Courier New', monospace; font-size: 12px; padding: 8px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg-input); color: var(--color-text-main);"></textarea>
                     </div>
                     <div class="modal-actions">
                         <button class="btn btn-success" id="modalCopyBtn">Copy URL</button>
@@ -2448,18 +2448,25 @@
                         if (response.ok) {
                             const result = await response.json();
                             console.log('✅ Server response data:', result);
+                            console.log('✅ Full URL from server:', result.ve_url.full_url);
+                            console.log('✅ Full URL length:', result.ve_url.full_url.length);
                             
                             // Hide loading spinner
                             loadingSpinner.classList.remove('show');
                             generateBtn.disabled = false;
                             
                             const veUrl = result.ve_url.full_url;
+                            console.log('✅ Stored veUrl:', veUrl);
+                            console.log('✅ Stored veUrl length:', veUrl.length);
                             
                             // Hide existing link section and show success modal
                             linkSection.style.display = 'none';
                             
                             // Show success modal with highlight effect
+                            console.log('✅ Setting modalGeneratedLink.value to:', veUrl);
                             modalGeneratedLink.value = veUrl;
+                            console.log('✅ modalGeneratedLink.value after setting:', modalGeneratedLink.value);
+                            console.log('✅ modalGeneratedLink.value length:', modalGeneratedLink.value.length);
                             successModal.classList.add('show');
                             modalGeneratedLink.classList.add('highlight');
                             

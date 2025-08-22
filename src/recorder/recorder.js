@@ -315,20 +315,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Help modal functionality
     // Ensure modal is hidden on page load
-    helpModal.style.display = 'none';
+    helpModal.classList.remove('show');
     
     helpModalBtn.addEventListener('click', function() {
-        helpModal.style.display = 'flex';
+        helpModal.classList.add('show');
     });
 
     helpModalClose.addEventListener('click', function() {
-        helpModal.style.display = 'none';
+        helpModal.classList.remove('show');
     });
 
     // Close help modal when clicking outside
     helpModal.addEventListener('click', function(e) {
         if (e.target === helpModal) {
-            helpModal.style.display = 'none';
+            helpModal.classList.remove('show');
         }
     });
 
@@ -379,20 +379,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (overlaySettingsBtn) {
         overlaySettingsBtn.addEventListener('click', function() {
-            overlaySettingsModal.style.display = 'flex';
+            overlaySettingsModal.classList.add('show');
         });
     }
 
     if (overlaySettingsClose) {
         overlaySettingsClose.addEventListener('click', function() {
-            overlaySettingsModal.style.display = 'none';
+            overlaySettingsModal.classList.remove('show');
         });
     }
 
     if (overlaySettingsModal) {
         overlaySettingsModal.addEventListener('click', function(e) {
             if (e.target === overlaySettingsModal) {
-                overlaySettingsModal.style.display = 'none';
+                overlaySettingsModal.classList.remove('show');
             }
         });
     }
