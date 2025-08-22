@@ -4,6 +4,7 @@
 
 // Global variables
 let youtubePlayer = null;
+let youtubePlayerOverlay = null;
 let mediaRecorder = null;
 let recordedBlobs = [];
 let webcamStream = null;
@@ -13,16 +14,24 @@ let isRecording = false;
 let isPaused = false;
 let youtubeReady = false;
 let youtubeFirstPlayTime = null; // Time when YouTube video was first played
+
+// Layout settings
+let currentMode = 'overlay'; // 'split' or 'overlay'
+let overlayPosition = 'top-right';
+let overlaySize = 25;
+let overlayVisible = true;
+let youtubeVolume = 100;
+
 let timestampData = {
     youtube_video_id: '',
     youtube_title: '',
     reaction_video: '',
     created_at: '',
     layout: {
-        reaction_position: 'left',
-        youtube_position: 'right',
-        reaction_size: 0.5,
-        youtube_size: 0.5
+        mode: 'overlay',
+        overlay_position: 'top-right',
+        overlay_size: 25,
+        hide_overlay: false
     },
     sync_points: []
 };
@@ -30,7 +39,7 @@ let timestampData = {
 // YouTube API callback
 function onYouTubeIframeAPIReady() {
     youtubeReady = true;
-    updateStatus('YouTube API Ready');
+    console.log('YouTube API Ready');
 }
 
 // Execute after DOM is loaded
@@ -42,12 +51,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const pauseBtn = document.getElementById('pause-btn');
     const stopBtn = document.getElementById('stop-btn');
     const timerElement = document.getElementById('timer');
-    const statusElement = document.getElementById('status');
     const webcamVideo = document.getElementById('webcam-video');
     const timestampItemsElement = document.getElementById('timestamp-items');
     const recordingStatusElement = document.getElementById('recording-status');
-    const downloadVideoBtn = document.getElementById('download-video-btn');
-    const downloadTimestampBtn = document.getElementById('download-timestamp-btn');
     const reDownloadBtn = document.getElementById('re-download-btn');
     const mirrorToggleBtn = document.getElementById('mirror-toggle');
     const helpModalBtn = document.getElementById('main-help-btn');
@@ -91,12 +97,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Clear timestamp list
         clearTimestampList();
         
-        // Remove existing player
+        // Remove existing players
         if (youtubePlayer) {
             youtubePlayer.destroy();
         }
+        if (youtubePlayerOverlay) {
+            youtubePlayerOverlay.destroy();
+        }
 
-        // Create new YouTube player
+        // Create new YouTube player for split mode
         youtubePlayer = new YT.Player('youtube-player', {
             height: '300',
             width: '100%',
@@ -113,10 +122,27 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // Create new YouTube player for overlay mode
+        youtubePlayerOverlay = new YT.Player('youtube-player-overlay', {
+            height: '100%',
+            width: '100%',
+            videoId: videoId,
+            playerVars: {
+                'playsinline': 1,
+                'controls': 1,
+                'autoplay': 0,
+                'rel': 0
+            },
+            events: {
+                'onReady': onPlayerReadyOverlay,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+
         // Close modal
         urlModal.style.display = 'none';
         
-        updateStatus('Loading YouTube video...');
+        console.log('Loading YouTube video...');
         updateStepProgress(1, 'completed');
     });
 
@@ -185,12 +211,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 audio: true 
             });
             
+            // Set webcam stream for both modes
             webcamVideo.srcObject = webcamStream;
+            const webcamVideoOverlay = document.getElementById('webcam-video-overlay');
+            if (webcamVideoOverlay) {
+                webcamVideoOverlay.srcObject = webcamStream;
+            }
+            
+            // Initialize overlay settings form values
+            initializeOverlaySettings();
+            
             webcamBtn.disabled = true;
             recordBtn.disabled = false;
             
             showAlert('Webcam successfully activated.', 'success');
-            updateStatus('Webcam activated');
+            console.log('Webcam activated');
             updateStepProgress(2, 'completed');
             updateStepProgress(3, 'active');
         } catch (error) {
@@ -224,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add first timestamp (start point)
         addTimestamp('start');
         
-        updateStatus('Recording...');
+        console.log('Recording...');
     });
 
     // Pause recording
@@ -236,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (isRecording && isPaused) {
             resumeRecording();
             pauseBtn.textContent = 'Pause';
-            updateStatus('Recording...');
+            console.log('Recording...');
         }
     });
 
@@ -254,12 +289,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add last timestamp (end point)
         addTimestamp('end');
         
-        updateStatus('Recording completed');
+        console.log('Recording completed');
         pauseBtn.textContent = 'Pause';
         
-        // Show download buttons
-        downloadVideoBtn.style.display = 'inline-flex';
-        downloadTimestampBtn.style.display = 'inline-flex';
+        // Enable re-download button
         reDownloadBtn.disabled = false;
         reDownloadBtn.textContent = 'Re-download';
         
@@ -272,15 +305,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-    // Download video button
-    downloadVideoBtn.addEventListener('click', function() {
-        downloadRecordedVideo();
-    });
 
-    // Download timestamp button
-    downloadTimestampBtn.addEventListener('click', function() {
-        downloadTimestampData();
-    });
 
     // Re-download button
     reDownloadBtn.addEventListener('click', function() {
@@ -289,6 +314,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Help modal functionality
+    // Ensure modal is hidden on page load
+    helpModal.style.display = 'none';
+    
     helpModalBtn.addEventListener('click', function() {
         helpModal.style.display = 'flex';
     });
@@ -304,17 +332,272 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Mode toggle functionality
+    const splitModeBtn = document.getElementById('split-mode-btn');
+    const overlayModeBtn = document.getElementById('overlay-mode-btn');
+    
+    if (splitModeBtn) {
+        splitModeBtn.addEventListener('click', function() {
+            setMode('split');
+        });
+        
+        // Split mode hover info
+        splitModeBtn.addEventListener('mouseenter', function() {
+            showInfoMessage('Split mode for easier recording and viewing', this);
+        });
+        
+        splitModeBtn.addEventListener('mouseleave', function() {
+            hideInfoMessage();
+        });
+    }
+    
+    if (overlayModeBtn) {
+        overlayModeBtn.addEventListener('click', function() {
+            setMode('overlay');
+        });
+        
+        // Overlay mode hover info
+        overlayModeBtn.addEventListener('mouseenter', function() {
+            showInfoMessage('This is how the final video will look', this);
+        });
+        
+        overlayModeBtn.addEventListener('mouseleave', function() {
+            hideInfoMessage();
+        });
+    }
+
+    // Overlay settings functionality
+    const overlaySettingsBtn = document.getElementById('overlay-settings-btn');
+    const overlaySettingsModal = document.getElementById('overlay-settings-modal');
+    const overlaySettingsClose = document.getElementById('overlay-settings-close');
+    const overlayPositionSelect = document.getElementById('overlay-position');
+    const overlaySizeSlider = document.getElementById('overlay-size');
+    const overlaySizeValue = document.getElementById('overlay-size-value');
+    const youtubeVolumeSlider = document.getElementById('youtube-volume');
+    const youtubeVolumeValue = document.getElementById('youtube-volume-value');
+    const toggleOverlayBtn = document.getElementById('toggle-overlay');
+
+    if (overlaySettingsBtn) {
+        overlaySettingsBtn.addEventListener('click', function() {
+            overlaySettingsModal.style.display = 'flex';
+        });
+    }
+
+    if (overlaySettingsClose) {
+        overlaySettingsClose.addEventListener('click', function() {
+            overlaySettingsModal.style.display = 'none';
+        });
+    }
+
+    if (overlaySettingsModal) {
+        overlaySettingsModal.addEventListener('click', function(e) {
+            if (e.target === overlaySettingsModal) {
+                overlaySettingsModal.style.display = 'none';
+            }
+        });
+    }
+
+    if (overlayPositionSelect) {
+        overlayPositionSelect.addEventListener('change', function(e) {
+            overlayPosition = e.target.value;
+            updateOverlayLayout();
+            updateTimestampDataLayout();
+        });
+    }
+
+    if (overlaySizeSlider) {
+        overlaySizeSlider.addEventListener('input', function(e) {
+            overlaySize = parseInt(e.target.value);
+            if (overlaySizeValue) {
+                overlaySizeValue.textContent = `${overlaySize}%`;
+            }
+            updateOverlayLayout();
+            updateTimestampDataLayout();
+        });
+    }
+
+    if (youtubeVolumeSlider) {
+        youtubeVolumeSlider.addEventListener('input', function(e) {
+            youtubeVolume = parseInt(e.target.value);
+            if (youtubeVolumeValue) {
+                youtubeVolumeValue.textContent = `${youtubeVolume}%`;
+            }
+            updateYouTubeVolume();
+            updateTimestampDataLayout();
+        });
+    }
+
+    if (toggleOverlayBtn) {
+        toggleOverlayBtn.addEventListener('click', function() {
+            overlayVisible = !overlayVisible;
+            toggleOverlayBtn.textContent = overlayVisible ? 'Hide Overlay' : 'Show Overlay';
+            updateOverlayLayout();
+            updateTimestampDataLayout();
+        });
+    }
+
+    // Mirror toggle for overlay mode
+    const mirrorToggleOverlay = document.getElementById('mirror-toggle-overlay');
+    if (mirrorToggleOverlay) {
+        mirrorToggleOverlay.addEventListener('change', function() {
+            const webcamVideoOverlay = document.getElementById('webcam-video-overlay');
+            if (this.checked) {
+                webcamVideoOverlay.style.transform = 'scaleX(-1)';
+            } else {
+                webcamVideoOverlay.style.transform = 'scaleX(1)';
+            }
+        });
+    }
+
+    // Initialize layout
+    initializeLayout();
+
     // Modal event listeners (이미 위에서 처리됨)
     // urlModalBtn, modalClose, modalCancel, modalConfirm 이벤트는 이미 위에서 처리됨
 });
 
-// YouTube player ready callback
+// Set mode function
+function setMode(mode) {
+    currentMode = mode;
+    updateModeDisplay();
+    updateLayout();
+    updateTimestampDataLayout();
+}
+
+// Update mode display
+function updateModeDisplay() {
+    const splitModeBtn = document.getElementById('split-mode-btn');
+    const overlayModeBtn = document.getElementById('overlay-mode-btn');
+    
+    if (splitModeBtn && overlayModeBtn) {
+        // Remove active class from both buttons
+        splitModeBtn.classList.remove('active');
+        overlayModeBtn.classList.remove('active');
+        
+        // Add active class to current mode button
+        if (currentMode === 'split') {
+            splitModeBtn.classList.add('active');
+        } else {
+            overlayModeBtn.classList.add('active');
+        }
+    }
+}
+
+// Initialize layout
+function initializeLayout() {
+    updateModeDisplay();
+    updateLayout();
+    updateTimestampDataLayout();
+}
+
+// Initialize overlay settings form values
+function initializeOverlaySettings() {
+    const overlayPositionSelect = document.getElementById('overlay-position');
+    const overlaySizeSlider = document.getElementById('overlay-size');
+    const overlaySizeValue = document.getElementById('overlay-size-value');
+    const youtubeVolumeSlider = document.getElementById('youtube-volume');
+    const youtubeVolumeValue = document.getElementById('youtube-volume-value');
+    const toggleOverlayBtn = document.getElementById('toggle-overlay');
+    
+    if (overlayPositionSelect) {
+        overlayPositionSelect.value = overlayPosition;
+    }
+    if (overlaySizeSlider) {
+        overlaySizeSlider.value = overlaySize;
+    }
+    if (overlaySizeValue) {
+        overlaySizeValue.textContent = `${overlaySize}%`;
+    }
+    if (youtubeVolumeSlider) {
+        youtubeVolumeSlider.value = youtubeVolume;
+    }
+    if (youtubeVolumeValue) {
+        youtubeVolumeValue.textContent = `${youtubeVolume}%`;
+    }
+    if (toggleOverlayBtn) {
+        toggleOverlayBtn.textContent = overlayVisible ? 'Hide Overlay' : 'Show Overlay';
+    }
+}
+
+// Update layout based on current mode
+function updateLayout() {
+    const splitModeLayout = document.getElementById('split-mode-layout');
+    const overlayModeLayout = document.getElementById('overlay-mode-layout');
+    const stepProgressContainer = document.querySelector('.step-progress-container');
+    
+    if (currentMode === 'overlay') {
+        splitModeLayout.style.display = 'none';
+        overlayModeLayout.style.display = 'block';
+        updateOverlayLayout();
+        // Reduce gap in overlay mode
+        if (stepProgressContainer) {
+            stepProgressContainer.style.marginBottom = 'var(--space-xs)';
+        }
+    } else {
+        splitModeLayout.style.display = 'grid';
+        overlayModeLayout.style.display = 'none';
+        // Restore normal gap in split mode
+        if (stepProgressContainer) {
+            stepProgressContainer.style.marginBottom = 'var(--space-sm)';
+        }
+    }
+}
+
+// Update overlay layout
+function updateOverlayLayout() {
+    const youtubeOverlay = document.getElementById('youtube-overlay');
+    if (!youtubeOverlay) return;
+    
+    // Remove all position classes
+    youtubeOverlay.classList.remove('overlay-top-right', 'overlay-top-left', 'overlay-bottom-right', 'overlay-bottom-left');
+    
+    // Add selected position class
+    youtubeOverlay.classList.add('overlay-' + overlayPosition);
+    
+    // Set overlay size (width only, height will be calculated by aspect-ratio)
+    youtubeOverlay.style.width = `${overlaySize}%`;
+    youtubeOverlay.style.height = 'auto'; // Let CSS aspect-ratio handle the height
+    
+    // Set visibility
+    youtubeOverlay.style.display = overlayVisible ? 'block' : 'none';
+}
+
+// Update YouTube volume
+function updateYouTubeVolume() {
+    if (youtubePlayer && youtubePlayer.setVolume) {
+        youtubePlayer.setVolume(youtubeVolume);
+    }
+    if (youtubePlayerOverlay && youtubePlayerOverlay.setVolume) {
+        youtubePlayerOverlay.setVolume(youtubeVolume);
+    }
+}
+
+// Update timestamp data layout
+function updateTimestampDataLayout() {
+    timestampData.layout = {
+        mode: currentMode,
+        overlay_position: overlayPosition,
+        overlay_size: overlaySize,
+        youtube_volume: youtubeVolume,
+        hide_overlay: !overlayVisible
+    };
+}
+
+// YouTube player ready callback for split mode
 function onPlayerReady(event) {
     const title = event.target.getVideoData().title;
     timestampData.youtube_title = title;
     
-    updateStatus('YouTube video loaded');
+    console.log('YouTube video loaded');
     showAlert('YouTube video loaded: ' + title, 'success');
+}
+
+// YouTube player ready callback for overlay mode
+function onPlayerReadyOverlay(event) {
+    const title = event.target.getVideoData().title;
+    timestampData.youtube_title = title;
+    
+    console.log('YouTube video loaded (Overlay Mode)');
 }
 
 // YouTube player state change callback
@@ -653,8 +936,8 @@ function extractYouTubeVideoId(url) {
 
 // Update status
 function updateStatus(text) {
-    const statusElement = document.getElementById('status');
-    statusElement.textContent = text;
+    // Status updates are now silent - no UI updates
+    console.log('Status:', text);
 }
 
 // Show alert message
@@ -722,6 +1005,53 @@ function showAlert(text, type) {
             alertElement.parentNode.removeChild(alertElement);
         }
     }, 4000);
+}
+
+// Show info message for mode buttons
+function showInfoMessage(text, button) {
+    // Remove existing info message
+    hideInfoMessage();
+    
+    // Create info message element
+    const infoElement = document.createElement('div');
+    infoElement.id = 'mode-info-message';
+    infoElement.textContent = text;
+    
+    // Add to page
+    document.body.appendChild(infoElement);
+    
+    // Get button position
+    const buttonRect = button.getBoundingClientRect();
+    
+    // Position it above the button
+    infoElement.style.position = 'fixed';
+    infoElement.style.top = (buttonRect.top - 35) + 'px';
+    infoElement.style.left = (buttonRect.left + buttonRect.width / 2) + 'px';
+    infoElement.style.transform = 'translateX(-50%)';
+    infoElement.style.zIndex = '10000';
+    infoElement.style.padding = '6px 10px';
+    infoElement.style.borderRadius = '6px';
+    infoElement.style.fontSize = '12px';
+    infoElement.style.fontWeight = '500';
+    infoElement.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+    infoElement.style.color = 'white';
+    infoElement.style.boxShadow = 'var(--shadow-md)';
+    infoElement.style.backdropFilter = 'blur(10px)';
+    infoElement.style.transition = 'opacity 0.2s ease';
+    infoElement.style.whiteSpace = 'nowrap';
+}
+
+// Hide info message
+function hideInfoMessage() {
+    const infoElement = document.getElementById('mode-info-message');
+    if (infoElement) {
+        infoElement.style.opacity = '0';
+        setTimeout(() => {
+            if (infoElement.parentNode) {
+                infoElement.parentNode.removeChild(infoElement);
+            }
+        }, 200);
+    }
 }
 
 // Modal event listeners (이미 위에서 처리됨)

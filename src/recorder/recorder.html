@@ -237,7 +237,7 @@
             width: 100%;
             height: 100%;
             display: block;
-            object-fit: cover;
+            object-fit: contain;
         }
 
         /* YouTube 영상 비율 유지 */
@@ -450,26 +450,29 @@
         }
 
         .help-btn {
-            width: 20px;
-            height: 20px;
+            position: fixed;
+            bottom: var(--space-lg);
+            right: var(--space-lg);
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            background: var(--color-secondary);
+            background: var(--color-action);
             color: white;
             border: none;
-            font-size: 12px;
+            font-size: var(--text-xl);
             font-weight: bold;
             cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition);
+            z-index: 100;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-left: var(--space-xs);
-            margin-top: 5px;
-            transition: var(--transition);
         }
 
         .help-btn:hover {
-            background: var(--color-action);
             transform: scale(1.1);
+            box-shadow: var(--shadow-action);
         }
 
         .beta-tag {
@@ -597,35 +600,7 @@
             color: var(--color-text-muted);
         }
 
-        .status-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--color-bg-card);
-            border-top: 1px solid var(--color-border);
-            padding: 8px var(--space-md);
-            backdrop-filter: blur(20px);
-            z-index: 1000;
-        }
 
-        .status-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .status-text {
-            color: var(--color-text-sub);
-            font-size: var(--text-sm);
-        }
-
-        .status-actions {
-            display: flex;
-            gap: 8px;
-        }
 
         .footer {
             text-align: center;
@@ -846,6 +821,27 @@
 
         .modal-body {
             margin-bottom: var(--space-sm);
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        /* 스크롤바 스타일링 */
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: var(--color-action);
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: var(--color-action-hover);
         }
 
         .modal-actions {
@@ -920,8 +916,8 @@
             font-weight: 500;
         }
 
-        /* Step Progress Section */
-        .step-progress {
+        /* Step Progress and Mode Toggle Container */
+        .step-progress-container {
             display: flex;
             align-items: center;
             gap: var(--space-lg);
@@ -929,11 +925,88 @@
             max-width: 1400px;
             margin-left: auto;
             margin-right: auto;
+        }
+
+
+
+        /* Step Progress Section */
+        .step-progress {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+            flex: 1;
             padding: var(--space-md);
             background: var(--color-bg-card);
             border-radius: var(--radius-md);
             border: 1px solid var(--color-border);
         }
+
+        /* Mode Toggle Container */
+        .mode-toggle-container {
+            display: flex;
+            gap: var(--space-sm);
+            align-items: center;
+        }
+
+        .mode-btn {
+            padding: var(--space-md) var(--space-lg);
+            border: 2px solid var(--color-secondary);
+            background: var(--color-bg-card);
+            color: var(--color-text-sub);
+            border-radius: var(--radius-lg);
+            font-size: var(--text-base);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 130px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .mode-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+            z-index: 1;
+        }
+
+        .mode-btn:hover::before {
+            left: 100%;
+        }
+
+        .mode-btn:hover {
+            background: var(--color-secondary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--color-secondary);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, var(--color-action), #d32f2f);
+            color: white;
+            border-color: var(--color-action);
+            box-shadow: var(--shadow-action);
+            transform: translateY(-2px);
+        }
+
+        .mode-btn.active:hover {
+            background: linear-gradient(135deg, var(--color-action-hover), #b71c1c);
+            transform: translateY(-3px);
+        }
+
+        /* Tooltip styles for mode buttons */
+        .mode-btn {
+            position: relative;
+        }
+
+
 
         .step-item {
             display: flex;
@@ -1009,6 +1082,115 @@
             font-size: var(--text-lg);
         }
 
+        /* Overlay Mode Layout */
+        .overlay-mode-layout {
+            position: relative;
+            width: 90%;
+            margin: 0 auto;
+            height: 55vh;
+            max-width: calc(55vh * 16 / 9);
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--color-border);
+        }
+
+        .webcam-main-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .webcam-main-container .video-container {
+            width: 100%;
+            height: calc(100% - 50px); /* 헤더 높이 제외 */
+            aspect-ratio: 16/9;
+        }
+
+        .youtube-overlay {
+            position: absolute;
+            top: calc(var(--space-md) + 20px);
+            right: var(--space-md);
+            width: 25%;
+            aspect-ratio: 16/9;
+            background: var(--color-bg-card);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--color-border);
+            z-index: 20;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .youtube-overlay.overlay-top-left {
+            top: calc(var(--space-md) + 20px);
+            left: var(--space-md);
+            right: auto;
+        }
+
+        .youtube-overlay.overlay-bottom-right {
+            bottom: 60px;
+            right: var(--space-md);
+            top: auto;
+        }
+
+        .youtube-overlay.overlay-bottom-left {
+            bottom: 60px;
+            left: var(--space-md);
+            top: auto;
+        }
+
+        .overlay-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            margin-left: auto;
+        }
+
+        .youtube-overlay .video-header {
+            padding: 8px 12px;
+            font-size: var(--text-sm);
+        }
+
+        .youtube-overlay .video-container {
+            height: 100%;
+            aspect-ratio: 16/9;
+        }
+
+        /* Slider Styles */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-top: var(--space-xs);
+        }
+
+        .slider {
+            flex-grow: 1;
+            height: 8px;
+            background: var(--color-secondary);
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--color-action);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .slider-value {
+            min-width: 60px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--color-action);
+            font-size: var(--text-lg);
+        }
+
         /* 모바일 반응형 */
         @media (max-width: 768px) {
             .step-progress {
@@ -1034,6 +1216,20 @@
                 flex-wrap: wrap;
                 justify-content: center;
             }
+
+            .step-progress-container {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+
+            .mode-toggle-container {
+                justify-content: center;
+            }
+
+                                .youtube-overlay {
+                width: 35%;
+                aspect-ratio: 16/9;
+            }
         }
 
         /* Bottom Controls Section */
@@ -1041,7 +1237,7 @@
             display: flex;
             flex-direction: column;
             gap: var(--space-sm);
-            margin-top: var(--space-sm);
+            margin-top: var(--space-xs);
             max-width: 1400px;
             margin-left: auto;
             margin-right: auto;
@@ -1098,7 +1294,7 @@
 
         .recording-guide {
             text-align: center;
-            margin: var(--space-sm) auto var(--space-md) auto;
+            margin: var(--space-xs) auto var(--space-sm) auto;
             max-width: 1400px;
             padding: var(--space-sm);
             background: var(--color-bg-card);
@@ -1129,8 +1325,8 @@
                     <div class="header-logo"></div>
                     <h1>YouTube Reaction Recorder</h1>
                     <span class="beta-tag">Beta</span>
-                    <button class="help-btn" id="main-help-btn" title="Learn more about this recorder">?</button>
                 </div>
+                <button class="help-btn" id="main-help-btn" title="Learn more about this recorder">?</button>
                 <a href="/" class="home-btn" title="Return to main studio">
                     Back to Studio
                 </a>
@@ -1138,38 +1334,52 @@
         </header>
 
                 <div class="main-content">
-            <!-- Step Progress Section -->
-            <div class="step-progress">
-                <div class="step-item completed" id="step-1">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                        <div class="step-title">Set YouTube URL</div>
-                        <button id="url-modal-btn" class="btn btn-primary btn-compact">Set URL</button>
+            <!-- Step Progress and Mode Toggle Section -->
+            <div class="step-progress-container">
+                <!-- Step Progress Section -->
+                <div class="step-progress">
+                    <div class="step-item completed" id="step-1">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Set YouTube URL</div>
+                            <button id="url-modal-btn" class="btn btn-primary btn-compact">Set URL</button>
+                        </div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-item active" id="step-2">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Enable Webcam</div>
+                            <button id="webcam-btn" class="btn btn-secondary btn-compact">Enable</button>
+                        </div>
+                    </div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-item locked" id="step-3">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Start Recording</div>
+                            <button id="re-download-btn" class="btn btn-secondary btn-compact" disabled title="timestamp, original video URL, overlay settings will be saved">
+                                Download
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="step-arrow">→</div>
-                <div class="step-item active" id="step-2">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                        <div class="step-title">Enable Webcam</div>
-                        <button id="webcam-btn" class="btn btn-secondary btn-compact">Enable</button>
-                    </div>
-                </div>
-                <div class="step-arrow">→</div>
-                <div class="step-item locked" id="step-3">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                        <div class="step-title">Start Recording</div>
-                        <button id="re-download-btn" class="btn btn-secondary btn-compact" disabled>
-                            Download
-                        </button>
-                    </div>
+
+                <!-- Mode Toggle Buttons -->
+                <div class="mode-toggle-container">
+                    <button id="overlay-mode-btn" class="mode-btn active" data-mode="overlay">
+                        Overlay Mode
+                    </button>
+                    <button id="split-mode-btn" class="mode-btn" data-mode="split">
+                        Split Mode
+                    </button>
                 </div>
             </div>
 
             <!-- Video Section -->
             <div class="video-section">
-                <div class="video-grid">
+                <!-- Split Mode Layout -->
+                <div class="video-grid" id="split-mode-layout">
                     <div class="video-card">
                         <div class="video-header">
                             <span>📹</span>
@@ -1209,6 +1419,41 @@
                         </div>
                         <div class="video-container">
                             <div id="youtube-player"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Overlay Mode Layout -->
+                <div class="overlay-mode-layout" id="overlay-mode-layout" style="display: none;">
+                    <div class="webcam-main-container">
+                        <div class="video-header">
+                            <span>📹</span>
+                            <span class="header-main">Webcam</span>
+                            <span class="header-sub">(Your Reaction Video)</span>
+                            <div class="overlay-controls">
+                                <button id="overlay-settings-btn" class="btn btn-secondary btn-compact" title="Overlay Settings">
+                                    ⚙️ Overlay Settings
+                                </button>
+                                <div class="toggle-switch" title="Toggle mirror mode">
+                                    <input type="checkbox" id="mirror-toggle-overlay" class="toggle-input">
+                                    <label for="mirror-toggle-overlay" class="toggle-label">
+                                        <span class="toggle-slider">
+                                            <span class="toggle-text-on">ON</span>
+                                            <span class="toggle-text-off">OFF</span>
+                                        </span>
+                                        <span class="toggle-text">Mirror</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="video-container">
+                            <video id="webcam-video-overlay" autoplay muted></video>
+                        </div>
+                    </div>
+                    
+                    <div class="youtube-overlay" id="youtube-overlay">
+                        <div class="video-container">
+                            <div id="youtube-player-overlay"></div>
                         </div>
                     </div>
                 </div>
@@ -1266,40 +1511,96 @@
         </div>
 
         <!-- Help Modal -->
-        <div id="help-modal" class="modal" style="display: none;">
+        <div id="help-modal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="help-modal-title">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>How to Use YouTube Reaction Recorder</h3>
-                    <button class="modal-close" id="help-modal-close">&times;</button>
+                    <h3 id="help-modal-title">How to Use YouTube Reaction Recorder</h3>
+                    <button class="modal-close" id="help-modal-close" aria-label="Close Help Modal">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="help-content">
                         <h4>🎬 What is YouTube Reaction Recorder?</h4>
-                        <p>This recorder is part of a complete reaction video creation workflow. It captures your webcam reaction while you watch YouTube videos, automatically tracks timestamps, and provides synchronized video and timestamp files for easy editing in video editing software.</p>
+                        <p>This recorder captures your webcam reaction while watching YouTube videos, automatically tracks timestamps, and provides synchronized video and timestamp files for easy editing in video editing software.</p>
                         
-                        <h4>Step-by-Step Guide:</h4>
+                        <h4>📋 Step-by-Step Guide:</h4>
                         <ol>
-                            <li><strong>Set YouTube URL:</strong> Click the "Set URL" button and enter a YouTube video URL</li>
+                            <li><strong>Set YouTube URL:</strong> Click "Set URL" and enter a YouTube video URL</li>
                             <li><strong>Enable Webcam:</strong> Click "Enable" to activate your camera and microphone</li>
                             <li><strong>Start Recording:</strong> Click "Start" to begin capturing your reaction</li>
                             <li><strong>Watch & React:</strong> Click on the YouTube video to start watching and react naturally</li>
                             <li><strong>Stop Recording:</strong> Click "Stop" when finished to download your video and timestamps</li>
                         </ol>
                         
-                        <h4>Features:</h4>
+                        <h4>🎛️ Layout Modes:</h4>
                         <ul>
-                            <li><strong>Mirror Mode:</strong> Toggle to flip your webcam horizontally</li>
-                            <li><strong>Expand YouTube:</strong> Toggle to make YouTube video larger</li>
-                            <li><strong>Timestamps:</strong> Automatically tracks when you start/stop YouTube video</li>
-                            <li><strong>Re-download:</strong> Download your video and timestamps again anytime</li>
+                            <li><strong>Overlay Mode:</strong> Webcam as main, YouTube as small overlay (default)</li>
+                            <li><strong>Split Mode:</strong> Side-by-side layout for easier recording and viewing</li>
                         </ul>
                         
-                        <h4>Tips:</h4>
+                        <h4>⚙️ Features:</h4>
+                        <ul>
+                            <li><strong>Mirror Mode:</strong> Toggle to flip your webcam horizontally</li>
+                            <li><strong>Overlay Settings:</strong> Adjust position, size, and YouTube volume</li>
+                            <li><strong>Auto Timestamps:</strong> Automatically tracks YouTube play/pause/end events</li>
+                            <li><strong>Download:</strong> Get timestamp JSON and recorded video files</li>
+                        </ul>
+                        
+                        <h4>💡 Tips:</h4>
                         <ul>
                             <li>Make sure your webcam and microphone are working before starting</li>
-                            <li>Click on the YouTube video to control playback</li>
+                            <li>Use Overlay Mode to see how your final video will look</li>
+                            <li>Use Split Mode for easier recording and viewing</li>
                             <li>Your reaction video will be saved with timestamps for easy editing</li>
                         </ul>
+                        
+                        <h4>📁 Output Files:</h4>
+                        <ul>
+                            <li><strong>timestamp_*.json:</strong> Contains sync points and layout settings</li>
+                            <li><strong>recorded_video_*.webm:</strong> Your webcam reaction video</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overlay Settings Modal -->
+        <div id="overlay-settings-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>⚙️ Overlay Settings</h3>
+                    <button class="modal-close" id="overlay-settings-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="overlay-settings-content">
+                        <div class="input-group">
+                            <label class="input-label" for="overlay-position">Overlay Position</label>
+                            <select id="overlay-position" class="input">
+                                <option value="top-right">Top Right</option>
+                                <option value="top-left">Top Left</option>
+                                <option value="bottom-right">Bottom Right</option>
+                                <option value="bottom-left">Bottom Left</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label" for="overlay-size">Overlay Size</label>
+                            <div class="slider-container">
+                                <input type="range" id="overlay-size" class="slider" min="20" max="60" value="40">
+                                <span id="overlay-size-value" class="slider-value">40%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label" for="youtube-volume">YouTube Volume</label>
+                            <div class="slider-container">
+                                <input type="range" id="youtube-volume" class="slider" min="0" max="100" value="100">
+                                <span id="youtube-volume-value" class="slider-value">100%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <button id="toggle-overlay" class="btn btn-secondary">Hide Overlay</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1322,19 +1623,7 @@
         </footer>
     </div>
 
-    <div class="status-bar">
-        <div class="status-content">
-            <div class="status-text" id="status">Ready to start recording</div>
-            <div class="status-actions">
-                <button id="download-video-btn" class="btn btn-small btn-success" style="display: none;">
-                    Download Video
-                </button>
-                <button id="download-timestamp-btn" class="btn btn-small btn-info" style="display: none;">
-                    Download Timestamps
-                </button>
-            </div>
-        </div>
-    </div>
+
 
     <!-- YouTube API -->
     <script src="https://www.youtube.com/iframe_api"></script>
