@@ -219,7 +219,10 @@ class SimpleEditor {
 
         if (loadFileBtn) {
             loadFileBtn.addEventListener('click', () => {
-                document.getElementById('timestamp-file').click();
+                const fileInput = document.getElementById('timestamp-file');
+                if (fileInput) {
+                    fileInput.click();
+                }
             });
         }
 
@@ -233,6 +236,17 @@ class SimpleEditor {
             exportBtn.addEventListener('click', () => {
                 this.fileManager.exportTimestamps();
             });
+        }
+
+        // 톱니바퀴 버튼으로 순서도 펼치기
+        const showStepsBtn = document.getElementById('show-steps-btn');
+        if (showStepsBtn) {
+            showStepsBtn.addEventListener('click', () => {
+                console.log('Show steps button clicked');
+                this.expandStepProgress();
+            });
+        } else {
+            console.log('Show steps button not found');
         }
     }
 
@@ -273,6 +287,26 @@ class SimpleEditor {
 
         if (exportBtn) {
             exportBtn.disabled = step < 4;
+        }
+    }
+
+    // 순서도 접기
+    collapseStepProgress() {
+        const stepProgress = document.getElementById('step-progress-section');
+        if (stepProgress) {
+            stepProgress.classList.add('collapsed');
+        }
+    }
+
+    // 순서도 펼치기
+    expandStepProgress() {
+        const stepProgress = document.getElementById('step-progress-section');
+        console.log('expandStepProgress called, stepProgress:', stepProgress);
+        if (stepProgress) {
+            stepProgress.classList.remove('collapsed');
+            console.log('Removed collapsed class');
+        } else {
+            console.log('Step progress section not found');
         }
     }
 
@@ -324,6 +358,11 @@ class SimpleEditor {
                         this.fileManager.setReactionVideoUrl();
                     }
                     this.closeUrlModal();
+                    
+                    // URL 입력 완료 후 순서도 자동 접기
+                    setTimeout(() => {
+                        this.collapseStepProgress();
+                    }, 500);
                 } else {
                     alert('Please enter a valid YouTube URL');
                 }

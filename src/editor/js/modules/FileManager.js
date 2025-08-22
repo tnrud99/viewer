@@ -11,25 +11,11 @@ export class FileManager {
     }
 
     setupFileControls() {
-        const loadBtn = document.getElementById('load-btn');
         const fileInput = document.getElementById('timestamp-file');
-        const exportBtn = document.getElementById('export-btn');
-
-        if (loadBtn) {
-            loadBtn.addEventListener('click', () => {
-                fileInput.click();
-            });
-        }
 
         if (fileInput) {
             fileInput.addEventListener('change', (e) => {
                 this.handleFileLoad(e);
-            });
-        }
-
-        if (exportBtn) {
-            exportBtn.addEventListener('click', () => {
-                this.exportTimestamps();
             });
         }
     }
@@ -53,7 +39,6 @@ export class FileManager {
 
     loadSampleData() {
         // 샘플 데이터 로드 (개발용) - 배포용으로 비활성화
-        console.log('Sample data loading disabled for production');
         return;
         
         // 실제 timestamp_1751179878134.json 파일에서 데이터 로드
@@ -173,7 +158,9 @@ export class FileManager {
 
     handleFileLoad(event) {
         const file = event.target.files[0];
-        if (!file) return;
+        if (!file) {
+            return;
+        }
 
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -204,6 +191,20 @@ export class FileManager {
             window.simpleEditor.layoutManager.loadLayoutFromData(data);
         }
         
+        // 원본 영상 URL 자동 설정
+        console.log('Checking for youtube_video_id:', data.youtube_video_id);
+        if (data.youtube_video_id && window.simpleEditor && window.simpleEditor.getPreviewManager) {
+            const originalVideoUrl = `https://www.youtube.com/watch?v=${data.youtube_video_id}`;
+            console.log('Setting original video URL:', originalVideoUrl);
+            window.simpleEditor.getPreviewManager().updateOriginalVideoUrl(originalVideoUrl);
+        } else {
+            console.log('Missing requirements:', {
+                youtube_video_id: !!data.youtube_video_id,
+                simpleEditor: !!window.simpleEditor,
+                getPreviewManager: !!(window.simpleEditor && window.simpleEditor.getPreviewManager)
+            });
+        }
+        
         // 히스토리 매니저에 원본 데이터 설정
         if (window.simpleEditor && window.simpleEditor.getHistoryManager) {
             window.simpleEditor.getHistoryManager().setOriginalData(data.sync_points);
@@ -211,6 +212,11 @@ export class FileManager {
         }
         
         this.updateFileInfo();
+        
+        // Step Progress 업데이트 (Step 1 완료)
+        if (window.simpleEditor && window.simpleEditor.updateStepProgress) {
+            window.simpleEditor.updateStepProgress(2);
+        }
     }
 
     updateFileInfo() {

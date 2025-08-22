@@ -297,6 +297,18 @@ body {
     border-radius: var(--radius-sm) !important;
 }
 
+/* 현재 단계의 버튼 스타일 */
+.step-item.active .btn-compact {
+    background: var(--color-action) !important;
+    border-color: var(--color-action) !important;
+    color: white !important;
+}
+
+.step-item.active .btn-compact:hover {
+    background: #d32f2f !important;
+    border-color: #d32f2f !important;
+}
+
 /* 모바일 반응형 */
 @media (max-width: 768px) {
     .step-progress {
@@ -430,7 +442,8 @@ body {
 }
 
 .url-input::placeholder {
-    color: var(--color-text-secondary);
+    color: var(--color-text-muted);
+    opacity: 0.5;
 }
 
 .url-info {
@@ -1239,6 +1252,16 @@ body {
     overflow-y: auto;
 }
 
+.modal-footer {
+    padding: var(--space-lg) var(--space-xl);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    gap: var(--space-md);
+    justify-content: flex-end;
+    background: var(--color-bg-card);
+    flex-shrink: 0;
+}
+
 .form-group {
     margin-bottom: 25px;
 }
@@ -1883,7 +1906,7 @@ body {
     }
 
     #sync-mode-btn.active {
-        background: var(--color-success);
+    background: var(--color-success);
         border-color: var(--color-success);
         color: white;
     }
@@ -1895,6 +1918,54 @@ body {
 
     #sync-mode-btn.active:hover {
         background: #45a049;
+    }
+
+    /* Sync Mode 버튼 커스텀 툴팁 */
+    #sync-mode-btn {
+        position: relative;
+    }
+
+    #sync-mode-btn::after {
+        content: "Sync Mode: Move all timestamps after the dragged segment together";
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        pointer-events: none;
+        margin-bottom: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    #sync-mode-btn::before {
+        content: "";
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-top-color: rgba(0, 0, 0, 0.9);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        pointer-events: none;
+        margin-bottom: 2px;
+    }
+
+    #sync-mode-btn:hover::after,
+    #sync-mode-btn:hover::before {
+        opacity: 1;
+        visibility: visible;
     }
 
     .timeline-controls .zoom-controls {
@@ -1955,6 +2026,21 @@ body {
         font-size: var(--text-sm);
         color: var(--color-text-sub);
         margin-top: var(--space-sm);
+    }
+
+    .timeline-tip {
+        text-align: center;
+        font-size: var(--text-sm);
+        color: var(--color-text-muted);
+        margin-top: var(--space-xs);
+        padding: var(--space-xs) var(--space-sm);
+        background: rgba(194, 41, 31, 0.1);
+        border-radius: var(--radius-sm);
+        border: 1px solid rgba(194, 41, 31, 0.2);
+    }
+
+    .timeline-tip span {
+        font-style: italic;
     }
 
         /* Responsive adjustments */

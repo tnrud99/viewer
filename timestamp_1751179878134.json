@@ -5,8 +5,8 @@
   "created_at": "2025-06-29T06:45:25.168Z",
   "layout": {
     "overlay_position": "top-right",
-    "overlay_size": 0.3,
-    "youtube_volume": 0.5,
+    "overlay_size": 60,
+    "youtube_volume": 100,
     "hide_overlay": false
   },
   "sync_points": [

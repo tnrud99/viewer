@@ -31,7 +31,7 @@
                 <div class="step-item active" id="step-1">
                     <div class="step-number">1</div>
                     <div class="step-content">
-                        <div class="step-title">Load File</div>
+                        <div class="step-title">Load Timestamp</div>
                         <button id="load-file-btn" class="btn btn-primary btn-compact">Load</button>
                     </div>
                 </div>
@@ -63,6 +63,9 @@
                 <div class="unified-header">
                     <h3>Video & Timeline Editor</h3>
                     <div class="header-controls">
+                        <button id="show-steps-btn" class="btn btn-secondary btn-small" title="Show Workflow Steps">
+                            ⚙️
+                        </button>
                         <button id="layout-settings-btn" class="btn btn-secondary btn-small">
                             Layout Settings
                         </button>
@@ -122,6 +125,9 @@
                     <div class="timeline-info">
                         <span>Total Duration: <span id="total-duration">00:00</span></span>
                         <span>Selected: <span id="selected-info">None</span></span>
+                    </div>
+                    <div class="timeline-tip">
+                        <span>💡 Tip: Click PLAY/PAUSE points to preview sync, then drag segments to adjust timestamps</span>
                     </div>
                 </div>
             </div>

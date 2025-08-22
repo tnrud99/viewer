@@ -46,6 +46,17 @@ export class PreviewManager {
                 'controls': 1,
                 'rel': 0,
                 'modestbranding': 1
+            },
+            events: {
+                'onReady': (event) => {
+                    console.log('Original player ready');
+                },
+                'onStateChange': (event) => {
+                    console.log('Original player state changed:', event.data);
+                },
+                'onError': (event) => {
+                    console.log('Original player error:', event.data);
+                }
             }
         });
 
@@ -236,7 +247,39 @@ export class PreviewManager {
         const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
         if (videoIdMatch && this.reactionPreviewPlayer) {
             const videoId = videoIdMatch[1];
-            this.reactionPreviewPlayer.loadVideoById(videoId);
+            // 자동 재생 방지: cueVideoById 사용
+            this.reactionPreviewPlayer.cueVideoById(videoId);
+        }
+    }
+
+    // 원본 영상 URL 업데이트
+    updateOriginalVideoUrl(url) {
+        console.log('updateOriginalVideoUrl called with:', url);
+        this.originalVideoUrl = url;
+        
+        // URL에서 video ID 추출
+        const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        console.log('Video ID match:', videoIdMatch);
+        
+        if (videoIdMatch && this.originalPreviewPlayer) {
+            const videoId = videoIdMatch[1];
+            console.log('Loading original video ID:', videoId);
+            console.log('Original player ready state:', this.originalPreviewPlayer.getPlayerState ? this.originalPreviewPlayer.getPlayerState() : 'Player not ready');
+            
+            // 자동 재생 방지: cueVideoById 사용
+            this.originalPreviewPlayer.cueVideoById(videoId);
+            
+            // 플레이어 상태 확인
+            setTimeout(() => {
+                console.log('Original player state after loading:', this.originalPreviewPlayer.getPlayerState ? this.originalPreviewPlayer.getPlayerState() : 'Player not ready');
+                console.log('Original player video ID:', this.originalPreviewPlayer.getVideoData ? this.originalPreviewPlayer.getVideoData().video_id : 'No video data');
+            }, 1000);
+        } else {
+            console.log('Cannot load original video:', {
+                videoIdMatch: !!videoIdMatch,
+                originalPreviewPlayer: !!this.originalPreviewPlayer,
+                playerReady: this.originalPreviewPlayer ? (this.originalPreviewPlayer.getPlayerState ? 'Yes' : 'No') : 'No player'
+            });
         }
     }
 
