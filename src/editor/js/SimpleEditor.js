@@ -6,12 +6,14 @@ import { PreviewManager } from './modules/PreviewManager.js';
 import { AdvancedEditor } from './modules/AdvancedEditor.js';
 import { FileManager } from './modules/FileManager.js';
 import { HistoryManager } from './modules/HistoryManager.js';
+import { LayoutManager } from './modules/LayoutManager.js';
 
 class SimpleEditor {
     constructor() {
         this.timestamps = [];
         this.selectedSegment = null;
         this.selectedPoint = null;
+        this.syncMode = false; // 연동 모드 상태
         
         this.init();
     }
@@ -41,6 +43,7 @@ class SimpleEditor {
         this.advancedEditor = new AdvancedEditor(this.timelineRenderer);
         this.fileManager = new FileManager(this.timelineRenderer);
         this.historyManager = new HistoryManager();
+        this.layoutManager = new LayoutManager();
 
         // 이벤트 리스너 설정
         this.setupEventListeners();
@@ -49,6 +52,9 @@ class SimpleEditor {
         
         // 모든 초기화 완료 후 샘플 데이터 로드
         this.fileManager.loadSampleData();
+        
+        // Step Progress 초기화
+        this.setupStepProgress();
     }
 
     setupEventListeners() {
@@ -200,12 +206,176 @@ class SimpleEditor {
     getHistoryManager() {
         return this.historyManager;
     }
+    
+    getLayoutManager() {
+        return this.layoutManager;
+    }
+
+    // Step Progress 설정
+    setupStepProgress() {
+        const loadFileBtn = document.getElementById('load-file-btn');
+        const setUrlBtn = document.getElementById('set-url-btn');
+        const exportBtn = document.getElementById('export-btn');
+
+        if (loadFileBtn) {
+            loadFileBtn.addEventListener('click', () => {
+                document.getElementById('timestamp-file').click();
+            });
+        }
+
+        if (setUrlBtn) {
+            setUrlBtn.addEventListener('click', () => {
+                this.showReactionUrlModal();
+            });
+        }
+
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                this.fileManager.exportTimestamps();
+            });
+        }
+    }
+
+    // Step Progress 업데이트
+    updateStepProgress(step) {
+        // 모든 step을 locked로 초기화
+        for (let i = 1; i <= 4; i++) {
+            const stepElement = document.getElementById(`step-${i}`);
+            if (stepElement) {
+                stepElement.className = 'step-item locked';
+            }
+        }
+
+        // 현재 step까지 completed로 설정
+        for (let i = 1; i <= step; i++) {
+            const stepElement = document.getElementById(`step-${i}`);
+            if (stepElement) {
+                if (i === step) {
+                    stepElement.className = 'step-item active';
+                } else {
+                    stepElement.className = 'step-item completed';
+                }
+            }
+        }
+
+        // 버튼 활성화/비활성화
+        this.updateStepButtons(step);
+    }
+
+    // Step 버튼 상태 업데이트
+    updateStepButtons(step) {
+        const setUrlBtn = document.getElementById('set-url-btn');
+        const exportBtn = document.getElementById('export-btn');
+
+        if (setUrlBtn) {
+            setUrlBtn.disabled = step < 2;
+        }
+
+        if (exportBtn) {
+            exportBtn.disabled = step < 4;
+        }
+    }
+
+    // Reaction URL 모달 표시
+    showReactionUrlModal() {
+        const modal = document.getElementById('url-modal');
+        const urlInput = document.getElementById('reaction-video-url-modal');
+        const currentUrlSpan = document.getElementById('current-reaction-url-modal');
+        
+        // 현재 URL 표시
+        if (this.fileManager.reactionVideoUrl) {
+            currentUrlSpan.textContent = `Current: ${this.fileManager.reactionVideoUrl}`;
+            currentUrlSpan.className = 'current-url has-url';
+        } else {
+            currentUrlSpan.textContent = 'No reaction video URL set';
+            currentUrlSpan.className = 'current-url';
+        }
+        
+        if (modal) {
+            modal.style.display = 'block';
+            modal.setAttribute('aria-hidden', 'false');
+            
+            // 입력창에 포커스
+            if (urlInput) {
+                urlInput.focus();
+            }
+        }
+        
+        this.setupUrlModalEvents();
+    }
+
+    // URL 모달 이벤트 설정
+    setupUrlModalEvents() {
+        const modal = document.getElementById('url-modal');
+        const urlInput = document.getElementById('reaction-video-url-modal');
+        const saveBtn = document.getElementById('save-url-btn');
+        const cancelBtn = document.getElementById('cancel-url-btn');
+        const closeBtn = document.getElementById('url-modal-close');
+
+        // 저장 버튼
+        if (saveBtn) {
+            saveBtn.onclick = () => {
+                const url = urlInput.value.trim();
+                if (url) {
+                    // 임시로 기존 input에 값 설정하여 FileManager 메서드 사용
+                    const hiddenInput = document.getElementById('reaction-video-url');
+                    if (hiddenInput) {
+                        hiddenInput.value = url;
+                        this.fileManager.setReactionVideoUrl();
+                    }
+                    this.closeUrlModal();
+                } else {
+                    alert('Please enter a valid YouTube URL');
+                }
+            };
+        }
+
+        // 취소/닫기 버튼
+        const closeModal = () => this.closeUrlModal();
+        if (cancelBtn) cancelBtn.onclick = closeModal;
+        if (closeBtn) closeBtn.onclick = closeModal;
+
+        // Enter 키로 저장
+        if (urlInput) {
+            urlInput.onkeypress = (e) => {
+                if (e.key === 'Enter') {
+                    saveBtn.click();
+                }
+            };
+        }
+
+        // 모달 외부 클릭으로 닫기
+        if (modal) {
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            };
+        }
+    }
+
+    // URL 모달 닫기
+    closeUrlModal() {
+        const modal = document.getElementById('url-modal');
+        const urlInput = document.getElementById('reaction-video-url-modal');
+        
+        if (modal) {
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+        }
+        
+        if (urlInput) {
+            urlInput.value = '';
+        }
+    }
 
     // 히스토리 컨트롤 설정
     setupHistoryControls() {
         const undoBtn = document.getElementById('undo-btn');
         const redoBtn = document.getElementById('redo-btn');
         const resetBtn = document.getElementById('reset-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const syncModeBtn = document.getElementById('sync-mode-btn');
 
         if (undoBtn) {
             undoBtn.addEventListener('click', () => this.handleUndo());
@@ -215,6 +385,12 @@ class SimpleEditor {
         }
         if (resetBtn) {
             resetBtn.addEventListener('click', () => this.handleReset());
+        }
+        if (pauseBtn) {
+            pauseBtn.addEventListener('click', () => this.handlePause());
+        }
+        if (syncModeBtn) {
+            syncModeBtn.addEventListener('click', () => this.toggleSyncMode());
         }
     }
 
@@ -251,6 +427,45 @@ class SimpleEditor {
                 this.updateButtons();
             }
         }
+    }
+
+    // 모든 비디오 일시정지 처리
+    handlePause() {
+        if (this.previewManager) {
+            this.previewManager.pauseAllVideos();
+        }
+    }
+
+    // Sync Mode 토글
+    toggleSyncMode() {
+        this.syncMode = !this.syncMode;
+        this.updateSyncModeButton();
+        
+        // DragDropManager에 sync mode 상태 전달
+        if (this.dragDropManager) {
+            this.dragDropManager.setSyncMode(this.syncMode);
+        }
+    }
+
+    // Sync Mode 버튼 UI 업데이트
+    updateSyncModeButton() {
+        const syncModeBtn = document.getElementById('sync-mode-btn');
+        if (syncModeBtn) {
+            if (this.syncMode) {
+                syncModeBtn.textContent = 'Sync: ON';
+                syncModeBtn.classList.add('active');
+                syncModeBtn.title = 'Sync Mode: ON - Move all timestamps after the dragged segment together';
+            } else {
+                syncModeBtn.textContent = 'Sync: OFF';
+                syncModeBtn.classList.remove('active');
+                syncModeBtn.title = 'Sync Mode: OFF - Move individual segments';
+            }
+        }
+    }
+
+    // Sync Mode 상태 반환
+    getSyncMode() {
+        return this.syncMode;
     }
 
     // 타임라인 변경사항을 히스토리에 추가

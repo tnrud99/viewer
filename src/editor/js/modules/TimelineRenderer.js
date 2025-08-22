@@ -32,39 +32,49 @@ export class TimelineRenderer {
 
         const ruler = document.createElement('div');
         ruler.className = 'time-ruler';
-        ruler.style.position = 'absolute';
-        ruler.style.top = '0';
-        ruler.style.left = '0';
-        ruler.style.width = '100%';
-        ruler.style.height = '30px';
-        ruler.style.borderBottom = '1px solid #333';
-        ruler.style.backgroundColor = 'rgba(42, 42, 42, 0.8)';
 
-        // 시간 마커 생성 (10초마다)
-        const interval = Math.max(1, Math.floor(maxTime / 10));
+        // 프로페셔널 편집 도구 방식의 시간 마커 생성
+        const interval = this.getOptimalInterval(maxTime);
         for (let time = 0; time <= maxTime; time += interval) {
             const marker = document.createElement('div');
-            marker.style.position = 'absolute';
+            marker.className = 'time-marker';
             marker.style.left = this.positionCalculator.getTimeMarkerLeft(time) + 'px';
-            marker.style.top = '20px';
-            marker.style.width = '1px';
-            marker.style.height = '10px';
-            marker.style.backgroundColor = '#666';
 
             const label = document.createElement('span');
+            label.className = 'time-label';
             label.textContent = this.formatTime(time);
-            label.style.position = 'absolute';
             label.style.left = this.positionCalculator.getTimeMarkerLeft(time) + 'px';
-            label.style.top = '5px';
-            label.style.transform = 'translateX(-50%)';
-            label.style.fontSize = '10px';
-            label.style.color = '#888';
 
             ruler.appendChild(marker);
             ruler.appendChild(label);
         }
 
         this.container.appendChild(ruler);
+    }
+
+    // 프로페셔널 편집 도구 방식: 줌 레벨과 총 시간에 따른 최적 간격 계산
+    getOptimalInterval(duration) {
+        // 가능한 간격들 (초 단위): 1초, 5초, 10초, 30초, 1분, 5분, 10분, 30분, 1시간
+        const intervals = [1, 5, 10, 30, 60, 300, 600, 1800, 3600];
+        
+        // 현재 줌 레벨 고려
+        const zoomLevel = this.positionCalculator.zoomLevel;
+        const pixelsPerSecond = this.positionCalculator.pixelsPerSecond * zoomLevel;
+        
+        console.log(`Zoom Level: ${zoomLevel}, Pixels per second: ${pixelsPerSecond}`); // 디버그
+        
+        // 간단한 방식: 줌 레벨에 따라 간격 결정
+        if (zoomLevel >= 3.0) {
+            return 1; // 매우 확대: 1초 간격
+        } else if (zoomLevel >= 2.0) {
+            return 5; // 확대: 5초 간격  
+        } else if (zoomLevel >= 1.0) {
+            return 10; // 기본: 10초 간격
+        } else if (zoomLevel >= 0.5) {
+            return 30; // 축소: 30초 간격
+        } else {
+            return 60; // 매우 축소: 1분 간격
+        }
     }
 
     renderSegments() {
@@ -94,28 +104,15 @@ export class TimelineRenderer {
         const left = this.positionCalculator.getSegmentLeft(startTime);
         const width = this.positionCalculator.getSegmentWidth(duration);
 
-        segment.style.position = 'absolute';
         segment.style.left = left + 'px';
         segment.style.width = width + 'px';
-        segment.style.backgroundColor = 'rgba(76, 175, 80, 0.3)';
-        segment.style.border = '1px solid rgba(76, 175, 80, 0.5)';
-        segment.style.borderRadius = '4px';
-        segment.style.cursor = 'grab';
-        segment.style.transition = 'all 0.2s ease';
 
         StyleManager.applySegmentStyles(segment);
 
         // 세그먼트 텍스트 (Duration)
         const text = document.createElement('div');
+        text.className = 'segment-text';
         text.textContent = duration.toFixed(1) + 's';
-        text.style.position = 'absolute';
-        text.style.top = '50%';
-        text.style.left = '50%';
-        text.style.transform = 'translate(-50%, -50%)';
-        text.style.fontSize = '10px';
-        text.style.color = '#4CAF50';
-        text.style.fontWeight = '600';
-        text.style.pointerEvents = 'none';
 
         segment.appendChild(text);
 
@@ -154,12 +151,7 @@ export class TimelineRenderer {
 
         const left = this.positionCalculator.getPointLeft(timestamp.reaction_time);
 
-        point.style.position = 'absolute';
         point.style.left = left + 'px';
-        point.style.width = TIMELINE_CONFIG.POINT_SIZE + 'px';
-        point.style.height = TIMELINE_CONFIG.POINT_SIZE + 'px';
-        point.style.borderRadius = '50%';
-        point.style.cursor = 'pointer';
         point.style.transition = 'all 0.2s ease';
         point.style.zIndex = '10';
 
@@ -193,15 +185,8 @@ export class TimelineRenderer {
 
         // 점 텍스트
         const text = document.createElement('div');
+        text.className = 'point-text';
         text.textContent = label;
-        text.style.position = 'absolute';
-        text.style.top = '50%';
-        text.style.left = '50%';
-        text.style.transform = 'translate(-50%, -50%)';
-        text.style.fontSize = '8px';
-        text.style.color = 'white';
-        text.style.fontWeight = 'bold';
-        text.style.pointerEvents = 'none';
 
         point.appendChild(text);
 
@@ -396,9 +381,21 @@ export class TimelineRenderer {
     }
 
     formatTime(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
+        // 프로페셔널 편집 도구 방식: 간격에 따라 포맷 조정
+        if (seconds < 60) {
+            // 1분 미만: "5s", "10s", "30s"
+            return `${seconds}s`;
+        } else if (seconds < 3600) {
+            // 1시간 미만: "1:30", "5:00"
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return secs === 0 ? `${mins}m` : `${mins}:${secs.toString().padStart(2, '0')}`;
+        } else {
+            // 1시간 이상: "1h", "1h 30m"
+            const hours = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            return mins === 0 ? `${hours}h` : `${hours}h ${mins}m`;
+        }
     }
 
     getSelectedSegment() {

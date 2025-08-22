@@ -68,6 +68,11 @@ export class FileManager {
                 }
                 
                 this.updateFileInfo();
+                
+                // Step Progress 업데이트 (Step 1 완료)
+                if (window.simpleEditor && window.simpleEditor.updateStepProgress) {
+                    window.simpleEditor.updateStepProgress(2);
+                }
             })
             .catch(error => {
                 console.error('Error loading sample timestamp file:', error);
@@ -190,6 +195,11 @@ export class FileManager {
         this.timelineRenderer.setTimestamps(data.sync_points);
         this.timelineRenderer.renderTimeline();
         
+        // Layout 데이터 로드
+        if (window.simpleEditor && window.simpleEditor.layoutManager) {
+            window.simpleEditor.layoutManager.loadLayoutFromData(data);
+        }
+        
         // 히스토리 매니저에 원본 데이터 설정
         if (window.simpleEditor && window.simpleEditor.getHistoryManager) {
             window.simpleEditor.getHistoryManager().setOriginalData(data.sync_points);
@@ -244,6 +254,11 @@ export class FileManager {
         if (window.simpleEditor && window.simpleEditor.getPreviewManager) {
             window.simpleEditor.getPreviewManager().updateReactionVideoUrl(this.reactionVideoUrl);
         }
+        
+        // Step Progress 업데이트 (Step 2 완료)
+        if (window.simpleEditor && window.simpleEditor.updateStepProgress) {
+            window.simpleEditor.updateStepProgress(3);
+        }
     }
 
     exportTimestamps() {
@@ -259,17 +274,25 @@ export class FileManager {
             youtube_first_play_time: timestamp.youtube_first_play_time || null
         }));
 
+        // Export 시점에 LayoutManager의 현재 상태를 가져오기
+        let currentLayout = {
+            overlay_position: "top-right",
+            overlay_size: 40,
+            youtube_volume: 100,
+            hide_overlay: false  // Viewer 형식에 맞춤
+        };
+        
+        // LayoutManager가 있으면 현재 상태를 가져옴 (실시간 적용된 상태)
+        if (window.simpleEditor && window.simpleEditor.layoutManager) {
+            currentLayout = window.simpleEditor.layoutManager.getLayout();
+        }
+        
         const exportData = {
             youtube_video_id: "AbZH7XWDW_k",
             youtube_title: "TAEYEON 태연 'INVU' MV",
             reaction_video: "reaction_1751179878125.webm",
             created_at: this.createdAt || new Date().toISOString(),
-            layout: {
-                reaction_position: "left",
-                youtube_position: "right",
-                reaction_size: 0.5,
-                youtube_size: 0.5
-            },
+            layout: currentLayout,
             sync_points: validatedTimestamps
         };
 

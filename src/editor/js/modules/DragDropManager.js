@@ -8,6 +8,8 @@ export class DragDropManager {
         this.dragStartTime = 0;
         this.draggedSegment = null;
         this.draggedSegmentIndex = -1;
+        this.syncMode = false; // 연동 모드 상태
+        this.originalTimestamps = []; // 드래그 시작 시 원본 타임스탬프 저장
         
         this.setupDragAndDrop();
     }
@@ -51,6 +53,16 @@ export class DragDropManager {
         
         const playIndex = parseInt(segment.dataset.playIndex);
         const pauseIndex = parseInt(segment.dataset.pauseIndex);
+        
+        // start/end 이벤트는 드래그 불가
+        const currentTimestamps = this.timelineRenderer.timestamps;
+        if (currentTimestamps[playIndex] && (currentTimestamps[playIndex].event === 'start' || currentTimestamps[playIndex].event === 'end')) {
+            return;
+        }
+        if (currentTimestamps[pauseIndex] && (currentTimestamps[pauseIndex].event === 'start' || currentTimestamps[pauseIndex].event === 'end')) {
+            return;
+        }
+        
         this.draggedSegmentIndex = playIndex;
         
         // 드래그 시작 전 현재 상태를 히스토리에 추가
@@ -67,6 +79,11 @@ export class DragDropManager {
         const timestamps = this.timelineRenderer.timestamps;
         if (timestamps[playIndex]) {
             this.dragStartTime = timestamps[playIndex].reaction_time;
+        }
+        
+        // Sync Mode일 때 원본 타임스탬프 저장
+        if (this.syncMode) {
+            this.originalTimestamps = timestamps.map(ts => ({ ...ts }));
         }
 
         // 드래그 중 스타일 적용
@@ -123,6 +140,20 @@ export class DragDropManager {
         const timestamps = this.timelineRenderer.timestamps;
         if (!timestamps[playIndex] || !timestamps[playIndex + 1]) return;
 
+        if (this.syncMode) {
+            // Sync Mode: 드래그한 세그먼트와 이후 세그먼트들을 함께 이동
+            this.moveSegmentWithSync(playIndex, newStartTime);
+        } else {
+            // 개별 모드: 현재 세그먼트만 이동
+            this.moveSingleSegment(playIndex, newStartTime);
+        }
+
+        // 타임라인 다시 렌더링
+        this.timelineRenderer.renderTimeline();
+    }
+
+    moveSingleSegment(playIndex, newStartTime) {
+        const timestamps = this.timelineRenderer.timestamps;
         const playTimestamp = timestamps[playIndex];
         const pauseTimestamp = timestamps[playIndex + 1];
         
@@ -132,11 +163,61 @@ export class DragDropManager {
         // 새로운 시간으로 업데이트
         playTimestamp.reaction_time = newStartTime;
         pauseTimestamp.reaction_time = newStartTime + currentDuration;
+    }
 
-        // 타임라인 다시 렌더링
-        this.timelineRenderer.renderTimeline();
+    moveSegmentWithSync(playIndex, newStartTime) {
+        const timestamps = this.timelineRenderer.timestamps;
         
-        // 실시간 렌더링만 수행, 히스토리는 드래그 종료 시에 추가
+        // 이동량 계산 (드래그 시작 시간 대비)
+        const deltaTime = newStartTime - this.dragStartTime;
+        
+        console.log(`Sync Mode - dragStartTime: ${this.dragStartTime}, newStartTime: ${newStartTime}, deltaTime: ${deltaTime}`);
+        
+        // 원본 타임스탬프에서 동일한 오프셋만큼 이동
+        for (let i = 0; i < timestamps.length; i++) {
+            const timestamp = timestamps[i];
+            const originalTimestamp = this.originalTimestamps[i];
+            
+            // start와 end 이벤트는 제외
+            if (timestamp.event === 'start' || timestamp.event === 'end') {
+                continue;
+            }
+            
+            // 드래그한 세그먼트 이후의 것들만 이동
+            if (i >= playIndex) {
+                const oldTime = timestamp.reaction_time;
+                // 원본 위치에서 동일한 오프셋만큼 이동
+                const newTime = originalTimestamp.reaction_time + deltaTime;
+                // 음수 시간 방지
+                timestamp.reaction_time = Math.max(0, newTime);
+                
+                console.log(`Moving timestamp ${i}: ${oldTime} -> ${timestamp.reaction_time} (original: ${originalTimestamp.reaction_time}, delta: ${deltaTime})`);
+            }
+        }
+    }
+
+    moveAllTimestamps(draggedPlayIndex, newStartTime) {
+        const timestamps = this.timelineRenderer.timestamps;
+        
+        // 이동량 계산
+        const deltaTime = newStartTime - this.dragStartTime;
+        
+        // 드래그한 세그먼트 이후의 타임스탬프들만 이동 (start/end 제외)
+        for (let i = 0; i < timestamps.length; i++) {
+            const timestamp = timestamps[i];
+            
+            // start와 end 이벤트는 제외
+            if (timestamp.event === 'start' || timestamp.event === 'end') {
+                continue;
+            }
+            
+            // 드래그한 세그먼트 이후의 것들만 이동 (드래그한 세그먼트 자체는 제외)
+            if (i > draggedPlayIndex + 1) { // PAUSE 포인트 이후부터
+                const newTime = timestamp.reaction_time + deltaTime;
+                // 음수 시간 방지
+                timestamp.reaction_time = Math.max(0, newTime);
+            }
+        }
     }
 
     // 외부에서 호출할 수 있는 메서드들
@@ -155,16 +236,32 @@ export class DragDropManager {
         }
     }
 
+    // Sync Mode 설정
+    setSyncMode(enabled) {
+        this.syncMode = enabled;
+    }
+
+    // Sync Mode 상태 반환
+    getSyncMode() {
+        return this.syncMode;
+    }
+
     // 점에서 세그먼트 드래그 시작
     startSegmentDrag(playIndex, event) {
+        // start/end 이벤트는 드래그 불가
+        const currentTimestamps = this.timelineRenderer.timestamps;
+        if (currentTimestamps[playIndex] && (currentTimestamps[playIndex].event === 'start' || currentTimestamps[playIndex].event === 'end')) {
+            return;
+        }
+        
         // 해당 세그먼트 찾기
         const segmentElement = this.container.querySelector(`[data-play-index="${playIndex}"]`);
         if (!segmentElement) return;
 
         // 드래그 시작 전 현재 상태를 히스토리에 추가 (첫 번째 변경사항 보존)
         if (window.simpleEditor && window.simpleEditor.getHistoryManager) {
-            const timestamps = this.timelineRenderer.timestamps;
-            window.simpleEditor.getHistoryManager().addState(timestamps);
+            const currentTimestamps = this.timelineRenderer.timestamps;
+            window.simpleEditor.getHistoryManager().addState(currentTimestamps);
         }
 
         // 기존 드래그 상태 설정

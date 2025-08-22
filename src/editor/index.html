@@ -15,8 +15,7 @@
             <div class="header-content">
                 <div class="header-center">
                     <div class="header-logo"></div>
-                    <h1>Simple Timestamp Editor</h1>
-
+                    <h1>Timestamp Editor</h1>
                 </div>
                 <a href="/" class="home-btn" title="Return to main studio">
                     Back to Studio
@@ -24,96 +23,132 @@
             </div>
         </header>
 
-        <!-- Simple Editor Section -->
-        <section class="simple-editor">
+        <!-- Main Content -->
+        <div class="main-content">
 
-
-            <!-- File Load Section -->
-            <div class="file-section">
-                <h3>📁 Load Timestamp File</h3>
-                <div class="file-controls">
-                    <input type="file" id="timestamp-file" accept=".json" class="visually-hidden" aria-label="Select timestamp JSON file">
-                    <button id="load-btn" class="btn btn-primary">Choose File</button>
-                    <span class="file-note">JSON timestamp files supported</span>
-                </div>
-                
-                <!-- Reaction Video URL Input -->
-                <div class="reaction-url-section">
-                    <h4>🎥 Reaction Video URL</h4>
-                    <div class="url-input-group">
-                        <input type="url" id="reaction-video-url" placeholder="Enter YouTube URL for reaction video" class="url-input">
-                        <button id="set-reaction-url-btn" class="btn btn-secondary">Set URL</button>
+            <!-- Step Progress Section -->
+            <div class="step-progress" id="step-progress-section">
+                <div class="step-item active" id="step-1">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-title">Load File</div>
+                        <button id="load-file-btn" class="btn btn-primary btn-compact">Load</button>
                     </div>
-                    <div class="url-info">
-                        <span id="current-reaction-url" class="current-url">No reaction video URL set</span>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-item locked" id="step-2">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-title">Set Reaction URL</div>
+                        <button id="set-url-btn" class="btn btn-secondary btn-compact" disabled>Set URL</button>
+                    </div>
+                </div>
+                <div class="step-arrow">→</div>
+                <div class="step-item locked" id="step-3">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-title">Edit Timestamps</div>
+                        <span class="step-status">Ready to edit</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Smart Preview Section -->
-            <div class="preview-section">
-                <div class="preview-header">
-                    <h3>🎬 Smart Preview</h3>
+            <!-- Hidden file input -->
+            <input type="file" id="timestamp-file" accept=".json" class="visually-hidden" aria-label="Select timestamp JSON file">
+            <!-- Hidden URL input for compatibility -->
+            <input type="url" id="reaction-video-url" class="visually-hidden">
+
+            <!-- Unified Video & Timeline Section -->
+            <div class="unified-editor-section">
+                <div class="unified-header">
+                    <h3>Video & Timeline Editor</h3>
+                    <div class="header-controls">
+                        <button id="layout-settings-btn" class="btn btn-secondary btn-small">
+                            Layout Settings
+                        </button>
+                    </div>
                 </div>
                 
-                <div class="preview-container">
-                    <!-- Reaction Video -->
-                    <div class="reaction-video-container">
-                        <div class="video-title">Reaction Video</div>
-                        <div id="reaction-preview-player"></div>
+                <!-- Video Preview Area -->
+                <div class="video-preview-area">
+                    <div class="preview-container">
+                        <!-- Reaction Video -->
+                        <div class="reaction-video-container">
+                            <div class="video-title">Reaction Video</div>
+                            <div id="reaction-preview-player"></div>
+                        </div>
+                        
+                        <!-- Original Video Overlay -->
+                        <div id="original-overlay" class="original-overlay">
+                            <div class="video-title">Original Video</div>
+                            <div id="original-preview-player"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                <!-- Timeline Area -->
+                <div class="timeline-area">
+                    <div class="timeline-controls">
+                        <button id="pause-btn" class="btn btn-secondary" aria-label="Pause Videos" disabled>Pause</button>
+                        <div class="history-controls">
+                            <button id="undo-btn" class="btn btn-secondary" aria-label="Undo" disabled>Undo</button>
+                            <button id="redo-btn" class="btn btn-secondary" aria-label="Redo" disabled>Redo</button>
+                            <button id="reset-btn" class="btn btn-warning" aria-label="Reset to Original">Reset</button>
+                        </div>
+                        <button id="advanced-edit-btn" class="btn btn-secondary" aria-label="Open Advanced Editor">Advanced Editor</button>
+                        <button id="sync-mode-btn" class="btn btn-secondary" aria-label="Toggle Sync Mode" title="Sync Mode: Move all timestamps after the dragged segment together">Sync: OFF</button>
+                        
+                        <div class="timeline-controls-right">
+                            <div class="zoom-controls">
+                                <button id="zoomOutBtn" class="btn btn-secondary" aria-label="Zoom Out">-</button>
+                                <span id="zoomLevel" aria-live="polite">100%</span>
+                                <button id="zoomInBtn" class="btn btn-secondary" aria-label="Zoom In">+</button>
+                                <span class="zoom-hint">(Ctrl+Wheel)</span>
+                            </div>
+                            <button id="export-btn" class="btn btn-primary" aria-label="Export Timestamps">Export Timestamp</button>
+                        </div>
                     </div>
                     
-                    <!-- Original Video Overlay -->
-                    <div id="original-overlay" class="original-overlay">
-                        <div class="video-title">Original Video</div>
-                        <div id="original-preview-player"></div>
+                    <div class="timeline-container" role="application" aria-label="Timeline Editor">
+                        <div class="timeline-track">
+                            <div class="timeline-content" tabindex="0" aria-label="Timeline Content - Use arrow keys to navigate">
+                                <!-- Time ruler will be rendered here -->
+                                <!-- Points and segments will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-info">
+                        <span>Total Duration: <span id="total-duration">00:00</span></span>
+                        <span>Selected: <span id="selected-info">None</span></span>
                     </div>
                 </div>
-                
-                <!-- Preview Info -->
-                <div class="preview-info">
-                    <span>Reaction: <span id="reaction-time">00:00</span></span>
-                    <span>Original: <span id="original-time">00:00</span></span>
-                    <span>Duration: <span id="preview-duration">5s</span></span>
-                </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Timeline Section -->
-            <div class="timeline-section">
-                <div class="timeline-header">
-                    <h3>⏰ Timeline Editor</h3>
-                    <div class="timeline-controls">
-                                                <div class="zoom-controls">
-                        <button id="zoomOutBtn" class="btn btn-secondary" aria-label="Zoom Out">-</button>
-                            <span id="zoomLevel" aria-live="polite">100%</span>
-                            <button id="zoomInBtn" class="btn btn-secondary" aria-label="Zoom In">+</button>
-                            <span class="zoom-hint">(Ctrl+Wheel)</span>
-                        </div>
-                        <div class="history-controls">
-                            <button id="undo-btn" class="btn btn-secondary btn-small" aria-label="Undo" disabled>↶ Undo</button>
-                            <button id="redo-btn" class="btn btn-secondary btn-small" aria-label="Redo" disabled>↷ Redo</button>
-                            <button id="reset-btn" class="btn btn-warning btn-small" aria-label="Reset to Original">🔄 Reset</button>
-                        </div>
-                        <button id="advanced-edit-btn" class="btn btn-secondary" aria-label="Open Advanced Editor">⚙️ Advanced Editor</button>
-                        <button id="export-btn" class="btn btn-primary" aria-label="Export Timestamps">Export JSON</button>
+    <!-- Set Reaction URL Modal -->
+    <div id="url-modal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="url-modal-title">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="url-modal-title">🎥 Set Reaction Video URL</h3>
+                <button class="modal-close" id="url-modal-close" aria-label="Close URL Modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="url-input-section">
+                    <label for="reaction-video-url-modal" class="input-label">YouTube URL for Reaction Video</label>
+                    <input type="url" id="reaction-video-url-modal" placeholder="https://www.youtube.com/watch?v=..." class="url-input">
+                    <div class="url-info">
+                        <span id="current-reaction-url-modal" class="current-url">No reaction video URL set</span>
                     </div>
-                </div>
-                
-                <div class="timeline-container" role="application" aria-label="Timeline Editor">
-                    <div class="timeline-track">
-                        <div class="timeline-content" tabindex="0" aria-label="Timeline Content - Use arrow keys to navigate">
-                            <!-- Time ruler will be rendered here -->
-                            <!-- Points and segments will be rendered here -->
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="timeline-info">
-                    <span>Total Duration: <span id="total-duration">00:00</span></span>
-                    <span>Selected: <span id="selected-info">None</span></span>
                 </div>
             </div>
-        </section>
+            <div class="modal-footer">
+                <button id="save-url-btn" class="btn btn-primary">Set URL</button>
+                <button id="cancel-url-btn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <!-- Simple Help Modal -->
@@ -147,6 +182,49 @@
                     
 
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Layout Settings Panel -->
+    <div class="overlay-settings-panel" id="layout-settings-panel">
+        <div class="overlay-settings-header">
+            <h3 class="overlay-settings-title">
+                <span>⚙️</span>
+                <span>Layout Settings</span>
+            </h3>
+        </div>
+        
+        <div class="compact-controls">
+            <div class="input-group">
+                <label for="overlay-position" class="input-label">Overlay Position</label>
+                <select id="overlay-position" class="input">
+                    <option value="top-right">Top Right</option>
+                    <option value="top-left">Top Left</option>
+                    <option value="bottom-right">Bottom Right</option>
+                    <option value="bottom-left">Bottom Left</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="overlay-size" class="input-label">Overlay Size</label>
+                <div class="slider-container">
+                    <input type="range" id="overlay-size" min="10" max="60" value="40">
+                    <span id="overlay-size-value" class="slider-value">40%</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="youtube-volume" class="input-label">Original Video Volume</label>
+                <div class="slider-container">
+                    <input type="range" id="youtube-volume" min="0" max="100" value="100">
+                    <span id="youtube-volume-value" class="slider-value">100%</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Overlay Visibility</label>
+                <button id="toggle-overlay" class="btn btn-secondary">Hide Overlay</button>
             </div>
         </div>
     </div>

@@ -4,11 +4,11 @@ export const TIMELINE_CONFIG = {
     POINT_SIZE: 24,
     POINT_RADIUS: 12,
     SEGMENT_HEIGHT: 8,
-    TRACK_HEIGHT: 120,
+    TRACK_HEIGHT: 140,  // Time Ruler 공간 포함하여 높이 증가
     
-    // 위치 설정
-    POINT_TOP: 5,
-    SEGMENT_TOP_OFFSET: 12, // 점의 중심(17px)에서 세그먼트까지의 거리
+    // 위치 설정 (Time Ruler가 10px~40px이므로 그 아래에 배치)
+    POINT_TOP: 70,  // Time Ruler 아래 충분한 공간
+    SEGMENT_TOP_OFFSET: 12, // 점의 중심에서 세그먼트까지의 거리
     
     // 렌더링 설정
     PIXELS_PER_SECOND: 10,

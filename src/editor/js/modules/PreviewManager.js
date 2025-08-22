@@ -48,6 +48,9 @@ export class PreviewManager {
                 'modestbranding': 1
             }
         });
+
+        // 초기 상태에서 Pause 버튼 비활성화
+        this.updatePauseButton(false);
     }
 
     startSmartPreview(point) {
@@ -155,6 +158,19 @@ export class PreviewManager {
         this.updatePreviewControls(false);
     }
 
+    // 모든 비디오 일시정지
+    pauseAllVideos() {
+        if (this.reactionPreviewPlayer && this.reactionPreviewPlayer.pauseVideo) {
+            this.reactionPreviewPlayer.pauseVideo();
+        }
+        if (this.originalPreviewPlayer && this.originalPreviewPlayer.pauseVideo) {
+            this.originalPreviewPlayer.pauseVideo();
+        }
+        
+        // 프리뷰 상태도 정리
+        this.stopPreview();
+    }
+
     updatePreviewInfo(point) {
         const reactionTimeDisplay = document.getElementById('reaction-time');
         const originalTimeDisplay = document.getElementById('original-time');
@@ -182,6 +198,17 @@ export class PreviewManager {
     updatePreviewControls(enabled) {
         // 프리뷰 컨트롤 상태 업데이트 (필요시)
         this.previewState.isPlaying = enabled;
+        
+        // Pause 버튼 활성화/비활성화
+        this.updatePauseButton(enabled);
+    }
+
+    // Pause 버튼 상태 업데이트
+    updatePauseButton(isPlaying) {
+        const pauseBtn = document.getElementById('pause-btn');
+        if (pauseBtn) {
+            pauseBtn.disabled = !isPlaying;
+        }
     }
 
     formatTime(seconds) {
