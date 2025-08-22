@@ -71,8 +71,19 @@ export class PreviewManager {
     }
 
     handlePlayPreview(point) {
-        const reactionStartTime = Math.max(0, point.reaction_time - 2); // Reaction starts 2s before
-        this.reactionPreviewPlayer.seekTo(reactionStartTime, true);
+        // 현재 PLAY 포인트의 인덱스 찾기
+        const currentIndex = this.findPointIndex(point);
+        if (currentIndex === -1) return;
+        
+        // 다음 PAUSE 포인트 찾기
+        const nextPausePoint = this.findNextPausePoint(currentIndex);
+        if (!nextPausePoint) return;
+        
+        // 세그먼트 길이 계산 (PLAY부터 PAUSE까지)
+        const segmentDuration = nextPausePoint.reaction_time - point.reaction_time;
+        
+        // Reaction video starts at PLAY point
+        this.reactionPreviewPlayer.seekTo(point.reaction_time, true);
         this.reactionPreviewPlayer.playVideo();
         
         let originalStartTime = 0;
@@ -88,12 +99,13 @@ export class PreviewManager {
             this.originalPreviewPlayer.playVideo();
         }, 3000);
         
+        // 세그먼트 길이만큼 재생 후 정지
         if (this.previewState.previewTimer) {
             clearTimeout(this.previewState.previewTimer);
         }
         this.previewState.previewTimer = setTimeout(() => {
             this.stopPreview();
-        }, this.previewState.previewDuration * 1000);
+        }, (segmentDuration + 3) * 1000); // 3초 지연 + 세그먼트 길이
     }
 
     handlePausePreview(point) {
@@ -198,7 +210,37 @@ export class PreviewManager {
         if (videoIdMatch && this.reactionPreviewPlayer) {
             const videoId = videoIdMatch[1];
             this.reactionPreviewPlayer.loadVideoById(videoId);
-            console.log('Reaction video updated to:', videoId);
         }
+    }
+
+    // 현재 포인트의 인덱스 찾기
+    findPointIndex(point) {
+        if (!window.simpleEditor || !window.simpleEditor.getTimelineRenderer) {
+            return -1;
+        }
+        
+        const timestamps = window.simpleEditor.getTimelineRenderer().timestamps;
+        return timestamps.findIndex(ts => 
+            ts.reaction_time === point.reaction_time && 
+            ts.event === point.event
+        );
+    }
+
+    // 다음 PAUSE 포인트 찾기
+    findNextPausePoint(currentIndex) {
+        if (!window.simpleEditor || !window.simpleEditor.getTimelineRenderer) {
+            return null;
+        }
+        
+        const timestamps = window.simpleEditor.getTimelineRenderer().timestamps;
+        
+        // 현재 인덱스 이후의 첫 번째 PAUSE 포인트 찾기
+        for (let i = currentIndex + 1; i < timestamps.length; i++) {
+            if (timestamps[i].event === 'youtube_pause') {
+                return timestamps[i];
+            }
+        }
+        
+        return null;
     }
 }

@@ -1,53 +1,9 @@
-/* 개발 중 배너 */
-.dev-banner {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: var(--color-action);
-    color: white;
-    z-index: 1000;
-    padding: var(--space-sm) 0;
-    box-shadow: var(--shadow-sm);
-}
-
-.dev-banner-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-sm);
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 var(--space-md);
-}
-
-.dev-icon {
-    font-size: var(--text-lg);
-    animation: pulse 2s infinite;
-}
-
-.dev-text {
-    font-size: var(--text-base);
-    font-weight: 500;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
-
 /* 비활성화된 버튼 스타일 */
 button:disabled,
 input:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;
-}
-
-/* 컨테이너 상단 여백 조정 */
-.container {
-    margin-top: 60px; /* 배너 높이만큼 여백 추가 */
 }
 
 /* 다크 모드 기본 스타일 */

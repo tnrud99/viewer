@@ -63,11 +63,8 @@ export class FileManager {
                 
                 // 히스토리 매니저에 원본 데이터 설정
                 if (window.simpleEditor && window.simpleEditor.getHistoryManager) {
-                    console.log('Setting original data and initial state from loaded file. Sync points:', data.sync_points.length);
                     window.simpleEditor.getHistoryManager().setOriginalData(data.sync_points);
                     window.simpleEditor.getHistoryManager().addState(data.sync_points);
-                } else {
-                    console.log('Cannot set history: simpleEditor or historyManager not available (loaded file)');
                 }
                 
                 this.updateFileInfo();
@@ -158,11 +155,8 @@ export class FileManager {
         
         // 히스토리 매니저에 원본 데이터 설정
         if (window.simpleEditor && window.simpleEditor.getHistoryManager) {
-            console.log('Setting original data and initial state from default sample. Sync points:', this.timestampData.sync_points.length);
             window.simpleEditor.getHistoryManager().setOriginalData(this.timestampData.sync_points);
             window.simpleEditor.getHistoryManager().addState(this.timestampData.sync_points);
-        } else {
-            console.log('Cannot set history: simpleEditor or historyManager not available (default sample)');
         }
         
         this.updateFileInfo();
@@ -246,8 +240,6 @@ export class FileManager {
         // 입력창 클리어
         urlInput.value = '';
         
-        console.log('Reaction video URL set:', this.reactionVideoUrl);
-        
         // PreviewManager에 새로운 URL 전달
         if (window.simpleEditor && window.simpleEditor.getPreviewManager) {
             window.simpleEditor.getPreviewManager().updateReactionVideoUrl(this.reactionVideoUrl);
@@ -281,7 +273,7 @@ export class FileManager {
             sync_points: validatedTimestamps
         };
 
-        console.log('Exporting timestamps with correct format:', exportData);
+
         
         const jsonString = JSON.stringify(exportData, null, 2);
         const blob = new Blob([jsonString], { type: 'application/json' });

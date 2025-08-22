@@ -177,6 +177,10 @@ class SimpleEditor {
         return this.previewManager;
     }
 
+    getTimelineRenderer() {
+        return this.timelineRenderer;
+    }
+
     getAdvancedEditor() {
         return this.advancedEditor;
     }
@@ -197,92 +201,55 @@ class SimpleEditor {
         return this.historyManager;
     }
 
-    getPreviewManager() {
-        return this.previewManager;
-    }
-
     // 히스토리 컨트롤 설정
     setupHistoryControls() {
-        console.log('Setting up history controls...');
         const undoBtn = document.getElementById('undo-btn');
         const redoBtn = document.getElementById('redo-btn');
         const resetBtn = document.getElementById('reset-btn');
 
-        console.log('History control buttons found:', {
-            undoBtn: !!undoBtn,
-            redoBtn: !!redoBtn,
-            resetBtn: !!resetBtn
-        });
-
         if (undoBtn) {
             undoBtn.addEventListener('click', () => this.handleUndo());
-            console.log('Undo button event listener added');
-        } else {
-            console.log('ERROR: Undo button not found in setupHistoryControls');
         }
         if (redoBtn) {
             redoBtn.addEventListener('click', () => this.handleRedo());
-            console.log('Redo button event listener added');
-        } else {
-            console.log('ERROR: Redo button not found in setupHistoryControls');
         }
         if (resetBtn) {
             resetBtn.addEventListener('click', () => this.handleReset());
-            console.log('Reset button event listener added');
-        } else {
-            console.log('ERROR: Reset button not found in setupHistoryControls');
         }
     }
 
     // Undo 처리
     handleUndo() {
-        console.log('handleUndo called');
         const previousState = this.historyManager.undo();
-        console.log('Undo result:', !!previousState);
         if (previousState) {
             this.timelineRenderer.setTimestamps(previousState);
             this.timelineRenderer.renderTimeline();
             this.updateTimelineInfo();
             this.updateButtons();
-            console.log('Undo completed successfully');
-        } else {
-            console.log('Undo failed - no previous state');
         }
     }
 
     // Redo 처리
     handleRedo() {
-        console.log('handleRedo called');
         const nextState = this.historyManager.redo();
-        console.log('Redo result:', !!nextState);
         if (nextState) {
             this.timelineRenderer.setTimestamps(nextState);
             this.timelineRenderer.renderTimeline();
             this.updateTimelineInfo();
             this.updateButtons();
-            console.log('Redo completed successfully');
-        } else {
-            console.log('Redo failed - no next state');
         }
     }
 
     // Reset 처리
     handleReset() {
-        console.log('handleReset called');
         if (confirm('Are you sure you want to reset to the original file? This will discard all changes.')) {
             const originalState = this.historyManager.reset();
-            console.log('Reset result:', !!originalState);
             if (originalState) {
                 this.timelineRenderer.setTimestamps(originalState);
                 this.timelineRenderer.renderTimeline();
                 this.updateTimelineInfo();
                 this.updateButtons();
-                console.log('Reset completed successfully');
-            } else {
-                console.log('Reset failed - no original state');
             }
-        } else {
-            console.log('Reset cancelled by user');
         }
     }
 

@@ -3,12 +3,10 @@
  */
 export class HistoryManager {
     constructor() {
-        console.log('HistoryManager constructor called');
         this.history = [];
         this.currentIndex = -1;
         this.maxHistorySize = 50; // 최대 히스토리 크기
         this.originalData = null; // 원본 데이터 저장
-        console.log('HistoryManager initialized');
     }
 
     /**
@@ -36,13 +34,7 @@ export class HistoryManager {
             this.currentIndex--;
         }
 
-        console.log('History state added:', {
-            historyLength: this.history.length,
-            currentIndex: this.currentIndex,
-            canUndo: this.canUndo(),
-            canRedo: this.canRedo(),
-            hasOriginal: !!this.originalData
-        });
+
 
         this.updateButtons();
     }
@@ -51,16 +43,11 @@ export class HistoryManager {
      * Undo 실행
      */
     undo() {
-        console.log('undo() called, canUndo:', this.canUndo());
         if (this.canUndo()) {
             this.currentIndex--;
-            console.log('undo() - new currentIndex:', this.currentIndex);
             this.updateButtons();
-            const result = JSON.parse(JSON.stringify(this.history[this.currentIndex]));
-            console.log('undo() - returning state with', result.length, 'timestamps');
-            return result;
+            return JSON.parse(JSON.stringify(this.history[this.currentIndex]));
         }
-        console.log('undo() - cannot undo, returning null');
         return null;
     }
 
@@ -80,16 +67,11 @@ export class HistoryManager {
      * Reset 실행 (원본 데이터로 복원)
      */
     reset() {
-        console.log('reset() called, has originalData:', !!this.originalData);
         if (this.originalData) {
             // 원본 데이터를 새 상태로 추가
-            console.log('reset() - adding original data to history');
             this.addState(this.originalData);
-            const result = JSON.parse(JSON.stringify(this.originalData));
-            console.log('reset() - returning original state with', result.length, 'timestamps');
-            return result;
+            return JSON.parse(JSON.stringify(this.originalData));
         }
-        console.log('reset() - no original data, returning null');
         return null;
     }
 
@@ -97,13 +79,7 @@ export class HistoryManager {
      * Undo 가능 여부 확인
      */
     canUndo() {
-        const result = this.currentIndex > 0;
-        console.log('canUndo check:', {
-            currentIndex: this.currentIndex,
-            historyLength: this.history.length,
-            result
-        });
-        return result;
+        return this.currentIndex > 0;
     }
 
     /**
@@ -127,45 +103,15 @@ export class HistoryManager {
                          (this.history.length === 1 && this.originalData && 
                           JSON.stringify(this.history[0]) !== JSON.stringify(this.originalData));
 
-        console.log('=== BUTTON UPDATE DEBUG ===');
-        console.log('Found buttons:', {
-            undoBtn: !!undoBtn,
-            redoBtn: !!redoBtn,
-            resetBtn: !!resetBtn
-        });
-        console.log('Button states before update:', {
-            undoDisabled: undoBtn?.disabled,
-            redoDisabled: redoBtn?.disabled,
-            resetDisabled: resetBtn?.disabled
-        });
-        console.log('Calculated states:', {
-            canUndo,
-            canRedo,
-            hasChanges,
-            historyLength: this.history.length,
-            currentIndex: this.currentIndex,
-            hasOriginal: !!this.originalData
-        });
-
         if (undoBtn) {
             undoBtn.disabled = !canUndo;
-            console.log('Undo button updated:', !canUndo);
-        } else {
-            console.log('ERROR: Undo button not found!');
         }
         if (redoBtn) {
             redoBtn.disabled = !canRedo;
-            console.log('Redo button updated:', !canRedo);
-        } else {
-            console.log('ERROR: Redo button not found!');
         }
         if (resetBtn) {
             resetBtn.disabled = !this.originalData || !hasChanges;
-            console.log('Reset button updated:', !this.originalData || !hasChanges);
-        } else {
-            console.log('ERROR: Reset button not found!');
         }
-        console.log('=== END BUTTON UPDATE ===');
     }
 
     /**

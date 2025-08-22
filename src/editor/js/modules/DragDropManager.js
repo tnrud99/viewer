@@ -56,11 +56,7 @@ export class DragDropManager {
         // 드래그 시작 전 현재 상태를 히스토리에 추가
         if (window.simpleEditor && window.simpleEditor.getHistoryManager) {
             const timestamps = this.timelineRenderer.timestamps;
-            console.log('Adding initial state to history before segment drag start. Timestamps:', timestamps.length);
             window.simpleEditor.getHistoryManager().addState(timestamps);
-            console.log('Initial state added to history before segment drag start');
-        } else {
-            console.log('Cannot add to history: simpleEditor or historyManager not available (segment drag)');
         }
         
         this.isDragging = true;
@@ -118,7 +114,6 @@ export class DragDropManager {
         });
 
         // 드래그 시작 시 이미 히스토리에 추가했으므로 여기서는 추가하지 않음
-        console.log('Drag ended, wasActuallyDragging:', wasActuallyDragging);
 
         this.draggedSegment = null;
         this.draggedSegmentIndex = -1;
@@ -169,11 +164,7 @@ export class DragDropManager {
         // 드래그 시작 전 현재 상태를 히스토리에 추가 (첫 번째 변경사항 보존)
         if (window.simpleEditor && window.simpleEditor.getHistoryManager) {
             const timestamps = this.timelineRenderer.timestamps;
-            console.log('Adding initial state to history before drag start. Timestamps:', timestamps.length);
             window.simpleEditor.getHistoryManager().addState(timestamps);
-            console.log('Initial state added to history before drag start');
-        } else {
-            console.log('Cannot add to history: simpleEditor or historyManager not available');
         }
 
         // 기존 드래그 상태 설정
