@@ -240,6 +240,7 @@ const veUrlSchema = new mongoose.Schema({
     description: { type: String },
     reaction_url: { type: String, required: true },
     original_url: { type: String, required: true },
+    generated_url: { type: String, required: true }, // 생성된 URL 저장
     timestamp_data: { type: Object, required: true },
     settings: {
         overlay_position: { type: String, default: 'top-right' },
@@ -420,6 +421,9 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
             view_count: 0
         };
 
+        // 생성된 VE URL
+        const generatedUrl = `${req.protocol}://${req.get('host')}/viewer.html?ve=${veId}`;
+
         // VE URL 문서 생성 (최적화된 구조)
         const veUrlDoc = new VEUrl({
             ve_id: veId,
@@ -427,6 +431,7 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
             description: finalMetadata.description,
             reaction_url: reactionUrl,
             original_url: originalUrl,
+            generated_url: generatedUrl, // 생성된 URL 저장
             timestamp_data: timestampData, // 이미 최적화된 데이터
             settings: finalSettings,
             metadata: finalMetadata,
@@ -504,6 +509,7 @@ app.get('/api/ve-urls/:id', ensureMongoConnection, async (req, res) => {
                 description: veUrl.description,
                 reaction_url: veUrl.reaction_url,
                 original_url: veUrl.original_url,
+                generated_url: veUrl.generated_url, // 생성된 URL 포함
                 timestamp_data: veUrl.timestamp_data,
                 settings: veUrl.settings,
                 metadata: veUrl.metadata
@@ -517,7 +523,7 @@ app.get('/api/ve-urls/:id', ensureMongoConnection, async (req, res) => {
 app.get('/api/ve-urls/user/:userId', authenticateToken, ensureMongoConnection, async (req, res) => {
     try {
         const veUrls = await VEUrl.find({ creator_id: req.params.userId })
-            .select('ve_id title description metadata')
+            .select('ve_id title description generated_url metadata')
             .sort({ 'metadata.created_at': -1 });
 
         res.json({ ve_urls: veUrls });
