@@ -171,7 +171,7 @@ export class DragDropManager {
         // 이동량 계산 (드래그 시작 시간 대비)
         const deltaTime = newStartTime - this.dragStartTime;
         
-        console.log(`Sync Mode - dragStartTime: ${this.dragStartTime}, newStartTime: ${newStartTime}, deltaTime: ${deltaTime}`);
+        // console.log(`Sync Mode - dragStartTime: ${this.dragStartTime}, newStartTime: ${newStartTime}, deltaTime: ${deltaTime}`); // 배포용으로 주석 처리
         
         // 원본 타임스탬프에서 동일한 오프셋만큼 이동
         for (let i = 0; i < timestamps.length; i++) {
@@ -191,7 +191,7 @@ export class DragDropManager {
                 // 음수 시간 방지
                 timestamp.reaction_time = Math.max(0, newTime);
                 
-                console.log(`Moving timestamp ${i}: ${oldTime} -> ${timestamp.reaction_time} (original: ${originalTimestamp.reaction_time}, delta: ${deltaTime})`);
+                // console.log(`Moving timestamp ${i}: ${oldTime} -> ${timestamp.reaction_time} (original: ${originalTimestamp.reaction_time}, delta: ${deltaTime})`); // 배포용으로 주석 처리
             }
         }
     }
@@ -280,7 +280,7 @@ export class DragDropManager {
         segmentElement.style.cursor = 'grabbing';
         segmentElement.style.opacity = '0.8';
         
-        console.log(`Started segment drag from point, playIndex: ${playIndex}`);
+        // console.log(`Started segment drag from point, playIndex: ${playIndex}`); // 배포용으로 주석 처리
     }
 }
 

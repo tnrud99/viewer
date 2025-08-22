@@ -50,8 +50,8 @@ class SimpleEditor {
         this.setupResizeHandler();
         this.setupHistoryControls();
         
-        // 모든 초기화 완료 후 샘플 데이터 로드
-        this.fileManager.loadSampleData();
+        // 모든 초기화 완료
+        // this.fileManager.loadSampleData(); // 배포용으로 주석 처리
         
         // Step Progress 초기화
         this.setupStepProgress();

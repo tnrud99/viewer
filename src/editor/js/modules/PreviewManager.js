@@ -23,11 +23,11 @@ export class PreviewManager {
     }
 
     createPreviewPlayers() {
-        // Reaction Video Player
+        // Reaction Video Player (빈 플레이어로 초기화)
         this.reactionPreviewPlayer = new YT.Player('reaction-preview-player', {
             height: '200',
             width: '100%',
-            videoId: 'niYgb0IfP4U',
+            videoId: '', // 배포용으로 빈 값으로 설정
             playerVars: {
                 'playsinline': 1,
                 'controls': 1,
@@ -36,11 +36,11 @@ export class PreviewManager {
             }
         });
 
-        // Original Video Player
+        // Original Video Player (빈 플레이어로 초기화)
         this.originalPreviewPlayer = new YT.Player('original-preview-player', {
             height: '200',
             width: '100%',
-            videoId: 'AbZH7XWDW_k',
+            videoId: '', // 배포용으로 빈 값으로 설정
             playerVars: {
                 'playsinline': 1,
                 'controls': 1,

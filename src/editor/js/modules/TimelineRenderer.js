@@ -61,7 +61,7 @@ export class TimelineRenderer {
         const zoomLevel = this.positionCalculator.zoomLevel;
         const pixelsPerSecond = this.positionCalculator.pixelsPerSecond * zoomLevel;
         
-        console.log(`Zoom Level: ${zoomLevel}, Pixels per second: ${pixelsPerSecond}`); // 디버그
+        // console.log(`Zoom Level: ${zoomLevel}, Pixels per second: ${pixelsPerSecond}`); // 디버그 - 배포용으로 주석 처리
         
         // 간단한 방식: 줌 레벨에 따라 간격 결정
         if (zoomLevel >= 3.0) {
