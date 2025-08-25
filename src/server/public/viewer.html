@@ -50,8 +50,8 @@
     /* 비디오 플레이어 최적화 */
     .full-mode #reaction-player,
     .full-mode #reaction-youtube-container {
-        width: 100vh !important;
-        height: 100vw !important;
+        width: 100% !important;
+        height: 100% !important;
         object-fit: contain !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -159,7 +159,7 @@
     
     /* Full 모드에서 모든 영상 가로 회전 */
     .full-mode .video-container {
-        transform: rotate(90deg) !important;
+        transform: rotate(-90deg) !important;
         transform-origin: center center !important;
         width: 100vh !important;
         height: 100vw !important;
@@ -182,7 +182,7 @@
     .full-mode #youtube-container {
         width: 100vh !important;
         height: 100vw !important;
-        object-fit: cover !important;
+        object-fit: contain !important;
         border-radius: 0 !important;
     }
     
@@ -3845,14 +3845,12 @@
                 if (window.fullscreenManager && window.fullscreenManager.isInFullMode()) {
                     console.log('Exiting full mode...');
                     window.fullscreenManager.exitFullMode();
-                    fullBtn.textContent = 'Full';
                     fullBtn.style.background = 'rgba(33, 150, 243, 0.2)';
                     fullBtn.style.color = 'rgba(33, 150, 243, 0.9)';
                     fullBtn.style.fontWeight = 'normal';
                 } else if (window.fullscreenManager) {
                     console.log('Entering full mode...');
                     await window.fullscreenManager.enterFullMode();
-                    fullBtn.textContent = 'Exit Full';
                     fullBtn.style.background = 'rgba(194, 41, 31, 0.9)';
                     fullBtn.style.color = 'white';
                     fullBtn.style.fontWeight = 'bold';
