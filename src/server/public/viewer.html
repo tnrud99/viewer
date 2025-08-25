@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="screen-orientation" content="portrait">
+    <meta name="x5-orientation" content="portrait">
+    <meta name="full-screen" content="yes">
+    <meta name="x5-fullscreen" content="true">
     <title>Multi-Window-Viewer - Synchronized Reaction Video Player</title>
     <link rel="icon" href="favicon.ico">
 
@@ -69,6 +75,24 @@
             background: linear-gradient(135deg, var(--color-bg-main) 0%, #2a2a2a 100%);
             color: var(--color-text-main);
             min-height: 100vh;
+            /* Prevent screen rotation on mobile */
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+        
+        /* Force portrait orientation on mobile */
+        @media screen and (orientation: landscape) and (max-width: 768px) {
+            body {
+                transform: rotate(-90deg);
+                transform-origin: left top;
+                width: 100vh;
+                height: 100vw;
+                overflow-x: hidden;
+                position: absolute;
+                top: 100%;
+                left: 0;
+            }
         }
 
         .container {
@@ -193,6 +217,59 @@
             transition: all 0.3s ease;
             white-space: normal;
             margin-top: 10px;
+        }
+        
+        /* Mobile Apple Tooltip */
+        @media (max-width: 768px) {
+            .apple-tooltip {
+                padding: 12px;
+                border-radius: 8px;
+                width: 300px;
+                max-width: 85vw;
+                font-size: 10px;
+                line-height: 1.3;
+                margin-top: 8px;
+            }
+            
+            .apple-tooltip-title {
+                font-size: 12px;
+                margin-bottom: 4px;
+            }
+            
+            .apple-tooltip-subtitle {
+                font-size: 9px;
+                margin-top: 2px;
+            }
+            
+            .apple-tooltip-section {
+                margin-bottom: 8px;
+            }
+            
+            .apple-tooltip-section-title {
+                font-size: 10px;
+                margin-bottom: 4px;
+            }
+            
+            .apple-tooltip-section-content {
+                font-size: 9px;
+                line-height: 1.2;
+            }
+            
+            .apple-tooltip-highlight {
+                padding: 8px;
+                margin: 8px 0;
+                border-radius: 4px;
+            }
+            
+            .apple-tooltip-highlight-title {
+                font-size: 10px;
+                margin-bottom: 4px;
+            }
+            
+            .apple-tooltip-highlight-content {
+                font-size: 9px;
+                line-height: 1.2;
+            }
         }
 
         .apple-tooltip.show {
@@ -338,6 +415,19 @@
             visibility: visible;
             transform: translateY(-50%) translateX(0);
         }
+        
+        /* Desktop: Hide overlay settings panel by default */
+        @media (min-width: 769px) {
+            .overlay-settings-panel {
+                display: none !important;
+            }
+            
+            .overlay-settings-panel.show {
+                display: block !important;
+                opacity: 1;
+                visibility: visible;
+            }
+        }
 
         .overlay-settings-header {
             display: flex;
@@ -356,6 +446,36 @@
             display: flex;
             align-items: center;
             gap: var(--space-sm);
+        }
+        
+        /* Desktop overlay toggle button - hide on mobile */
+        .overlay-toggle-btn {
+            display: none;
+        }
+        
+        /* Mobile overlay toggle button */
+        @media (max-width: 768px) {
+            .overlay-toggle-btn {
+                background: none;
+                border: none;
+                color: rgba(255, 255, 255, 0.7);
+                font-size: 12px;
+                cursor: pointer;
+                padding: 4px 2px;
+                margin-left: auto;
+                transition: transform 0.2s ease;
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .overlay-toggle-btn:hover {
+                color: rgba(255, 255, 255, 0.9);
+            }
+            
+            .overlay-toggle-btn.collapsed {
+                transform: rotate(-90deg);
+            }
         }
 
         .floating-controls h3 {
@@ -855,6 +975,83 @@
             font-weight: 700;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
+        
+        /* Mobile Help FAQ Styles - New Design */
+        @media (max-width: 768px) {
+            .help-faq {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                max-height: 100vh;
+                margin: 0;
+                border-radius: 0;
+                background: rgba(0, 0, 0, 0.95);
+                backdrop-filter: blur(20px);
+                z-index: 2000;
+                overflow-y: auto;
+            }
+            
+            .help-header {
+                position: sticky;
+                top: 0;
+                background: rgba(0, 0, 0, 0.9);
+                padding: 8px 12px;
+                border-radius: 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .help-header h3 {
+                font-size: 14px;
+                margin: 0;
+            }
+            
+            .help-close-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 16px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+            }
+            
+            .faq-content {
+                padding: 12px;
+            }
+            
+            .faq-section {
+                margin-bottom: 8px;
+                padding: 8px;
+                border-radius: 8px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .faq-section h4 {
+                font-size: 12px;
+                margin-bottom: 4px;
+                color: var(--color-action);
+            }
+            
+            .faq-section p,
+            .faq-section li {
+                font-size: 11px;
+                line-height: 1.4;
+                margin-bottom: 2px;
+            }
+            
+            .faq-section ul {
+                padding-left: 12px;
+                margin: 4px 0;
+            }
+            
+            .faq-section strong {
+                color: var(--color-action);
+            }
+        }
 
         .help-close-btn {
             background: rgba(255, 255, 255, 0.1);
@@ -1071,6 +1268,8 @@
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: var(--space-lg);
             margin-bottom: var(--space-lg);
+            width: 100%;
+            box-sizing: border-box;
         }
 
         /* Source Selector */
@@ -1213,41 +1412,316 @@
             color: var(--color-text-muted);
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                padding: var(--space-md);
+                 /* Responsive Design */
+         @media (max-width: 768px) {
+             .container {
+                 padding: var(--space-sm);
+                 max-width: 100%;
+             }
+             
+             /* Hide overlay toggle and settings button on mobile */
+             .overlay-toggle-desktop {
+                 display: none !important;
+             }
+             
+             .quick-controls .btn[data-overlay-settings] {
+                 display: none !important;
+             }
+            
+            /* Header Mobile Optimization */
+            .header {
+                margin-bottom: var(--space-md);
+                padding: var(--space-md) 0 var(--space-sm) 0;
             }
             
             .header-content {
                 flex-direction: column;
-                gap: var(--space-md);
+                gap: var(--space-sm);
             }
             
-            .controls-grid {
-                grid-template-columns: 1fr;
-                gap: var(--space-md);
+            .header h1 {
+                font-size: var(--text-xl);
+                flex-wrap: wrap;
+                gap: var(--space-xs);
             }
             
-            .button-group {
+            .create-own-btn {
+                font-size: var(--text-xs);
+                padding: 4px 8px;
+            }
+            
+            .beta-tag {
+                font-size: 0.6em;
+                padding: 2px 6px;
+            }
+            
+            /* Video Container Mobile Optimization */
+            .video-container {
+                margin-bottom: var(--space-md);
+            }
+            
+            .main-video-box {
+                border-radius: var(--radius-sm);
+            }
+            
+            .video-title {
+                padding: var(--space-sm);
                 flex-direction: column;
+                gap: var(--space-xs);
             }
             
-            .btn {
-                width: 100%;
-                justify-content: center;
+            .video-title-text {
+                font-size: var(--text-sm);
             }
             
             #reaction-youtube-container, 
             #reaction-youtube-container iframe {
-                min-height: 400px;
+                min-height: 250px;
+                border-radius: var(--radius-sm);
             }
             
-            .source-selector {
-                flex-direction: column;
-                gap: var(--space-sm);
+            /* Overlay Mobile Optimization */
+            .overlay-top-right,
+            .overlay-top-left,
+            .overlay-bottom-right,
+            .overlay-bottom-left {
+                width: 40% !important;
+                height: 30% !important;
+                max-width: 200px;
+                max-height: 150px;
+            }
+            
+            /* Controls Mobile Optimization */
+            .quick-controls {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: var(--space-xs);
+                margin-bottom: var(--space-md);
             }
 
+            .quick-controls .btn {
+                flex: 1;
+                min-width: 80px;
+                padding: var(--space-sm) var(--space-xs);
+                font-size: var(--text-sm);
+                min-height: 44px; /* Touch-friendly */
+                order: 0;
+            }
+            
+            .inline-btn {
+                padding: 4px 6px;
+                font-size: 9px;
+                min-height: 24px;
+                border-radius: 8px;
+                order: 0;
+            }
+            
+                         /* Overlay Settings Panel Mobile - Inside quick-controls */
+             .overlay-settings-panel {
+                 position: static;
+                 top: auto;
+                 right: auto;
+                 transform: none;
+                 background: transparent;
+                 backdrop-filter: none;
+                 border-radius: 0;
+                 padding: 0;
+                 box-shadow: none;
+                 border: none;
+                 z-index: auto;
+                 max-width: none;
+                 max-height: none;
+                 overflow-y: visible;
+                 transition: none;
+                 opacity: 1;
+                 visibility: visible;
+                 margin: var(--space-sm) 0 0 0;
+                 width: 100%;
+                 order: 1;
+                 display: block !important;
+             }
+            
+                         .overlay-settings-panel.show {
+                 display: none;
+             }
+             
+             /* Ensure overlay controls are properly styled on mobile */
+             .overlay-settings-panel .compact-controls {
+                 grid-template-columns: 1fr 1fr;
+                 gap: var(--space-sm);
+                 width: 100%;
+                 padding: var(--space-sm);
+                 background: rgba(255, 255, 255, 0.05);
+                 border-radius: var(--radius-md);
+                 border: 1px solid rgba(255, 255, 255, 0.1);
+                 box-sizing: border-box;
+                 overflow: hidden;
+                 display: grid; /* Default display, but can be overridden by JavaScript */
+             }
+            
+                         .overlay-settings-header {
+                 display: flex;
+                 justify-content: space-between;
+                 align-items: center;
+                 margin-bottom: var(--space-xs);
+                 padding: var(--space-xs) 0;
+                 border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+             }
+            
+                         .overlay-settings-title {
+                 font-size: var(--text-xs);
+                 font-weight: 600;
+                 color: rgba(255, 255, 255, 0.9);
+                 margin: 0;
+                 display: flex;
+                 align-items: center;
+                 gap: var(--space-xs);
+                 cursor: pointer;
+                 flex: 1;
+                 padding: 2px 0;
+             }
+             
+             /* Show toggle button on mobile */
+             .overlay-toggle-btn {
+                 display: flex !important;
+                 cursor: pointer;
+                 user-select: none;
+                 -webkit-tap-highlight-color: transparent;
+             }
+             
+             /* Show overlay settings panel on mobile */
+             .overlay-settings-panel {
+                 display: block !important;
+                 max-width: none;
+                 max-height: none;
+                 overflow-y: visible;
+                 transition: none;
+                 opacity: 1;
+                 visibility: visible;
+                 margin: var(--space-sm) 0 0 0;
+                 width: 100%;
+                 order: 1;
+             }
+             
+             /* Show controls when expanded on mobile */
+             .compact-controls {
+                 /* Remove !important to allow JavaScript control */
+             }
+            
+                         .compact-controls {
+                 display: grid;
+                 grid-template-columns: 1fr 1fr;
+                 gap: var(--space-sm);
+                 width: 100%;
+                 padding: var(--space-sm);
+                 background: rgba(255, 255, 255, 0.05);
+                 border-radius: var(--radius-md);
+                 border: 1px solid rgba(255, 255, 255, 0.1);
+                 box-sizing: border-box;
+                 overflow: hidden;
+             }
+             
+             /* Mobile: Hide controls by default */
+             @media (max-width: 768px) {
+                 .compact-controls {
+                     display: none;
+                 }
+             }
+            
+                         .input-group {
+                 margin-bottom: 0;
+                 padding: 2px;
+                 background: rgba(255, 255, 255, 0.03);
+                 border-radius: var(--radius-sm);
+                 border: 1px solid rgba(255, 255, 255, 0.08);
+                 display: flex;
+                 flex-direction: column;
+                 align-items: stretch;
+                 gap: 2px;
+             }
+            
+                         .input-group label {
+                 font-size: 10px;
+                 margin-bottom: 0;
+                 padding: 0;
+                 color: rgba(255, 255, 255, 0.7);
+                 white-space: nowrap;
+                 font-weight: 400;
+                 text-transform: uppercase;
+                 letter-spacing: 0.5px;
+             }
+            
+                         .input-group input,
+             .input-group select {
+                 padding: 2px 4px;
+                 font-size: var(--text-xs);
+                 min-height: 20px;
+                 background: rgba(255, 255, 255, 0.1);
+                 border: 1px solid rgba(255, 255, 255, 0.2);
+                 border-radius: var(--radius-sm);
+                 color: white;
+                 width: 100%;
+                 position: relative;
+                 z-index: 1;
+             }
+            
+                         .slider-container {
+                 margin-top: 0;
+                 display: flex;
+                 align-items: center;
+                 gap: 2px;
+                 width: 100%;
+             }
+            
+                         .slider-container input[type="range"] {
+                 min-height: 24px;
+                 width: 100%;
+                 background: rgba(255, 255, 255, 0.2);
+                 border-radius: 2px;
+                 flex: 1;
+             }
+             
+             .slider-container input[type="range"]::-webkit-slider-thumb {
+                 -webkit-appearance: none;
+                 width: 16px;
+                 height: 16px;
+                 background: var(--color-action);
+                 border-radius: 50%;
+                 cursor: pointer;
+                 box-shadow: var(--shadow-sm);
+             }
+             
+             .slider-value {
+                 font-size: var(--text-xs);
+                 min-width: 30px;
+                 color: rgba(255, 255, 255, 0.8);
+                 display: none;
+             }
+             
+             /* Hide slider values on mobile to prevent horizontal scroll */
+             @media (max-width: 768px) {
+                 .slider-value {
+                     display: none;
+                 }
+             }
+            
+            /* Beta Notice Mobile */
+            .beta-notice {
+                margin-bottom: var(--space-md);
+            }
+            
+            .beta-notice-content {
+                padding: var(--space-sm);
+                flex-direction: column;
+                gap: var(--space-xs);
+            }
+            
+            .beta-notice-text {
+                font-size: var(--text-sm);
+                line-height: 1.4;
+            }
+            
+            /* Floating Controls Mobile */
             .floating-controls {
                 position: fixed;
                 bottom: 0;
@@ -1266,6 +1740,8 @@
                 left: 50%;
                 transform: translateX(-50%);
                 border-radius: var(--radius-md) var(--radius-md) 0 0;
+                min-height: 44px;
+                min-width: 44px;
             }
 
             .floating-controls.collapsed {
@@ -1275,18 +1751,412 @@
             .floating-controls.collapsed .floating-toggle {
                 border-radius: var(--radius-md);
             }
-
-            .quick-controls {
-                flex-direction: column;
-            }
-
-            .quick-controls .btn {
-                width: 100%;
-            }
-
+            
+            /* Status Bar Mobile */
             .status-bar {
                 flex-direction: column;
                 align-items: stretch;
+                padding: var(--space-sm);
+                font-size: var(--text-sm);
+            }
+            
+            /* General Mobile Improvements */
+            .btn {
+                min-height: 40px; /* Touch-friendly minimum */
+                font-size: 10px;
+            }
+            
+            /* Unified font sizes for mobile */
+            .btn,
+            .inline-btn,
+            .help-header h3,
+            .faq-section h4,
+            .apple-tooltip-title,
+            .apple-tooltip-section-title,
+            .apple-tooltip-highlight-title {
+                font-size: 10px !important;
+            }
+            
+            .faq-section p,
+            .faq-section li,
+            .apple-tooltip-section-content,
+            .apple-tooltip-highlight-content,
+            .apple-tooltip-subtitle {
+                font-size: 9px !important;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-sm);
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: var(--space-xs);
+            }
+            
+            .source-selector {
+                flex-direction: column;
+                gap: var(--space-sm);
+            }
+        }
+        
+                 /* Extra Small Mobile Devices */
+         @media (max-width: 480px) {
+             .container {
+                 padding: var(--space-xs);
+             }
+             
+             /* Compact overlay settings for very small screens */
+             .overlay-settings-panel {
+                 margin: var(--space-sm) 0;
+             }
+             
+             .input-group {
+                 margin-bottom: 0;
+                 padding: 2px;
+                 background: rgba(255, 255, 255, 0.05);
+                 border-radius: var(--radius-sm);
+                 border: 1px solid rgba(255, 255, 255, 0.1);
+                 display: flex;
+                 flex-direction: column;
+                 align-items: stretch;
+                 gap: 2px;
+             }
+             
+             .compact-controls {
+                 display: grid;
+                 grid-template-columns: 1fr 1fr;
+                 gap: var(--space-sm);
+                 width: 100%;
+                 padding: var(--space-sm);
+                 background: rgba(255, 255, 255, 0.05);
+                 border-radius: var(--radius-md);
+                 border: 1px solid rgba(255, 255, 255, 0.1);
+                 box-sizing: border-box;
+                 overflow: hidden;
+             }
+             
+             .input-group label {
+                 font-size: 9px;
+                 margin-bottom: 0;
+                 padding: 0;
+                 color: rgba(255, 255, 255, 0.7);
+                 white-space: nowrap;
+                 font-weight: 400;
+                 text-transform: uppercase;
+                 letter-spacing: 0.5px;
+             }
+             
+             .input-group input,
+             .input-group select {
+                 font-size: var(--text-xs);
+                 min-height: 18px;
+                 padding: 2px 3px;
+                 background: rgba(255, 255, 255, 0.1);
+                 border: 1px solid rgba(255, 255, 255, 0.2);
+                 border-radius: var(--radius-sm);
+                 color: white;
+                 width: 100%;
+                 position: relative;
+                 z-index: 1;
+             }
+             
+             .slider-container {
+                 margin-top: 0;
+                 display: flex;
+                 align-items: center;
+                 gap: 2px;
+                 width: 100%;
+             }
+             
+             .slider-container input[type="range"] {
+                 min-height: 20px;
+                 width: 100%;
+                 background: rgba(255, 255, 255, 0.2);
+                 border-radius: 2px;
+                 flex: 1;
+             }
+             
+             .slider-container input[type="range"]::-webkit-slider-thumb {
+                 width: 12px;
+                 height: 12px;
+             }
+             
+             .slider-value {
+                 font-size: var(--text-xs);
+                 min-width: 25px;
+                 color: rgba(255, 255, 255, 0.8);
+                 display: none;
+             }
+            
+            .header h1 {
+                font-size: 10px;
+            }
+            
+            .header {
+                height: 35px;
+                padding: 3px var(--space-xs);
+            }
+            
+            .container {
+                margin-top: 35px;
+            }
+            
+            .quick-controls {
+                flex-direction: column;
+            }
+            
+            .quick-controls .btn {
+                width: 100%;
+            }
+            
+            .overlay-top-right,
+            .overlay-top-left,
+            .overlay-bottom-right,
+            .overlay-bottom-left {
+                width: 35% !important;
+                height: 25% !important;
+            }
+        }
+        
+        /* Mobile Video UX Enhancements */
+        @media (max-width: 768px) {
+            /* Fullscreen-like experience */
+            .video-container {
+                position: relative;
+                background: #000;
+                border-radius: var(--radius-md);
+                margin: var(--space-sm);
+                padding: 0;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            }
+            
+            .main-video-box {
+                border-radius: 0;
+                background: #000;
+            }
+            
+            #reaction-youtube-container, 
+            #reaction-youtube-container iframe {
+                border-radius: 0;
+                background: #000;
+            }
+            
+            /* Mobile controls between video and footer */
+            .quick-controls {
+                position: static;
+                transform: none;
+                background: rgba(0, 0, 0, 0.9);
+                backdrop-filter: blur(10px);
+                border-radius: var(--radius-md);
+                padding: var(--space-sm);
+                gap: var(--space-xs);
+                margin: var(--space-md) 0;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            .quick-controls .btn {
+                border-radius: 15px;
+                min-width: 40px;
+                height: 40px;
+                padding: 0;
+                font-size: 12px;
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                color: white;
+            }
+            
+            .quick-controls .btn:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+            
+            .quick-controls .btn:active {
+                transform: scale(0.95);
+            }
+            
+            /* Hide controls when not needed */
+            .quick-controls.hidden {
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(20px);
+            }
+            
+            /* Video title overlay (like Netflix) */
+            .video-title {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);
+                padding: 20px var(--space-sm) var(--space-sm);
+                z-index: 10;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .video-container:hover .video-title {
+                opacity: 1;
+            }
+            
+            /* Gesture-friendly overlay controls */
+            .overlay-settings-panel {
+                background: rgba(0, 0, 0, 0.95);
+                backdrop-filter: blur(20px);
+            }
+            
+            .overlay-settings-header {
+                background: rgba(255, 255, 255, 0.1);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            
+            /* Swipe-friendly sliders */
+            .slider-container input[type="range"] {
+                -webkit-appearance: none;
+                height: 6px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 3px;
+                outline: none;
+            }
+            
+            .slider-container input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 20px;
+                height: 20px;
+                background: var(--color-action);
+                border-radius: 50%;
+                cursor: pointer;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            }
+            
+            /* Compact fixed header */
+            .header {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+                background: rgba(0, 0, 0, 0.9);
+                backdrop-filter: blur(10px);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 4px var(--space-xs);
+                opacity: 1;
+                transition: all 0.3s ease;
+                height: 40px;
+            }
+            
+            .header h1 {
+                font-size: 11px;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                white-space: nowrap;
+                overflow: hidden;
+            }
+            
+            .header-logo {
+                width: 16px;
+                height: 16px;
+                background-size: contain;
+                flex-shrink: 0;
+            }
+            
+            .beta-tag {
+                font-size: 8px;
+                padding: 1px 3px;
+                flex-shrink: 0;
+            }
+            
+            .create-own-btn {
+                font-size: 8px;
+                padding: 1px 4px;
+                border-radius: 8px;
+                flex-shrink: 0;
+            }
+            
+            .info-icon {
+                width: 14px;
+                height: 14px;
+                font-size: 8px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+            
+            /* Add top margin to container for fixed header */
+            .container {
+                margin-top: 40px;
+            }
+            
+                         /* Beta notice less intrusive */
+             .beta-notice {
+                 background: rgba(0, 0, 0, 0.9);
+                 backdrop-filter: blur(10px);
+                 border-radius: var(--radius-md);
+                 border: 1px solid rgba(255, 255, 255, 0.1);
+                 margin: var(--space-sm) 0;
+                 padding: var(--space-xs);
+             }
+             
+             /* Mobile Beta Notice - Hide icon and modify text */
+             .beta-notice .beta-notice-icon {
+                 display: none;
+             }
+             
+             .beta-notice .beta-notice-text {
+                 font-size: 11px;
+                 line-height: 1.3;
+                 text-align: center;
+             }
+             
+             /* Mobile Beta Notice Text Switching */
+             .beta-notice .desktop-beta-text {
+                 display: none !important;
+             }
+             
+             .beta-notice .mobile-beta-text {
+                 display: block !important;
+             }
+            
+            .beta-notice-content {
+                padding: var(--space-xs);
+            }
+            
+            .beta-notice-text {
+                font-size: 11px;
+                line-height: 1.3;
+            }
+            
+            /* Status bar floating */
+            .status-bar {
+                position: fixed;
+                top: 15px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(10px);
+                border-radius: 15px;
+                padding: 6px 12px;
+                font-size: 11px;
+                z-index: 1000;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            /* Overlay positioning for better visibility */
+            .overlay-top-right,
+            .overlay-top-left {
+                top: 70px !important;
+            }
+            
+            .overlay-bottom-right,
+            .overlay-bottom-left {
+                bottom: 120px !important;
             }
         }
     </style>
@@ -1340,22 +2210,22 @@
         <!-- Video Player Section - Now at the top -->
         <div class="video-container">
             <div class="main-video-box">
-                <div class="video-title">
-                    <div class="video-title-text">
-                        <span>🎬</span>
-                        <span>Reaction Video</span>
-                </div>
-                    <div style="display: flex; align-items: center; gap: var(--space-sm); background: rgba(255, 255, 255, 0.1); padding: 4px 8px; border-radius: var(--radius-sm); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
-                        <span style="font-size: var(--text-sm); color: rgba(255, 255, 255, 0.9);">Overlay Custom Settings</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="overlayToggleBtn">
-                            <span class="toggle-slider">
-                                <span class="toggle-text-on">ON</span>
-                                <span class="toggle-text-off">OFF</span>
-                            </span>
-                        </label>
-                    </div>
-                </div>
+                                 <div class="video-title">
+                     <div class="video-title-text">
+                         <span>🎬</span>
+                         <span>Reaction Video</span>
+                     </div>
+                     <div class="overlay-toggle-desktop" style="display: flex; align-items: center; gap: var(--space-sm); background: rgba(255, 255, 255, 0.1); padding: 4px 8px; border-radius: var(--radius-sm); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
+                         <span style="font-size: var(--text-sm); color: rgba(255, 255, 255, 0.9);">Overlay Custom Settings</span>
+                         <label class="toggle-switch">
+                             <input type="checkbox" id="overlayToggleBtn">
+                             <span class="toggle-slider">
+                                 <span class="toggle-text-on">ON</span>
+                                 <span class="toggle-text-off">OFF</span>
+                             </span>
+                         </label>
+                     </div>
+                 </div>
                 <video id="reaction-player" controls style="display: none;"></video>
                 <div id="reaction-youtube-container" style="display: block;"></div>
             </div>
@@ -1373,62 +2243,54 @@
             <button id="restart-btn" class="btn btn-secondary" disabled>Restart</button>
             <button id="help-btn" class="btn btn-info">Help</button>
             <button id="resyncBtn" class="inline-btn">Resync</button>
-        </div>
-
-        <!-- Beta Version Notice -->
-        <div class="beta-notice">
-            <div class="beta-notice-content">
-                <span class="beta-notice-icon">⚠️</span>
-                <div class="beta-notice-text">
-                    <strong>Beta Version</strong><br>
-                    Continuous playback is stable. Jumping to other points works but may occasionally cause unexpected issues.<br>
-                    If you experience problems or want more information, please press the Help button.
-                </div>
-            </div>
-        </div>
-
-        <!-- Floating Overlay Settings Panel -->
-        <div class="overlay-settings-panel" id="overlaySettingsPanel">
-            <div class="overlay-settings-header">
-                <h3 class="overlay-settings-title">
-                    <span>⚙️</span>
-                    <span>Overlay Settings</span>
-                </h3>
-            </div>
+            <button id="overlay-settings-btn" class="btn btn-secondary" data-overlay-settings>⚙️</button>
             
-            <div class="compact-controls">
-                <div class="input-group">
-                    <label for="overlay-position" class="input-label">Overlay Position</label>
-                    <select id="overlay-position" class="input">
-                    <option value="top-right">Top Right</option>
-                    <option value="top-left">Top Left</option>
-                    <option value="bottom-right">Bottom Right</option>
-                    <option value="bottom-left">Bottom Left</option>
-                </select>
-            </div>
-                
-                <div class="input-group">
-                    <label for="overlay-size" class="input-label">Overlay Size</label>
-                <div class="slider-container">
-                        <input type="range" id="overlay-size" min="10" max="60" value="50">
-                    <span id="overlay-size-value" class="slider-value">50%</span>
+            <!-- Overlay Settings Panel - Inside quick-controls -->
+            <div class="overlay-settings-panel" id="overlaySettingsPanel">
+                <div class="overlay-settings-header">
+                    <h3 class="overlay-settings-title">
+                        <span>⚙️</span>
+                        <span>Overlay Settings</span>
+                        <button class="overlay-toggle-btn" id="overlayControlsToggleBtn" style="display: none;">▶</button>
+                    </h3>
                 </div>
-            </div>
                 
-                <div class="input-group">
-                    <label for="youtube-volume" class="input-label">Original Video Volume</label>
-                <div class="slider-container">
-                    <input type="range" id="youtube-volume" min="0" max="100" value="100">
-                    <span id="youtube-volume-value" class="slider-value">100%</span>
+                <div class="compact-controls" id="overlayControls">
+                    <div class="input-group">
+                        <label for="overlay-position" class="input-label">Position</label>
+                        <select id="overlay-position" class="input">
+                        <option value="top-right">Top Right</option>
+                        <option value="top-left">Top Left</option>
+                        <option value="bottom-right">Bottom Right</option>
+                        <option value="bottom-left">Bottom Left</option>
+                    </select>
                 </div>
-            </div>
+                    
+                    <div class="input-group">
+                        <label for="overlay-size" class="input-label">Size</label>
+                    <div class="slider-container">
+                            <input type="range" id="overlay-size" min="10" max="60" value="50">
+                        <span id="overlay-size-value" class="slider-value">50%</span>
+                    </div>
+                </div>
+                    
+                    <div class="input-group">
+                        <label for="youtube-volume" class="input-label">Relative Volume</label>
+                    <div class="slider-container">
+                        <input type="range" id="youtube-volume" min="0" max="100" value="100">
+                        <span id="youtube-volume-value" class="slider-value">100%</span>
+                    </div>
+                </div>
 
-                <div class="input-group">
-                    <label class="input-label">Overlay Visibility</label>
-                    <button id="toggle-overlay" class="btn btn-secondary" disabled>Hide Overlay</button>
-            </div>
+                                     <div class="input-group">
+                         <label class="input-label">Visibility</label>
+                         <button id="toggle-overlay" class="btn btn-secondary" disabled>Hide Overlay</button>
+                     </div>
+                </div>
             </div>
         </div>
+
+
 
                 <!-- Message Display -->
         <div class="message" id="message"></div>
@@ -1470,6 +2332,23 @@
                         <li>Original video is clickable but we recommend avoiding interaction for smooth timestamp control</li>
                         <li>All YouTube terms and copyright protections remain fully intact, ensuring no risk of disputes.</li>
                     </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Beta Version Notice -->
+        <div class="beta-notice">
+            <div class="beta-notice-content">
+                <span class="beta-notice-icon">⚠️</span>
+                <div class="beta-notice-text desktop-beta-text">
+                    <strong>Beta Version</strong><br>
+                    Continuous playback is stable. Jumping to other points works but may occasionally cause unexpected issues.<br>
+                    If you experience problems or want more information, please press the Help button.
+                </div>
+                <div class="beta-notice-text mobile-beta-text" style="display: none;">
+                    <strong>Beta Version</strong><br>
+                    Continuous playback is stable. Jumping to other points works but may occasionally cause unexpected issues.<br>
+                    <strong>Note:</strong> iPhone/iOS support is not yet available.
                 </div>
             </div>
         </div>
@@ -1543,18 +2422,121 @@
 
     // DOM loaded event
     document.addEventListener('DOMContentLoaded', function() {
+        // Prevent screen rotation on mobile
+        if (window.innerWidth <= 768) {
+            // Lock orientation to portrait
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('portrait').catch(function(error) {
+                    console.log('Orientation lock failed:', error);
+                });
+            }
+            
+            // Alternative method for older browsers
+            if (window.orientation !== undefined) {
+                window.addEventListener('orientationchange', function() {
+                    if (window.orientation === 90 || window.orientation === -90) {
+                        // Force portrait mode
+                        document.body.style.transform = 'rotate(-90deg)';
+                        document.body.style.transformOrigin = 'left top';
+                        document.body.style.width = '100vh';
+                        document.body.style.height = '100vw';
+                        document.body.style.overflowX = 'hidden';
+                        document.body.style.position = 'absolute';
+                        document.body.style.top = '100%';
+                        document.body.style.left = '0';
+                    } else {
+                        // Portrait mode - reset
+                        document.body.style.transform = '';
+                        document.body.style.transformOrigin = '';
+                        document.body.style.width = '';
+                        document.body.style.height = '';
+                        document.body.style.overflowX = '';
+                        document.body.style.position = '';
+                        document.body.style.top = '';
+                        document.body.style.left = '';
+                    }
+                });
+            }
+        }
         // Overlay settings panel controls
         const overlayToggleBtn = document.getElementById('overlayToggleBtn');
+        const overlayControlsToggleBtn = document.getElementById('overlayControlsToggleBtn');
+        const overlaySettingsBtn = document.getElementById('overlay-settings-btn');
         const overlaySettingsPanel = document.getElementById('overlaySettingsPanel');
+        const overlayControls = document.getElementById('overlayControls');
         
-        if (overlayToggleBtn && overlaySettingsPanel) {
+        // Desktop overlay toggle functionality
+        if (overlayToggleBtn) {
             overlayToggleBtn.addEventListener('change', function() {
+                const overlaySettingsPanel = document.getElementById('overlaySettingsPanel');
                 if (this.checked) {
                     overlaySettingsPanel.classList.add('show');
                 } else {
                     overlaySettingsPanel.classList.remove('show');
                 }
             });
+        }
+        
+        // Mobile overlay controls toggle functionality
+        if (overlayControlsToggleBtn && overlayControls) {
+            console.log('Setting up mobile toggle button');
+            console.log('Button element:', overlayControlsToggleBtn);
+            console.log('Controls element:', overlayControls);
+            
+            overlayControlsToggleBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Toggle button clicked');
+                console.log('Current display:', overlayControls.style.display);
+                console.log('Window width:', window.innerWidth);
+                
+                if (window.innerWidth <= 768) {
+                    const isHidden = overlayControls.style.display === 'none' || overlayControls.style.display === '';
+                    overlayControls.style.display = isHidden ? 'grid' : 'none';
+                    this.classList.toggle('collapsed');
+                    this.textContent = isHidden ? '▼' : '▶';
+                    console.log('New display:', overlayControls.style.display);
+                    console.log('New text:', this.textContent);
+                }
+            });
+            
+                         // Also add touch event for mobile
+             overlayControlsToggleBtn.addEventListener('touchstart', function(e) {
+                 console.log('Touch event on toggle button');
+             });
+        }
+        
+        if (overlaySettingsBtn && overlaySettingsPanel) {
+            overlaySettingsBtn.addEventListener('click', function() {
+                overlaySettingsPanel.classList.toggle('show');
+            });
+        }
+        
+                         // Mobile: Set initial state for overlay controls
+        if (window.innerWidth <= 768) {
+            console.log('Setting mobile initial state');
+            if (overlaySettingsPanel) {
+                overlaySettingsPanel.classList.remove('show');
+            }
+            if (overlayControls) {
+                overlayControls.style.display = 'none';
+                console.log('Set overlayControls display to none');
+            }
+            if (overlayControlsToggleBtn) {
+                overlayControlsToggleBtn.textContent = '▶';
+                overlayControlsToggleBtn.classList.remove('collapsed');
+                console.log('Set toggle button text to ▶');
+            }
+        }
+        
+        // Mobile: Controls are always visible between video and footer
+        const quickControls = document.querySelector('.quick-controls');
+        
+        // Remove auto-hide functionality for mobile
+        if (window.innerWidth <= 768) {
+            if (quickControls) {
+                quickControls.classList.remove('hidden');
+            }
         }
 
         // Apple-style tooltip controls - Hover based
