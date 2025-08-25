@@ -155,6 +155,28 @@
         width: 100vh !important;
         height: 100vw !important;
     }
+    
+    /* Full 모드에서 모든 영상 가로 회전 */
+    .full-mode .video-container,
+    .full-mode .main-video-box,
+    .full-mode #reaction-player,
+    .full-mode #reaction-youtube-container,
+    .full-mode #youtube-container {
+        transform: rotate(90deg) !important;
+        transform-origin: center center !important;
+        width: 100vh !important;
+        height: 100vw !important;
+        position: relative !important;
+    }
+    
+    /* Full 모드에서 영상 내부 콘텐츠도 가로 회전 */
+    .full-mode video,
+    .full-mode iframe {
+        transform: rotate(90deg) !important;
+        transform-origin: center center !important;
+        width: 100vh !important;
+        height: 100vw !important;
+    }
 
     /* 모바일 최소 풀스크린 */
     .mobile-full-mode {
@@ -367,8 +389,8 @@
         /* Mobile: Container padding reduction */
         @media (max-width: 768px) {
             .container {
-                padding: var(--space-xs);
-                padding-bottom: var(--space-sm); /* 베타 안내와 푸터 공간 최소화 */
+                padding: 0; /* 패딩 완전 제거 */
+                padding-bottom: var(--space-xs); /* 최소한의 하단 여백만 */
             }
         }
         
