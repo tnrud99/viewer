@@ -800,6 +800,13 @@
             height: 100%;
             object-fit: cover;
         }
+        
+        /* Ensure YouTube overlay maintains 16:9 ratio */
+        #youtube-container iframe {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+        }
 
         .video-title {
             padding: 2.5px var(--space-sm);
@@ -918,7 +925,7 @@
             box-shadow: var(--shadow-lg);
             width: 50%;
             transition: all 0.3s ease;
-            aspect-ratio: 16 / 9;
+            aspect-ratio: 16/9;
         }
 
         #youtube-container iframe {
@@ -2105,8 +2112,9 @@
             .overlay-top-left,
             .overlay-bottom-right,
             .overlay-bottom-left {
-                width: 35% !important;
-                height: 25% !important;
+                width: 40% !important;
+                aspect-ratio: 16/9 !important;
+                height: auto !important;
             }
         }
         
