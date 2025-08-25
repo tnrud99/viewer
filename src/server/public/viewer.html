@@ -11,6 +11,7 @@
     <meta name="x5-fullscreen" content="true">
     <title>Multi-Window-Viewer - Synchronized Reaction Video Player</title>
     <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/fullscreen.css">
 
     
     <!-- 독립적인 스타일 (ui-system.css 참조하지 않음) -->
@@ -81,19 +82,58 @@
             text-size-adjust: 100%;
         }
         
-        /* Force portrait orientation on mobile */
-        @media screen and (orientation: landscape) and (max-width: 768px) {
-            body {
-                transform: rotate(-90deg);
-                transform-origin: left top;
-                width: 100vh;
-                height: 100vw;
-                overflow-x: hidden;
-                position: absolute;
-                top: 100%;
-                left: 0;
-            }
-        }
+                     /* Mobile optimizations */
+             @media (max-width: 768px) {
+                 /* Force portrait orientation on mobile */
+                 @media screen and (orientation: landscape) {
+                     body {
+                         transform: rotate(-90deg);
+                         transform-origin: left top;
+                         width: 100vh;
+                         height: 100vw;
+                         overflow-x: hidden;
+                         position: absolute;
+                         top: 100%;
+                         left: 0;
+                     }
+                 }
+                 
+                 /* Optimize touch interactions */
+                 button, input, select {
+                     -webkit-tap-highlight-color: transparent;
+                     touch-action: manipulation;
+                 }
+                 
+                 /* Improve scrolling performance */
+                 .container {
+                     -webkit-overflow-scrolling: touch;
+                 }
+                 
+                 /* Show Full button on mobile */
+                 #full-btn {
+                     display: inline-block !important;
+                     border: none !important; /* 테두리 제거 */
+                     background: rgba(33, 150, 243, 0.1) !important;
+                     min-width: auto !important; /* inline-btn 스타일 적용 */
+                     padding: 6px 12px !important; /* 다른 버튼들과 동일한 패딩 */
+                     font-size: var(--text-sm) !important; /* 다른 버튼들과 동일한 폰트 크기 */
+                     height: auto !important; /* 높이 자동 조정 */
+                     font-weight: normal !important; /* 글씨 두께 정상 */
+                     background: rgba(33, 150, 243, 0.1) !important; /* inline-btn 그라데이션 덮어쓰기 */
+                     align-self: center !important; /* 중간 정렬 */
+                 }
+                 
+                 /* Help button yellow border on mobile */
+                 #help-btn {
+                     border: none !important; /* 테두리 제거 */
+                     background: rgba(255, 193, 7, 0.1) !important;
+                     font-weight: normal !important; /* 글씨 두께 정상 */
+                     padding: 6px 12px !important; /* 다른 버튼들과 동일한 패딩 */
+                     font-size: var(--text-sm) !important; /* 다른 버튼들과 동일한 폰트 크기 */
+                     min-width: auto !important; /* 크기 자동 조정 */
+                     align-self: center !important; /* 중간 정렬 */
+                 }
+             }
 
         .container {
             max-width: 1400px;
@@ -101,12 +141,33 @@
             padding: var(--space-lg);
             min-height: 100vh;
         }
+        
+        /* Mobile: Container padding reduction */
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-xs);
+                padding-bottom: 120px; /* 고정된 베타 안내와 푸터 공간 확보 */
+            }
+        }
 
         /* Header with Logo & Navigation */
         .header {
             text-align: center;
             margin-bottom: var(--space-xl);
             padding: var(--space-lg) 0 var(--space-sm) 0;
+        }
+        
+        /* Mobile: Header optimization */
+        @media (max-width: 768px) {
+            .header {
+                margin-bottom: var(--space-sm);
+                padding: var(--space-xs) 0;
+                background: none;
+            }
+            
+            .header-center {
+                padding-top: 0;
+            }
         }
 
         .header-content {
@@ -122,7 +183,7 @@
             display: flex;
             align-items: center;
             gap: var(--space-sm);
-            padding-top: var(--space-md);
+            padding-top: var(--space-xs);
         }
 
         .header-logo {
@@ -157,6 +218,13 @@
             margin-left: 4px;
             margin-top: 5px;
         }
+        
+                 /* Mobile: Beta tag padding increase */
+         @media (max-width: 768px) {
+             .beta-tag {
+                 padding: 4px 9px !important; /* 1px씩 증가 */
+             }
+         }
 
         .header p {
             color: var(--color-text-sub);
@@ -376,6 +444,13 @@
             backdrop-filter: blur(10px);
             margin-left: 10px;
         }
+        
+                                                                       /* Mobile: Create My Own button padding increase */
+           @media (max-width: 768px) {
+               .create-own-btn {
+                   padding: calc(var(--space-xs) + 0.2px) calc(var(--space-sm) + 0.2px) !important; /* 0.2px씩 증가 */
+               }
+           }
 
         .create-own-btn:hover {
             background: var(--color-action);
@@ -446,6 +521,26 @@
             display: flex;
             align-items: center;
             gap: var(--space-sm);
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        /* Mobile: Make title clickable */
+        @media (max-width: 768px) {
+            .overlay-settings-title {
+                cursor: pointer;
+                padding: var(--space-xs);
+                border-radius: var(--radius-sm);
+                transition: background-color 0.2s ease;
+            }
+            
+            .overlay-settings-title:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+            
+            .overlay-settings-title:active {
+                background-color: rgba(255, 255, 255, 0.2);
+            }
         }
         
         /* Desktop overlay toggle button - hide on mobile */
@@ -670,7 +765,7 @@
         /* Video Container - Centered */
         .video-container {
             position: relative;
-            margin: var(--space-xl) auto var(--space-lg) auto;
+            margin: var(--space-md) auto var(--space-sm) auto;
             overflow: hidden;
             border-radius: var(--radius-xl);
             background: var(--color-bg-card);
@@ -838,7 +933,17 @@
             justify-content: center;
             gap: var(--space-sm);
             flex-wrap: wrap;
-            margin-top: var(--space-xs);
+            margin-top: 0;
+        }
+        
+        /* Mobile: flexbox order support for Full button positioning */
+        @media (max-width: 768px) {
+            .quick-controls {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-items: center;
+            }
         }
 
         .quick-controls .btn {
@@ -915,10 +1020,22 @@
             background: rgba(255, 193, 7, 0.08);
             border: 1px solid rgba(255, 193, 7, 0.2);
             border-radius: var(--radius-lg);
-            margin-top: var(--space-md);
-            padding: var(--space-md) var(--space-lg);
+            margin-top: var(--space-xs);
+            padding: var(--space-xs) var(--space-sm);
             backdrop-filter: blur(15px);
             box-shadow: var(--shadow-sm);
+        }
+        
+        /* Mobile: Fixed position for beta notice */
+        @media (max-width: 768px) {
+            .beta-notice {
+                position: fixed;
+                bottom: 60px;
+                left: var(--space-xs);
+                right: var(--space-xs);
+                margin-top: 0;
+                z-index: 100;
+            }
         }
 
         .beta-notice-content {
@@ -951,7 +1068,7 @@
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: var(--radius-xl);
-            margin-top: var(--space-md);
+            margin-top: 0;
             box-shadow: var(--shadow-lg);
             backdrop-filter: blur(15px);
             max-height: 70vh;
@@ -1348,8 +1465,8 @@
         }
 
         .message {
-            padding: var(--space-md);
-            margin-top: var(--space-md);
+            padding: var(--space-sm);
+            margin-top: var(--space-xs);
             border-radius: var(--radius-md);
             display: none;
             font-weight: 500;
@@ -1411,6 +1528,21 @@
             font-size: var(--text-sm);
             color: var(--color-text-muted);
         }
+        
+        /* Mobile: Reduce footer margin */
+        @media (max-width: 768px) {
+            footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                margin-top: 0;
+                padding: var(--space-xs);
+                background: var(--color-bg-main);
+                border-top: 1px solid var(--color-border);
+                z-index: 99;
+            }
+        }
 
                  /* Responsive Design */
          @media (max-width: 768px) {
@@ -1430,8 +1562,15 @@
             
             /* Header Mobile Optimization */
             .header {
-                margin-bottom: var(--space-md);
-                padding: var(--space-md) 0 var(--space-sm) 0;
+                position: static !important;
+                margin-bottom: var(--space-xs);
+                padding: var(--space-xs) 0;
+                background: none;
+            }
+            
+            /* Remove container padding */
+            .container {
+                padding-top: 0;
             }
             
             .header-content {
@@ -1457,7 +1596,7 @@
             
             /* Video Container Mobile Optimization */
             .video-container {
-                margin-bottom: var(--space-md);
+                margin-bottom: var(--space-xs);
             }
             
             .main-video-box {
@@ -1496,7 +1635,7 @@
                 flex-direction: row;
                 flex-wrap: wrap;
                 gap: var(--space-xs);
-                margin-bottom: var(--space-md);
+                margin-bottom: 0;
             }
 
             .quick-controls .btn {
@@ -2100,7 +2239,7 @@
                  backdrop-filter: blur(10px);
                  border-radius: var(--radius-md);
                  border: 1px solid rgba(255, 255, 255, 0.1);
-                 margin: var(--space-sm) 0;
+                 margin: 0;
                  padding: var(--space-xs);
              }
              
@@ -2239,14 +2378,15 @@
         <div class="quick-controls">
             <button id="play-btn" class="btn btn-primary" disabled>Play</button>
             <button id="pause-btn" class="btn btn-secondary" disabled>Pause</button>
-            <button id="stop-btn" class="btn btn-secondary" disabled>Stop</button>
             <button id="restart-btn" class="btn btn-secondary" disabled>Restart</button>
-            <button id="help-btn" class="btn btn-info">Help</button>
+            <button id="full-btn" class="inline-btn btn-secondary" style="display: none;">Full</button>
+            <button id="help-btn" class="inline-btn btn-info">Help</button>
             <button id="resyncBtn" class="inline-btn">Resync</button>
             <button id="overlay-settings-btn" class="btn btn-secondary" data-overlay-settings>⚙️</button>
-            
-            <!-- Overlay Settings Panel - Inside quick-controls -->
-            <div class="overlay-settings-panel" id="overlaySettingsPanel">
+        </div>
+        
+        <!-- Overlay Settings Panel - Outside quick-controls -->
+        <div class="overlay-settings-panel" id="overlaySettingsPanel" style="margin-top: 0;">
                 <div class="overlay-settings-header">
                     <h3 class="overlay-settings-title">
                         <span>⚙️</span>
@@ -2290,15 +2430,11 @@
             </div>
         </div>
 
-
-
-                <!-- Message Display -->
+        <!-- Message Display -->
         <div class="message" id="message"></div>
         
-
-        
         <!-- Help FAQ -->
-        <div class="help-faq" id="helpFaq" style="display: none;">
+        <div class="help-faq" id="helpFaq" style="display: none; margin: 0; padding: 0;">
             <div class="help-header">
                 <h3>❓ Help & FAQ</h3>
                 <button class="help-close-btn" id="helpCloseBtn">×</button>
@@ -2360,6 +2496,7 @@
 
     <!-- YouTube API -->
     <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="js/FullscreenManager.js"></script>
     <script>
     // Fixed Viewer JavaScript - Completely Redesigned Synchronization Logic with Enhanced Event Detection
     // Version 7: Fixed YouTube-YouTube mode synchronization and player creation with improved UI and default YouTube URL mode
@@ -2414,11 +2551,10 @@
     let youtubeYoutubeSyncThreshold = 0.3; // Threshold for YouTube-YouTube synchronization in seconds
     let reactionYoutubeState = -1; // Current state of reaction YouTube player
 
-    // YouTube API callback
-    function onYouTubeIframeAPIReady() {
-        youtubeReady = true;
-        console.log("YouTube API is ready");
-    }
+            // YouTube API callback
+        function onYouTubeIframeAPIReady() {
+            youtubeReady = true;
+        }
 
     // DOM loaded event
     document.addEventListener('DOMContentLoaded', function() {
@@ -2427,7 +2563,7 @@
             // Lock orientation to portrait
             if (screen.orientation && screen.orientation.lock) {
                 screen.orientation.lock('portrait').catch(function(error) {
-                    console.log('Orientation lock failed:', error);
+                    // Silently handle orientation lock failure
                 });
             }
             
@@ -2468,7 +2604,6 @@
         // Desktop overlay toggle functionality
         if (overlayToggleBtn) {
             overlayToggleBtn.addEventListener('change', function() {
-                const overlaySettingsPanel = document.getElementById('overlaySettingsPanel');
                 if (this.checked) {
                     overlaySettingsPanel.classList.add('show');
                 } else {
@@ -2477,33 +2612,39 @@
             });
         }
         
-        // Mobile overlay controls toggle functionality
+                // Mobile overlay controls toggle functionality
         if (overlayControlsToggleBtn && overlayControls) {
-            console.log('Setting up mobile toggle button');
-            console.log('Button element:', overlayControlsToggleBtn);
-            console.log('Controls element:', overlayControls);
-            
             overlayControlsToggleBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Toggle button clicked');
-                console.log('Current display:', overlayControls.style.display);
-                console.log('Window width:', window.innerWidth);
                 
                 if (window.innerWidth <= 768) {
                     const isHidden = overlayControls.style.display === 'none' || overlayControls.style.display === '';
                     overlayControls.style.display = isHidden ? 'grid' : 'none';
                     this.classList.toggle('collapsed');
                     this.textContent = isHidden ? '▼' : '▶';
-                    console.log('New display:', overlayControls.style.display);
-                    console.log('New text:', this.textContent);
                 }
             });
-            
-                         // Also add touch event for mobile
-             overlayControlsToggleBtn.addEventListener('touchstart', function(e) {
-                 console.log('Touch event on toggle button');
-             });
+        }
+        
+        // Overlay settings title click functionality
+        const overlaySettingsTitle = document.querySelector('.overlay-settings-title');
+        if (overlaySettingsTitle && overlayControls) {
+            overlaySettingsTitle.addEventListener('click', function(e) {
+                if (window.innerWidth <= 768) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const isHidden = overlayControls.style.display === 'none' || overlayControls.style.display === '';
+                    overlayControls.style.display = isHidden ? 'grid' : 'none';
+                    
+                    // Update toggle button state
+                    if (overlayControlsToggleBtn) {
+                        overlayControlsToggleBtn.classList.toggle('collapsed');
+                        overlayControlsToggleBtn.textContent = isHidden ? '▼' : '▶';
+                    }
+                }
+            });
         }
         
         if (overlaySettingsBtn && overlaySettingsPanel) {
@@ -2514,18 +2655,20 @@
         
                          // Mobile: Set initial state for overlay controls
         if (window.innerWidth <= 768) {
-            console.log('Setting mobile initial state');
             if (overlaySettingsPanel) {
                 overlaySettingsPanel.classList.remove('show');
             }
             if (overlayControls) {
                 overlayControls.style.display = 'none';
-                console.log('Set overlayControls display to none');
             }
             if (overlayControlsToggleBtn) {
                 overlayControlsToggleBtn.textContent = '▶';
                 overlayControlsToggleBtn.classList.remove('collapsed');
-                console.log('Set toggle button text to ▶');
+            }
+            
+            // Show Full button on mobile
+            if (fullBtn) {
+                fullBtn.style.display = 'inline-block';
             }
         }
         
@@ -2564,7 +2707,6 @@
         const veId = urlParams.get('ve');
         
         if (veId) {
-            console.log("VE URL detected:", veId);
             addDebugMessage(`VE URL detected: ${veId}`);
             
             // Load VE URL data from server
@@ -2579,8 +2721,9 @@
         const loadBtn = document.getElementById('load-btn');
         const playBtn = document.getElementById('play-btn');
         const pauseBtn = document.getElementById('pause-btn');
-        const stopBtn = document.getElementById('stop-btn');
+
         const restartBtn = document.getElementById('restart-btn');
+        const fullBtn = document.getElementById('full-btn');
         const helpBtn = document.getElementById('help-btn');
         const helpFaq = document.getElementById('helpFaq');
         const helpCloseBtn = document.getElementById('helpCloseBtn');
@@ -2602,18 +2745,21 @@
         youtubeContainer.style.display = 'none';
 
         // Source type change event
+        const fileSourceContainer = document.getElementById('file-source-container');
+        const youtubeSourceContainer = document.getElementById('youtube-source-container');
+        
         sourceTypeRadios.forEach(radio => {
             radio.addEventListener('change', function() {
                 reactionSource = this.value;
                 if (reactionSource === 'file') {
-                    document.getElementById('file-source-container').style.display = 'block';
-                    document.getElementById('youtube-source-container').style.display = 'none';
+                    fileSourceContainer.style.display = 'block';
+                    youtubeSourceContainer.style.display = 'none';
                     reactionPlayer.style.display = 'block';
                     reactionYoutubeContainer.style.display = 'none';
                     youtubeYoutubeMode = false;
                 } else {
-                    document.getElementById('file-source-container').style.display = 'none';
-                    document.getElementById('youtube-source-container').style.display = 'block';
+                    fileSourceContainer.style.display = 'none';
+                    youtubeSourceContainer.style.display = 'block';
                     reactionPlayer.style.display = 'none';
                     reactionYoutubeContainer.style.display = 'block';
                     youtubeYoutubeMode = true;
@@ -2972,17 +3118,31 @@
             });
         }
 
-        // Stop button click
-        if (stopBtn) {
-            stopBtn.addEventListener('click', function() {
-                stopSynchronizedPlayback();
-            });
-        }
+
 
         // Restart button click
         if (restartBtn) {
             restartBtn.addEventListener('click', function() {
                 restartSynchronizedPlayback();
+            });
+        }
+
+        // Full button click
+        if (fullBtn) {
+            fullBtn.addEventListener('click', async function() {
+                console.log('Full button clicked!');
+                console.log('FullscreenManager exists:', !!window.fullscreenManager);
+                console.log('Current full mode:', window.fullscreenManager?.isInFullMode());
+                
+                if (window.fullscreenManager && window.fullscreenManager.isInFullMode()) {
+                    console.log('Exiting full mode...');
+                    window.fullscreenManager.exitFullMode();
+                } else if (window.fullscreenManager) {
+                    console.log('Entering full mode...');
+                    await window.fullscreenManager.enterFullMode();
+                } else {
+                    console.error('FullscreenManager not found!');
+                }
             });
         }
 
@@ -3596,61 +3756,7 @@
         updateButtonStates(false);
     }
 
-    // Stop synchronized playback
-    function stopSynchronizedPlayback() {
-        isPlaying = false;
-        waitingForFirstSync = false;
-        
-        // Stop and rewind reaction video
-        if (reactionSource === 'file') {
-            reactionPlayer.pause();
-            reactionPlayer.currentTime = 0;
-        } else {
-            if (reactionYoutubeReady && reactionYoutubePlayer && reactionYoutubePlayer.pauseVideo && reactionYoutubePlayer.seekTo) {
-                reactionYoutubePlayer.pauseVideo();
-                reactionYoutubePlayer.seekTo(0, true);
-                addDebugMessage("Stopped and rewound reaction YouTube player");
-            }
-        }
-        
-        // Stop YouTube video if it exists
-        if (youtubePlayer && youtubePlayer.pauseVideo && youtubePlayer.seekTo) {
-            youtubePlayer.pauseVideo();
-            youtubePlayer.seekTo(0, true);
-            
-            // Hide YouTube container
-            document.getElementById('youtube-container').style.display = 'none';
-            addDebugMessage("Stopped and rewound original YouTube player");
-        }
-        
-        // Stop sync intervals
-        if (syncInterval) {
-            clearInterval(syncInterval);
-            syncInterval = null;
-        }
-        if (youtubeYoutubeSyncInterval) {
-            clearInterval(youtubeYoutubeSyncInterval);
-            youtubeYoutubeSyncInterval = null;
-            addDebugMessage("Stopped YouTube-YouTube synchronization interval");
-        }
-        
-        console.log('Status updated');
-        addDebugMessage("Playback stopped");
-        updateDebugDisplay();
-        updateButtonStates(false);
-        
-        // Reset YouTube started flag
-        youtubeStarted = false;
-        youtubePaused = false;
-        currentSyncPoint = null;
-        nextPauseTime = null;
-        nextPlayTime = null;
-        lastProcessedPauseTime = -1;
-        lastProcessedPlayTime = -1;
-        lastReactionTime = 0;
-        reactionYoutubeCurrentTime = 0;
-        lastReactionYoutubeTime = 0;
-    }
+
 
     // Restart synchronized playback
     function restartSynchronizedPlayback() {
@@ -3762,8 +3868,8 @@
     function enableControls(enabled) {
         document.getElementById('play-btn').disabled = !enabled;
         document.getElementById('pause-btn').disabled = !enabled;
-        document.getElementById('stop-btn').disabled = !enabled;
         document.getElementById('restart-btn').disabled = !enabled;
+        document.getElementById('full-btn').disabled = !enabled;
         document.getElementById('toggle-overlay').disabled = !enabled;
     }
 
@@ -3771,8 +3877,8 @@
     function updateButtonStates(playing) {
         document.getElementById('play-btn').disabled = playing;
         document.getElementById('pause-btn').disabled = !playing;
-        document.getElementById('stop-btn').disabled = !playing;
         document.getElementById('restart-btn').disabled = !playing;
+        document.getElementById('full-btn').disabled = false; // Full 버튼은 항상 활성화
     }
 
     // Show message

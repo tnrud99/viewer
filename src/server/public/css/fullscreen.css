@@ -1,0 +1,219 @@
+/* Full Mode Styles */
+.full-mode {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: #000 !important;
+    z-index: 9999 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Full 모드에서 비디오 컨테이너 최적화 */
+.full-mode .video-container {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.full-mode .main-video-box {
+    width: 100% !important;
+    height: 100% !important;
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 비디오 플레이어 최적화 */
+.full-mode #reaction-player,
+.full-mode #reaction-youtube-container {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.full-mode #youtube-container {
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Full 모드에서 다른 요소들 숨김 */
+.full-mode .header,
+.full-mode .quick-controls,
+.full-mode .beta-notice,
+.full-mode .help-faq,
+.full-mode .message,
+.full-mode footer {
+    display: none !important;
+}
+
+/* 터치 이벤트 차단 (플로팅 컨트롤 제외) */
+.full-mode * {
+    pointer-events: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+}
+
+/* 플로팅 컨트롤만 터치 가능 */
+.full-mode .floating-controls,
+.full-mode .floating-controls * {
+    pointer-events: auto !important;
+}
+
+/* 플로팅 컨트롤 스타일 */
+.floating-controls {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    gap: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.full-mode .floating-controls {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.floating-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.floating-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.floating-btn:active {
+    transform: scale(0.95);
+}
+
+/* 모바일 가로모드 시뮬레이션 */
+.mobile-landscape {
+    transform: rotate(90deg);
+    transform-origin: center center;
+    width: 100vh !important;
+    height: 100vw !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+.mobile-landscape .video-container {
+    transform: rotate(-90deg);
+    transform-origin: center center;
+    width: 100vh !important;
+    height: 100vw !important;
+}
+
+/* 모바일 최소 풀스크린 */
+.mobile-full-mode {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: #000 !important;
+    z-index: 9999 !important;
+    overflow: hidden !important;
+}
+
+/* 모바일 터치 최적화 */
+@media (max-width: 768px) {
+    .floating-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+    
+    .floating-controls {
+        top: 15px;
+        right: 15px;
+    }
+}
+
+/* 애니메이션 효과 */
+.full-mode {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* 스크롤 방지 */
+.full-mode {
+    overflow: hidden !important;
+    position: fixed !important;
+}
+
+body.full-mode {
+    overflow: hidden !important;
+}
+
+/* 비디오 플레이어 컨트롤 숨김 (선택사항) */
+.full-mode video::-webkit-media-controls {
+    display: none !important;
+}
+
+.full-mode video::-webkit-media-controls-panel {
+    display: none !important;
+}
+
+.full-mode video::-webkit-media-controls-play-button {
+    display: none !important;
+}
+
+.full-mode video::-webkit-media-controls-start-playback-button {
+    display: none !important;
+}
+
+/* Hide overlay settings and controls in full mode */
+.full-mode .overlay-settings-panel {
+    display: none !important;
+}
+
+.full-mode .quick-controls {
+    display: none !important;
+}
