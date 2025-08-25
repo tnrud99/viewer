@@ -149,6 +149,14 @@
                 padding-bottom: 120px; /* 고정된 베타 안내와 푸터 공간 확보 */
             }
         }
+        
+        /* Desktop: Normal container padding */
+        @media (min-width: 769px) {
+            .container {
+                padding: var(--space-lg);
+                padding-bottom: var(--space-lg);
+            }
+        }
 
         /* Header with Logo & Navigation */
         .header {
@@ -779,6 +787,18 @@
             background-color: #000;
             border-radius: var(--radius-lg);
             overflow: hidden;
+            aspect-ratio: 16/9;
+        }
+        
+        /* Ensure video elements maintain 16:9 ratio */
+        .main-video-box video,
+        .main-video-box iframe,
+        #reaction-player,
+        #reaction-youtube-container,
+        #youtube-container {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .video-title {
@@ -1027,6 +1047,27 @@
         }
         
         /* Mobile: Fixed position for beta notice */
+        @media (max-width: 768px) {
+            .beta-notice {
+                position: fixed;
+                bottom: 60px;
+                left: var(--space-xs);
+                right: var(--space-xs);
+                margin-top: 0;
+                z-index: 100;
+            }
+        }
+        
+        /* Desktop: Normal flow for beta notice */
+        @media (min-width: 769px) {
+            .beta-notice {
+                position: static;
+                margin-top: var(--space-xs);
+                margin-bottom: var(--space-sm);
+            }
+        }
+        
+        /* Mobile: Keep fixed position for beta notice */
         @media (max-width: 768px) {
             .beta-notice {
                 position: fixed;
@@ -1522,8 +1563,8 @@
         /* Footer */
         footer {
             text-align: center;
-            margin-top: var(--space-xl);
-            padding-top: var(--space-lg);
+            margin-top: var(--space-lg);
+            padding-top: var(--space-md);
             border-top: 1px solid var(--color-border);
             font-size: var(--text-sm);
             color: var(--color-text-muted);
@@ -1541,6 +1582,15 @@
                 background: var(--color-bg-main);
                 border-top: 1px solid var(--color-border);
                 z-index: 99;
+            }
+        }
+        
+        /* Desktop: Normal flow for footer */
+        @media (min-width: 769px) {
+            footer {
+                position: static;
+                margin-top: var(--space-sm);
+                padding-top: var(--space-sm);
             }
         }
 
@@ -1617,6 +1667,7 @@
             #reaction-youtube-container iframe {
                 min-height: 250px;
                 border-radius: var(--radius-sm);
+                aspect-ratio: 16/9;
             }
             
             /* Overlay Mobile Optimization */
@@ -2385,6 +2436,23 @@
             <button id="overlay-settings-btn" class="btn btn-secondary" data-overlay-settings>⚙️</button>
         </div>
         
+        <!-- Beta Version Notice - Right below quick controls -->
+        <div class="beta-notice">
+            <div class="beta-notice-content">
+                <span class="beta-notice-icon">⚠️</span>
+                <div class="beta-notice-text desktop-beta-text">
+                    <strong>Beta Version</strong><br>
+                    Continuous playback is stable. Jumping to other points works but may occasionally cause unexpected issues.<br>
+                    If you experience problems or want more information, please press the Help button.
+                </div>
+                <div class="beta-notice-text mobile-beta-text" style="display: none;">
+                    <strong>Beta Version</strong><br>
+                    Continuous playback is stable. Jumping to other points works but may occasionally cause unexpected issues.<br>
+                    <strong>Note:</strong> iPhone/iOS support is not yet available.
+                </div>
+            </div>
+        </div>
+        
         <!-- Overlay Settings Panel - Outside quick-controls -->
         <div class="overlay-settings-panel" id="overlaySettingsPanel" style="margin-top: 0;">
                 <div class="overlay-settings-header">
@@ -2468,23 +2536,6 @@
                         <li>Original video is clickable but we recommend avoiding interaction for smooth timestamp control</li>
                         <li>All YouTube terms and copyright protections remain fully intact, ensuring no risk of disputes.</li>
                     </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- Beta Version Notice -->
-        <div class="beta-notice">
-            <div class="beta-notice-content">
-                <span class="beta-notice-icon">⚠️</span>
-                <div class="beta-notice-text desktop-beta-text">
-                    <strong>Beta Version</strong><br>
-                    Continuous playback is stable. Jumping to other points works but may occasionally cause unexpected issues.<br>
-                    If you experience problems or want more information, please press the Help button.
-                </div>
-                <div class="beta-notice-text mobile-beta-text" style="display: none;">
-                    <strong>Beta Version</strong><br>
-                    Continuous playback is stable. Jumping to other points works but may occasionally cause unexpected issues.<br>
-                    <strong>Note:</strong> iPhone/iOS support is not yet available.
                 </div>
             </div>
         </div>
