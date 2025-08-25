@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="screen-orientation" content="portrait">
@@ -780,6 +781,7 @@
             border: 1px solid var(--color-border);
             max-width: 1200px;
             box-shadow: var(--shadow-md);
+            z-index: 10;
         }
 
         .main-video-box {
@@ -798,14 +800,14 @@
         #youtube-container {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
         }
         
         /* Ensure YouTube overlay maintains 16:9 ratio */
         #youtube-container iframe {
             width: 100% !important;
             height: 100% !important;
-            object-fit: cover;
+            object-fit: contain;
         }
 
         .video-title {
@@ -1654,6 +1656,7 @@
             /* Video Container Mobile Optimization */
             .video-container {
                 margin-bottom: var(--space-xs);
+                z-index: 10;
             }
             
             .main-video-box {
@@ -1683,7 +1686,8 @@
             .overlay-bottom-right,
             .overlay-bottom-left {
                 width: 40% !important;
-                height: 30% !important;
+                aspect-ratio: 16/9 !important;
+                height: auto !important;
                 max-width: 200px;
                 max-height: 150px;
             }
@@ -1725,7 +1729,7 @@
                  padding: 0;
                  box-shadow: none;
                  border: none;
-                 z-index: auto;
+                 z-index: 1;
                  max-width: none;
                  max-height: none;
                  overflow-y: visible;
@@ -2726,6 +2730,7 @@
             }
             
             // Show Full button on mobile
+            const fullBtn = document.getElementById('full-btn');
             if (fullBtn) {
                 fullBtn.style.display = 'inline-block';
             }
@@ -2782,7 +2787,6 @@
         const pauseBtn = document.getElementById('pause-btn');
 
         const restartBtn = document.getElementById('restart-btn');
-        const fullBtn = document.getElementById('full-btn');
         const helpBtn = document.getElementById('help-btn');
         const helpFaq = document.getElementById('helpFaq');
         const helpCloseBtn = document.getElementById('helpCloseBtn');
