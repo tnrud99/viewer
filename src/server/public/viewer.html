@@ -157,25 +157,37 @@
     }
     
     /* Full 모드에서 모든 영상 가로 회전 */
-    .full-mode .video-container,
-    .full-mode .main-video-box,
-    .full-mode #reaction-player,
-    .full-mode #reaction-youtube-container,
-    .full-mode #youtube-container {
+    .full-mode .video-container {
         transform: rotate(90deg) !important;
         transform-origin: center center !important;
         width: 100vh !important;
         height: 100vw !important;
-        position: relative !important;
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        margin: -50vh 0 0 -50vw !important;
+    }
+    
+    .full-mode .main-video-box {
+        width: 100vh !important;
+        height: 100vw !important;
+        aspect-ratio: auto !important;
+    }
+    
+    .full-mode #reaction-player,
+    .full-mode #reaction-youtube-container,
+    .full-mode #youtube-container {
+        width: 100vh !important;
+        height: 100vw !important;
+        object-fit: cover !important;
     }
     
     /* Full 모드에서 영상 내부 콘텐츠도 가로 회전 */
     .full-mode video,
     .full-mode iframe {
-        transform: rotate(90deg) !important;
-        transform-origin: center center !important;
         width: 100vh !important;
         height: 100vw !important;
+        object-fit: cover !important;
     }
 
     /* 모바일 최소 풀스크린 */
@@ -412,8 +424,8 @@
         /* Mobile: Header optimization */
         @media (max-width: 768px) {
             .header {
-                margin-bottom: var(--space-sm);
-                padding: var(--space-xs) 0;
+                margin-bottom: 0;
+                padding: 0;
                 background: none;
             }
             
@@ -1014,10 +1026,10 @@
             flex-wrap: wrap;
         }
 
-        /* Video Container - Centered */
+        /* Video Container - Centered (Unified for mobile and desktop) */
         .video-container {
             position: relative;
-            margin: var(--space-sm) auto var(--space-sm) auto;
+            margin: var(--space-md) auto var(--space-md) auto;
             overflow: hidden;
             border-radius: var(--radius-xl);
             background: var(--color-bg-card);
@@ -1025,13 +1037,6 @@
             max-width: 1200px;
             box-shadow: var(--shadow-md);
             z-index: 10;
-        }
-        
-        /* Desktop specific video container spacing */
-        @media (min-width: 769px) {
-            .video-container {
-                margin: var(--space-xl) auto var(--space-lg) auto !important;
-            }
         }
 
         .main-video-box {
@@ -1053,14 +1058,14 @@
             object-fit: contain;
         }
         
-        /* Mobile: Use cover to fill container and prevent video cutoff */
+        /* Mobile: Use same format as desktop - contain to show full video */
         @media (max-width: 768px) {
             .main-video-box video,
             .main-video-box iframe,
             #reaction-player,
             #reaction-youtube-container,
             #youtube-container {
-                object-fit: cover !important;
+                object-fit: contain !important;
             }
         }
         
@@ -3799,13 +3804,24 @@
                 console.log('Full button clicked!');
                 console.log('FullscreenManager exists:', !!window.fullscreenManager);
                 console.log('Current full mode:', window.fullscreenManager?.isInFullMode());
+                console.log('Is playing:', isPlaying);
+                
+                // Only allow full mode when playing
+                if (!isPlaying) {
+                    showMessage('Please start playback first to use full mode.', 'warning');
+                    return;
+                }
                 
                 if (window.fullscreenManager && window.fullscreenManager.isInFullMode()) {
                     console.log('Exiting full mode...');
                     window.fullscreenManager.exitFullMode();
+                    fullBtn.textContent = 'Full';
+                    fullBtn.style.background = 'rgba(33, 150, 243, 0.1)';
                 } else if (window.fullscreenManager) {
                     console.log('Entering full mode...');
                     await window.fullscreenManager.enterFullMode();
+                    fullBtn.textContent = 'Exit Full';
+                    fullBtn.style.background = 'rgba(194, 41, 31, 0.8)';
                 } else {
                     console.error('FullscreenManager not found!');
                 }
