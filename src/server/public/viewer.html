@@ -774,7 +774,7 @@
         /* Video Container - Centered */
         .video-container {
             position: relative;
-            margin: var(--space-md) auto var(--space-sm) auto;
+            margin: var(--space-sm) auto var(--space-sm) auto;
             overflow: hidden;
             border-radius: var(--radius-xl);
             background: var(--color-bg-card);
@@ -925,9 +925,9 @@
             overflow: hidden;
             z-index: 10;
             box-shadow: var(--shadow-lg);
-            width: 50%;
+            width: 300px;
+            height: 169px;
             transition: all 0.3s ease;
-            aspect-ratio: 16/9;
         }
 
         #youtube-container iframe {
@@ -936,12 +936,12 @@
         }
 
         #youtube-container.overlay-top-right {
-            top: calc(var(--space-md) + 20px);
+            top: var(--space-sm);
             right: var(--space-md);
         }
 
         #youtube-container.overlay-top-left {
-            top: calc(var(--space-md) + 20px);
+            top: var(--space-sm);
             left: var(--space-md);
         }
 
@@ -1685,11 +1685,11 @@
             .overlay-top-left,
             .overlay-bottom-right,
             .overlay-bottom-left {
-                width: 40% !important;
+                width: 35% !important;
                 aspect-ratio: 16/9 !important;
                 height: auto !important;
-                max-width: 200px;
-                max-height: 150px;
+                max-width: 180px;
+                max-height: 120px;
             }
             
             /* Controls Mobile Optimization */
@@ -3191,6 +3191,7 @@
         }
 
         // Full button click
+        const fullBtn = document.getElementById('full-btn');
         if (fullBtn) {
             fullBtn.addEventListener('click', async function() {
                 console.log('Full button clicked!');
