@@ -8,31 +8,7 @@
   ],
   "routes": [
     {
-      "src": "/js/(.*)",
-      "dest": "/src/server/public/js/$1"
-    },
-    {
-      "src": "/css/(.*)",
-      "dest": "/src/server/public/css/$1"
-    },
-    {
-      "src": "/logo/(.*)",
-      "dest": "/src/server/public/logo/$1"
-    },
-    {
-      "src": "/favicon.ico",
-      "dest": "/src/server/public/favicon.ico"
-    },
-    {
-      "src": "/favicon.png",
-      "dest": "/src/server/public/favicon.png"
-    },
-    {
       "src": "/api/(.*)",
-      "dest": "src/server/server.js"
-    },
-    {
-      "src": "/src/(.*)",
       "dest": "src/server/server.js"
     },
     {
