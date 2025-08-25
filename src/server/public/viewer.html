@@ -50,11 +50,12 @@
     /* 비디오 플레이어 최적화 */
     .full-mode #reaction-player,
     .full-mode #reaction-youtube-container {
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: contain !important;
+        width: 100vh !important;
+        height: 100vw !important;
+        object-fit: cover !important;
         margin: 0 !important;
         padding: 0 !important;
+        border-radius: 0 !important;
     }
 
     .full-mode #youtube-container {
@@ -166,12 +167,14 @@
         top: 50% !important;
         left: 50% !important;
         margin: -50vh 0 0 -50vw !important;
+        z-index: 10000 !important;
     }
     
     .full-mode .main-video-box {
         width: 100vh !important;
         height: 100vw !important;
         aspect-ratio: auto !important;
+        border-radius: 0 !important;
     }
     
     .full-mode #reaction-player,
@@ -180,6 +183,7 @@
         width: 100vh !important;
         height: 100vw !important;
         object-fit: cover !important;
+        border-radius: 0 !important;
     }
     
     /* Full 모드에서 영상 내부 콘텐츠도 가로 회전 */
@@ -188,6 +192,7 @@
         width: 100vh !important;
         height: 100vw !important;
         object-fit: cover !important;
+        border-radius: 0 !important;
     }
 
     /* 모바일 최소 풀스크린 */
@@ -3668,9 +3673,15 @@
                     videoId: reactionVideoId,
                     playerVars: {
                         'playsinline': 1,
-                        'controls': 1,
+                        'controls': 0, // Disable controls for better overlay experience
                         'autoplay': 0,
-                        'rel': 0
+                        'rel': 0,
+                        'showinfo': 0, // Hide video title and uploader info
+                        'modestbranding': 1, // Hide YouTube logo
+                        'iv_load_policy': 3, // Hide video annotations
+                        'fs': 0, // Disable fullscreen button
+                        'cc_load_policy': 0, // Disable closed captions
+                        'disablekb': 1 // Disable keyboard controls
                     },
                     events: {
                         'onReady': onReactionPlayerReady,
@@ -3816,12 +3827,16 @@
                     console.log('Exiting full mode...');
                     window.fullscreenManager.exitFullMode();
                     fullBtn.textContent = 'Full';
-                    fullBtn.style.background = 'rgba(33, 150, 243, 0.1)';
+                    fullBtn.style.background = 'rgba(33, 150, 243, 0.8)';
+                    fullBtn.style.color = 'white';
+                    fullBtn.style.fontWeight = 'bold';
                 } else if (window.fullscreenManager) {
                     console.log('Entering full mode...');
                     await window.fullscreenManager.enterFullMode();
                     fullBtn.textContent = 'Exit Full';
-                    fullBtn.style.background = 'rgba(194, 41, 31, 0.8)';
+                    fullBtn.style.background = 'rgba(194, 41, 31, 0.9)';
+                    fullBtn.style.color = 'white';
+                    fullBtn.style.fontWeight = 'bold';
                 } else {
                     console.error('FullscreenManager not found!');
                 }
@@ -4122,7 +4137,13 @@
                 'controls': 0, // Disable controls for better overlay experience
                 'autoplay': 0, // Critical: No autoplay
                 'start': Math.floor(startTime), // Set start time
-                'rel': 0
+                'rel': 0,
+                'showinfo': 0, // Hide video title and uploader info
+                'modestbranding': 1, // Hide YouTube logo
+                'iv_load_policy': 3, // Hide video annotations
+                'fs': 0, // Disable fullscreen button
+                'cc_load_policy': 0, // Disable closed captions
+                'disablekb': 1 // Disable keyboard controls
             },
             events: {
                 'onReady': function(event) {
@@ -4710,9 +4731,15 @@
                         videoId: reactionVideoId,
                         playerVars: {
                             'playsinline': 1,
-                            'controls': 1,
+                            'controls': 0, // Disable controls for better overlay experience
                             'autoplay': 0,
-                            'rel': 0
+                            'rel': 0,
+                            'showinfo': 0, // Hide video title and uploader info
+                            'modestbranding': 1, // Hide YouTube logo
+                            'iv_load_policy': 3, // Hide video annotations
+                            'fs': 0, // Disable fullscreen button
+                            'cc_load_policy': 0, // Disable closed captions
+                            'disablekb': 1 // Disable keyboard controls
                         },
                         events: {
                             'onReady': onReactionPlayerReady,
