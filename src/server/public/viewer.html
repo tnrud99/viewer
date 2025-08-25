@@ -52,7 +52,7 @@
     .full-mode #reaction-youtube-container {
         width: 100vh !important;
         height: 100vw !important;
-        object-fit: cover !important;
+        object-fit: contain !important;
         margin: 0 !important;
         padding: 0 !important;
         border-radius: 0 !important;
@@ -191,7 +191,7 @@
     .full-mode iframe {
         width: 100vh !important;
         height: 100vw !important;
-        object-fit: cover !important;
+        object-fit: contain !important;
         border-radius: 0 !important;
     }
 
@@ -1990,6 +1990,19 @@
                 height: auto !important;
                 max-width: 180px;
                 max-height: 120px;
+            }
+            
+            /* 모바일에서 오리지널 영상 위치 조정 */
+            .overlay-top-right,
+            .overlay-top-left {
+                top: var(--space-md) !important;
+                bottom: auto !important;
+            }
+            
+            .overlay-bottom-right,
+            .overlay-bottom-left {
+                bottom: var(--space-lg) !important;
+                top: auto !important;
             }
             
             /* Controls Mobile Optimization */
@@ -3811,6 +3824,12 @@
         // Full button click
         const fullBtn = document.getElementById('full-btn');
         if (fullBtn) {
+            // 초기 Full 버튼 상태 설정
+            fullBtn.textContent = 'Full';
+            fullBtn.style.background = 'rgba(33, 150, 243, 0.2)';
+            fullBtn.style.color = 'rgba(33, 150, 243, 0.9)';
+            fullBtn.style.fontWeight = 'normal';
+            
             fullBtn.addEventListener('click', async function() {
                 console.log('Full button clicked!');
                 console.log('FullscreenManager exists:', !!window.fullscreenManager);
@@ -3827,9 +3846,9 @@
                     console.log('Exiting full mode...');
                     window.fullscreenManager.exitFullMode();
                     fullBtn.textContent = 'Full';
-                    fullBtn.style.background = 'rgba(33, 150, 243, 0.8)';
-                    fullBtn.style.color = 'white';
-                    fullBtn.style.fontWeight = 'bold';
+                    fullBtn.style.background = 'rgba(33, 150, 243, 0.2)';
+                    fullBtn.style.color = 'rgba(33, 150, 243, 0.9)';
+                    fullBtn.style.fontWeight = 'normal';
                 } else if (window.fullscreenManager) {
                     console.log('Entering full mode...');
                     await window.fullscreenManager.enterFullMode();
@@ -4580,7 +4599,7 @@
     function updateButtonStates(playing) {
         document.getElementById('play-btn').disabled = playing;
         document.getElementById('pause-btn').disabled = !playing;
-        document.getElementById('restart-btn').disabled = !playing;
+        document.getElementById('restart-btn').disabled = false; // Restart 버튼은 항상 활성화
         document.getElementById('full-btn').disabled = false; // Full 버튼은 항상 활성화
     }
 
