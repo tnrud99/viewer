@@ -2884,8 +2884,8 @@
                 youtubePlayerCreated = false;
             }
             
-            // Hide YouTube container until first sync point
-            document.getElementById('youtube-container').style.display = 'none';
+            // YouTube container will be shown when first sync point is reached
+            // (Don't hide it here to avoid timing issues)
 
             console.log('Status: Ready to Play');
             enableControls(true);
@@ -3059,10 +3059,7 @@
                 updateNextEventTimes(currentTime);
                 
                 // Update status
-                const statusElement = document.getElementById('status');
-                if (statusElement) {
-                    statusElement.textContent = 'Status: Playing (YouTube started)';
-                }
+                document.getElementById('status').textContent = 'Status: Playing (YouTube started)';
             }
             return; // Don't process other events until first sync is done
         }
