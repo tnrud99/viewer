@@ -39,6 +39,7 @@
     object-fit: contain !important;
     margin: 0 !important;
     padding: 0 !important;
+    border-radius: 0 !important;
 }
 
 .full-mode #youtube-container {
@@ -138,6 +139,44 @@
     transform-origin: center center;
     width: 100vh !important;
     height: 100vw !important;
+}
+
+/* Full 모드에서 모든 영상 가로 회전 */
+.full-mode .video-container {
+    transform: rotate(-90deg) !important;
+    transform-origin: center center !important;
+    width: 100vh !important;
+    height: 100vw !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    margin: -50vh 0 0 -50vw !important;
+    z-index: 10000 !important;
+}
+
+.full-mode .main-video-box {
+    width: 100vh !important;
+    height: 100vw !important;
+    aspect-ratio: auto !important;
+    border-radius: 0 !important;
+}
+
+.full-mode #reaction-player,
+.full-mode #reaction-youtube-container,
+.full-mode #youtube-container {
+    width: 100vh !important;
+    height: 100vw !important;
+    object-fit: contain !important;
+    border-radius: 0 !important;
+}
+
+/* Full 모드에서 영상 내부 콘텐츠도 가로 회전 */
+.full-mode video,
+.full-mode iframe {
+    width: 100vh !important;
+    height: 100vw !important;
+    object-fit: contain !important;
+    border-radius: 0 !important;
 }
 
 /* 모바일 최소 풀스크린 */
