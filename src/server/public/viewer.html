@@ -781,10 +781,10 @@
 
         #reaction-youtube-container {
             width: 100%;
-            aspect-ratio: 16 / 9;
+            height: 100%; /* 부모의 aspect-ratio를 따름 */
             background-color: #000;
             display: flex;
-            align-items: center;
+            align-items: flex-start; /* 맨 위로 붙이기 */
             justify-content: center;
         }
 
@@ -1477,7 +1477,7 @@
             #reaction-youtube-container, 
             #reaction-youtube-container iframe {
                 border-radius: var(--radius-sm);
-                aspect-ratio: 16 / 9; /* 모바일에서도 16:9 비율 유지 */
+                height: 100%; /* 부모의 aspect-ratio를 따름 */
             }
             
             /* Overlay Mobile Optimization */
@@ -1940,7 +1940,7 @@
             #reaction-youtube-container iframe {
                 border-radius: 0;
                 background: #000;
-                aspect-ratio: 16 / 9; /* 모바일에서도 16:9 비율 유지 */
+                height: 100%; /* 부모의 aspect-ratio를 따름 */
             }
             
             /* Mobile controls between video and footer */
