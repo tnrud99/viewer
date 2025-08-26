@@ -1345,6 +1345,7 @@
             padding: var(--space-sm);
             background: var(--color-bg-input);
             border-radius: var(--radius-md);
+            font-weight: 500;
         }
 
         .message {
@@ -2276,7 +2277,10 @@
 
 
 
-                <!-- Message Display -->
+                <!-- Status Display -->
+        <div class="status" id="status">Status: Waiting</div>
+        
+        <!-- Message Display -->
         <div class="message" id="message"></div>
         
 
@@ -2394,7 +2398,7 @@
     let youtubeYoutubeSyncInterval = null; // Interval for YouTube-YouTube synchronization
     let reactionYoutubeStateChangeTime = 0; // Time of last state change in reaction YouTube player
     let youtubeYoutubeSyncEnabled = true; // Enable YouTube-YouTube synchronization
-    let youtubeYoutubeSyncFrequency = 200; // Frequency of YouTube-YouTube synchronization in ms (Increased frequency)
+    let youtubeYoutubeSyncFrequency = 500; // Frequency of YouTube-YouTube synchronization in ms (Reduced for stability)
     let youtubeYoutubeSyncThreshold = 0.3; // Threshold for YouTube-YouTube synchronization in seconds
     let reactionYoutubeState = -1; // Current state of reaction YouTube player
 
@@ -2406,6 +2410,12 @@
 
     // DOM loaded event
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize status
+        const statusElement = document.getElementById('status');
+        if (statusElement) {
+            statusElement.textContent = 'Status: Waiting';
+        }
+        
         // Prevent screen rotation on mobile
         if (window.innerWidth <= 768) {
             // Lock orientation to portrait
@@ -3059,6 +3069,12 @@
             checkForMissedEvents(currentTime);
         }
         
+        // Prevent processing the same time multiple times
+        if (Math.abs(currentTime - lastSyncTime) < 0.1) {
+            return;
+        }
+        lastSyncTime = currentTime;
+        
         // Precise event detection with wider window
         if (isPlaying && youtubeStarted) {
             // Check for pause events with enhanced timing
@@ -3074,7 +3090,7 @@
                     lastProcessedPauseTime = pauseEvent.reaction_time;
                     
                     // Use the exact relative_youtube_time from the pause event
-                    if (youtubePlayer && !youtubePaused) {
+                    if (youtubePlayer && !youtubePaused && youtubePlayer.pauseVideo) {
                         youtubePaused = true;
                         
                         console.log("Pausing YouTube at exact time:", pauseEvent.relative_youtube_time);
@@ -3104,7 +3120,7 @@
                     lastProcessedPlayTime = playEvent.reaction_time;
                     
                     // Use the exact relative_youtube_time from the play event
-                    if (youtubePlayer) {
+                    if (youtubePlayer && youtubePlayer.seekTo && youtubePlayer.playVideo) {
                         youtubePaused = false;
                         
                         console.log("Resuming YouTube at exact time:", playEvent.relative_youtube_time);
@@ -3115,6 +3131,7 @@
                         
                         currentSyncPoint = playEvent;
                         
+                        document.getElementById('status').textContent = 'Status: Playing (synchronized)';
                         showMessage(`YouTube video resumed at ${playEvent.relative_youtube_time.toFixed(2)}s`, 'success');
                     }
                     
@@ -3165,19 +3182,14 @@
                 addDebugMessage(`Catching up missed play event at ${event.reaction_time.toFixed(2)}s`);
                 
                 // Process the missed play event
-                                    if (youtubePlayer && youtubePaused) {
-                        youtubePaused = false;
-                        
-                        // Special handling for specific events
-                        if (Math.abs(event.reaction_time - 43.858) < 0.1) {
-                            console.log("Special handling for 43.858s play event");
-                            addDebugMessage("Special handling for 43.858s play event");
-                        }
-                        
-                        if (youtubePlayer && youtubePlayer.seekTo && youtubePlayer.playVideo) {
-                            youtubePlayer.seekTo(event.relative_youtube_time, true);
-                            youtubePlayer.playVideo();
-                        }
+                if (youtubePlayer && youtubePaused && youtubePlayer.seekTo && youtubePlayer.playVideo) {
+                    youtubePaused = false;
+                    
+                    // Special handling for specific events
+                    if (Math.abs(event.reaction_time - 43.858) < 0.1) {
+                        console.log("Special handling for 43.858s play event");
+                        addDebugMessage("Special handling for 43.858s play event");
+                    }
                     
                     if (Math.abs(event.reaction_time - 70.681) < 0.1) {
                         console.log("Special handling for 70.681s play event");
@@ -3185,16 +3197,14 @@
                     }
                     
                     // Seek to exact position and play
-                    if (youtubePlayer && youtubePlayer.seekTo && youtubePlayer.playVideo) {
-                        youtubePlayer.seekTo(event.relative_youtube_time, true);
-                        youtubePlayer.playVideo();
-                    }
+                    youtubePlayer.seekTo(event.relative_youtube_time, true);
+                    youtubePlayer.playVideo();
                     
                     // Update current sync point
                     currentSyncPoint = event;
                     
                     // Update status
-                    console.log('Status updated');
+                    document.getElementById('status').textContent = 'Status: Playing (synchronized after catch-up)';
                     showMessage(`YouTube video resumed at ${event.relative_youtube_time.toFixed(2)}s (catch-up)`, 'success');
                 }
                 
@@ -3222,7 +3232,7 @@
                     }
                     
                     // Update status
-                    console.log('Status updated');
+                    document.getElementById('status').textContent = 'Status: YouTube Paused (by timestamp catch-up)';
                     showMessage(`YouTube video paused at ${event.relative_youtube_time.toFixed(2)}s (catch-up)`, 'success');
                 }
                 
@@ -3288,7 +3298,7 @@
 
     // Reaction YouTube player ready callback
     function onReactionPlayerReady(event) {
-        console.log('Status updated');
+        document.getElementById('status').textContent = 'Status: Reaction Video Loaded';
         reactionYoutubeReady = true;
         addDebugMessage("Reaction YouTube player ready");
         
@@ -3325,8 +3335,16 @@
 
     // YouTube player state change callback
     function onPlayerStateChange(event) {
-        // Handle YouTube player state changes if needed
-        // We generally don't want the original player to control the reaction player
+        // Handle YouTube player state changes
+        if (event.data === YT.PlayerState.PLAYING) {
+            addDebugMessage("Original YouTube player started playing");
+        } else if (event.data === YT.PlayerState.PAUSED) {
+            addDebugMessage("Original YouTube player paused");
+        } else if (event.data === YT.PlayerState.ENDED) {
+            addDebugMessage("Original YouTube player ended");
+        } else if (event.data === YT.PlayerState.BUFFERING) {
+            addDebugMessage("Original YouTube player buffering");
+        }
     }
 
     // Find sync point for a given reaction time
@@ -3361,11 +3379,14 @@
             try {
                 reactionYoutubeCurrentTime = reactionYoutubePlayer.getCurrentTime();
                 
-                // Call the central synchronization logic
-                handleSynchronization(reactionYoutubeCurrentTime);
-                
-                // Update last reaction YouTube time
-                lastReactionYoutubeTime = reactionYoutubeCurrentTime;
+                // Only process if time has changed significantly
+                if (Math.abs(reactionYoutubeCurrentTime - lastReactionYoutubeTime) > 0.1) {
+                    // Call the central synchronization logic
+                    handleSynchronization(reactionYoutubeCurrentTime);
+                    
+                    // Update last reaction YouTube time
+                    lastReactionYoutubeTime = reactionYoutubeCurrentTime;
+                }
             } catch (error) {
                 console.error("Error in YouTube-YouTube sync interval:", error);
                 addDebugMessage(`ERROR in YouTube-YouTube sync: ${error.message}`);
@@ -3422,8 +3443,8 @@
             // Get current YouTube time
             const currentYoutubeTime = youtubePlayer.getCurrentTime();
             
-            // Only sync if difference is significant
-            if (Math.abs(currentYoutubeTime - expectedYoutubeTime) > youtubeYoutubeSyncThreshold) {
+            // Only sync if difference is significant and player is ready
+            if (Math.abs(currentYoutubeTime - expectedYoutubeTime) > youtubeYoutubeSyncThreshold && youtubePlayer.seekTo) {
                 console.log("Syncing YouTube time from", currentYoutubeTime, "to", expectedYoutubeTime);
                 addDebugMessage(`Syncing YouTube time from ${currentYoutubeTime.toFixed(2)}s to ${expectedYoutubeTime.toFixed(2)}s`);
                 youtubePlayer.seekTo(expectedYoutubeTime, true);
@@ -3464,7 +3485,7 @@
             console.log("Starting from beginning or before first sync point");
             addDebugMessage("Starting from beginning or before first sync point");
             waitingForFirstSync = true;
-            console.log('Status updated');
+            document.getElementById('status').textContent = 'Status: Playing (waiting for sync point)';
         } else {
             // We're already past the first sync point, find the nearest sync point
             console.log("Starting from middle, finding nearest sync point");
@@ -3491,8 +3512,9 @@
                     youtubePlayer.playVideo();
                     document.getElementById('youtube-container').style.display = 'block';
                 }
-                youtubeStarted = true; /* 레거시와 동일하게 무조건 설정 */
+                youtubeStarted = true;
                 updateNextEventTimes(currentReactionTime);
+                document.getElementById('status').textContent = 'Status: Playing (synchronized)';
             } else {
                 showMessage('Could not find a sync point. Please restart.', 'error');
                 addDebugMessage("ERROR: Could not find a sync point. Please restart.");
@@ -3566,6 +3588,7 @@
             addDebugMessage("Stopped YouTube-YouTube synchronization interval");
         }
         
+        document.getElementById('status').textContent = 'Status: Paused';
         addDebugMessage("Playback paused");
         updateDebugDisplay();
         updateButtonStates(false);
@@ -3581,7 +3604,7 @@
             reactionPlayer.pause();
             reactionPlayer.currentTime = 0;
         } else {
-            if (reactionYoutubeReady && reactionYoutubePlayer && reactionYoutubePlayer.pauseVideo && reactionYoutubePlayer.seekTo) {
+            if (reactionYoutubeReady) {
                 reactionYoutubePlayer.pauseVideo();
                 reactionYoutubePlayer.seekTo(0, true);
                 addDebugMessage("Stopped and rewound reaction YouTube player");
@@ -3589,7 +3612,7 @@
         }
         
         // Stop YouTube video if it exists
-        if (youtubePlayer && youtubePlayer.pauseVideo && youtubePlayer.seekTo) {
+        if (youtubePlayer) {
             youtubePlayer.pauseVideo();
             youtubePlayer.seekTo(0, true);
             
@@ -3609,7 +3632,7 @@
             addDebugMessage("Stopped YouTube-YouTube synchronization interval");
         }
         
-        console.log('Status updated');
+        document.getElementById('status').textContent = 'Status: Stopped';
         addDebugMessage("Playback stopped");
         updateDebugDisplay();
         updateButtonStates(false);

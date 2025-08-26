@@ -36,7 +36,6 @@
 .full-mode #reaction-youtube-container {
     width: 100% !important;
     height: 100% !important;
-    object-fit: contain !important;
     margin: 0 !important;
     padding: 0 !important;
     border-radius: 0 !important;
