@@ -14,12 +14,12 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
 
-// 정적 파일 서빙 - 전체 프로젝트 디렉토리
-app.use('/src', express.static(path.join(__dirname, '..')));
+// 정적 파일 서빙 설정
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/js', express.static(path.join(__dirname, 'public', 'js')));
+app.use('/css', express.static(path.join(__dirname, 'public', 'css')));
 app.use('/assets', express.static(path.join(__dirname, '..', '..', 'assets')));
-app.use('/', express.static(path.join(__dirname, '..', '..')));
 
 // Favicon 직접 서빙
 app.get('/favicon.ico', (req, res) => {
