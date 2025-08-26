@@ -3535,8 +3535,8 @@
             }
         }
         
-        // Reset YouTube pause state
-        youtubePaused = false;
+        // Don't reset YouTube pause state - keep the current pause state
+        // youtubePaused should remain as is (true if paused by timestamp, false if playing)
         lastProcessedPauseTime = -1;
         lastProcessedPlayTime = -1;
         lastReactionTime = currentReactionTime;
