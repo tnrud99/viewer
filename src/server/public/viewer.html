@@ -684,6 +684,7 @@
             background-color: #000;
             border-radius: var(--radius-lg);
             overflow: hidden;
+            aspect-ratio: 16 / 9; /* 16:9 비율 유지 */
         }
 
         .video-title {
@@ -1446,7 +1447,7 @@
             
             .create-own-btn {
                 font-size: var(--text-xs);
-                padding: 4.2px 8px; /* 0.2px 패딩 증가 */
+                padding: 4.5px 8px; /* 0.5px 패딩 증가 */
             }
             
             .beta-tag {
@@ -2238,6 +2239,7 @@
         <div class="quick-controls">
             <button id="play-btn" class="btn btn-primary" disabled>Play</button>
             <button id="pause-btn" class="btn btn-secondary" disabled>Pause</button>
+            <button id="stop-btn" class="btn btn-secondary" disabled style="display: none;">Stop</button>
             <button id="restart-btn" class="btn btn-secondary" disabled>Restart</button>
             <button id="help-btn" class="btn btn-info">Help</button>
             <button id="resyncBtn" class="inline-btn">Resync</button>
@@ -2577,7 +2579,7 @@
         const loadBtn = document.getElementById('load-btn');
         const playBtn = document.getElementById('play-btn');
         const pauseBtn = document.getElementById('pause-btn');
-
+        const stopBtn = document.getElementById('stop-btn');
         const restartBtn = document.getElementById('restart-btn');
         const helpBtn = document.getElementById('help-btn');
         const helpFaq = document.getElementById('helpFaq');
@@ -2970,7 +2972,12 @@
             });
         }
 
-
+        // Stop button click
+        if (stopBtn) {
+            stopBtn.addEventListener('click', function() {
+                stopSynchronizedPlayback();
+            });
+        }
 
         // Restart button click
         if (restartBtn) {
@@ -3755,6 +3762,7 @@
     function enableControls(enabled) {
         document.getElementById('play-btn').disabled = !enabled;
         document.getElementById('pause-btn').disabled = !enabled;
+        document.getElementById('stop-btn').disabled = !enabled;
         document.getElementById('restart-btn').disabled = !enabled;
         document.getElementById('toggle-overlay').disabled = !enabled;
     }
@@ -3763,7 +3771,8 @@
     function updateButtonStates(playing) {
         document.getElementById('play-btn').disabled = playing;
         document.getElementById('pause-btn').disabled = !playing;
-        document.getElementById('restart-btn').disabled = !playing;
+        document.getElementById('stop-btn').disabled = !playing;
+        document.getElementById('restart-btn').disabled = playing; /* play가 아닐 때만 활성화 */
     }
 
     // Show message
