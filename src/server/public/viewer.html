@@ -684,6 +684,7 @@
             background-color: #000;
             border-radius: var(--radius-lg);
             overflow: hidden;
+            aspect-ratio: 16 / 9; /* 16:9 비율 유지 */
         }
 
         .video-title {
@@ -780,10 +781,10 @@
 
         #reaction-youtube-container {
             width: 100%;
-            aspect-ratio: 16 / 9;
+            height: 100%; /* 부모의 aspect-ratio를 따름 */
             background-color: #000;
             display: flex;
-            align-items: center;
+            align-items: flex-start; /* 맨 위로 붙이기 */
             justify-content: center;
         }
 
@@ -1475,7 +1476,7 @@
             
             #reaction-youtube-container, 
             #reaction-youtube-container iframe {
-                min-height: 250px;
+                height: 100%; /* 부모의 aspect-ratio를 따름 */
                 border-radius: var(--radius-sm);
             }
             
@@ -1485,9 +1486,8 @@
             .overlay-bottom-right,
             .overlay-bottom-left {
                 width: 40% !important;
-                height: 30% !important;
-                max-width: 200px;
-                max-height: 150px;
+                aspect-ratio: 16 / 9 !important; /* 모바일에서도 16:9 비율 유지 */
+                /* 크기 제한 제거 - 오버레이 설정에서 사용자가 조정 가능 */
             }
             
             /* Controls Mobile Optimization */
@@ -1938,6 +1938,7 @@
             
             #reaction-youtube-container, 
             #reaction-youtube-container iframe {
+                height: 100%; /* 부모의 aspect-ratio를 따름 */
                 border-radius: 0;
                 background: #000;
             }
@@ -2222,7 +2223,7 @@
         <div class="quick-controls">
             <button id="play-btn" class="btn btn-primary" disabled>Play</button>
             <button id="pause-btn" class="btn btn-secondary" disabled>Pause</button>
-            <button id="stop-btn" class="btn btn-secondary" disabled>Stop</button>
+            <button id="stop-btn" class="btn btn-secondary" disabled style="display: none;">Stop</button>
             <button id="restart-btn" class="btn btn-secondary" disabled>Restart</button>
             <button id="help-btn" class="btn btn-info">Help</button>
             <button id="resyncBtn" class="inline-btn">Resync</button>
@@ -3035,10 +3036,8 @@
                 if (!youtubePlayerCreated && youtubeVideoId) {
                     createYouTubePlayer(youtubeVideoId, youtubeStartTime);
                 } else if (youtubePlayer) {
-                    if (youtubePlayer && youtubePlayer.seekTo && youtubePlayer.playVideo) {
-                        youtubePlayer.seekTo(youtubeStartTime, true);
-                        youtubePlayer.playVideo();
-                    }
+                    youtubePlayer.seekTo(youtubeStartTime, true);
+                    youtubePlayer.playVideo();
                     document.getElementById('youtube-container').style.display = 'block';
                 }
                 
@@ -3050,7 +3049,7 @@
                 updateNextEventTimes(currentTime);
                 
                 // Update status
-                console.log('Status: Playing (YouTube started)');
+                document.getElementById('status').textContent = 'Status: Playing (YouTube started)';
             }
             return; // Don't process other events until first sync is done
         }
@@ -3081,11 +3080,9 @@
                         console.log("Pausing YouTube at exact time:", pauseEvent.relative_youtube_time);
                         addDebugMessage(`Pausing YouTube at ${pauseEvent.relative_youtube_time.toFixed(2)}s`);
                         
-                        if (youtubePlayer && youtubePlayer.pauseVideo) {
-                            youtubePlayer.pauseVideo();
-                        }
+                        youtubePlayer.pauseVideo();
                         
-                        console.log('Status updated');
+                        document.getElementById('status').textContent = 'Status: YouTube Paused (by timestamp)';
                         showMessage(`YouTube video paused at ${pauseEvent.relative_youtube_time.toFixed(2)}s`, 'success');
                     }
                     
@@ -3113,14 +3110,11 @@
                         console.log("Resuming YouTube at exact time:", playEvent.relative_youtube_time);
                         addDebugMessage(`Resuming YouTube at ${playEvent.relative_youtube_time.toFixed(2)}s`);
                         
-                        if (youtubePlayer && youtubePlayer.seekTo && youtubePlayer.playVideo) {
-                            youtubePlayer.seekTo(playEvent.relative_youtube_time, true);
-                            youtubePlayer.playVideo();
-                        }
+                        youtubePlayer.seekTo(playEvent.relative_youtube_time, true);
+                        youtubePlayer.playVideo();
                         
                         currentSyncPoint = playEvent;
                         
-                        console.log('Status updated');
                         showMessage(`YouTube video resumed at ${playEvent.relative_youtube_time.toFixed(2)}s`, 'success');
                     }
                     
@@ -3497,9 +3491,8 @@
                     youtubePlayer.playVideo();
                     document.getElementById('youtube-container').style.display = 'block';
                 }
-                youtubeStarted = true;
+                youtubeStarted = true; /* 레거시와 동일하게 무조건 설정 */
                 updateNextEventTimes(currentReactionTime);
-                console.log('Status updated');
             } else {
                 showMessage('Could not find a sync point. Please restart.', 'error');
                 addDebugMessage("ERROR: Could not find a sync point. Please restart.");
@@ -3557,7 +3550,7 @@
         }
         
         // Pause YouTube video if it has started
-        if (youtubeStarted && youtubePlayer && youtubePlayer.pauseVideo) {
+        if (youtubeStarted && youtubePlayer) {
             youtubePlayer.pauseVideo();
             addDebugMessage("Paused original YouTube player");
         }
@@ -3573,7 +3566,6 @@
             addDebugMessage("Stopped YouTube-YouTube synchronization interval");
         }
         
-        console.log('Status updated');
         addDebugMessage("Playback paused");
         updateDebugDisplay();
         updateButtonStates(false);
