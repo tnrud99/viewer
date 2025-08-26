@@ -1446,7 +1446,7 @@
             
             .create-own-btn {
                 font-size: var(--text-xs);
-                padding: 4px 8px;
+                padding: 4.2px 8px; /* 0.2px 패딩 증가 */
             }
             
             .beta-tag {
@@ -1475,8 +1475,8 @@
             
             #reaction-youtube-container, 
             #reaction-youtube-container iframe {
-                min-height: 250px;
                 border-radius: var(--radius-sm);
+                aspect-ratio: 16 / 9; /* 모바일에서도 16:9 비율 유지 */
             }
             
             /* Overlay Mobile Optimization */
@@ -1485,9 +1485,8 @@
             .overlay-bottom-right,
             .overlay-bottom-left {
                 width: 40% !important;
-                height: 30% !important;
-                max-width: 200px;
-                max-height: 150px;
+                aspect-ratio: 16 / 9 !important; /* 모바일에서도 16:9 비율 유지 */
+                /* 크기 제한 제거 - 오버레이 설정에서 사용자가 조정 가능 */
             }
             
             /* Controls Mobile Optimization */
@@ -1940,7 +1939,7 @@
             #reaction-youtube-container iframe {
                 border-radius: 0;
                 background: #000;
-                object-fit: cover; /* 모바일에서 재생바 잘림 방지 */
+                aspect-ratio: 16 / 9; /* 모바일에서도 16:9 비율 유지 */
             }
             
             /* Mobile controls between video and footer */
@@ -2239,7 +2238,6 @@
         <div class="quick-controls">
             <button id="play-btn" class="btn btn-primary" disabled>Play</button>
             <button id="pause-btn" class="btn btn-secondary" disabled>Pause</button>
-            <button id="stop-btn" class="btn btn-secondary" disabled>Stop</button>
             <button id="restart-btn" class="btn btn-secondary" disabled>Restart</button>
             <button id="help-btn" class="btn btn-info">Help</button>
             <button id="resyncBtn" class="inline-btn">Resync</button>
@@ -2579,7 +2577,7 @@
         const loadBtn = document.getElementById('load-btn');
         const playBtn = document.getElementById('play-btn');
         const pauseBtn = document.getElementById('pause-btn');
-        const stopBtn = document.getElementById('stop-btn');
+
         const restartBtn = document.getElementById('restart-btn');
         const helpBtn = document.getElementById('help-btn');
         const helpFaq = document.getElementById('helpFaq');
@@ -2972,12 +2970,7 @@
             });
         }
 
-        // Stop button click
-        if (stopBtn) {
-            stopBtn.addEventListener('click', function() {
-                stopSynchronizedPlayback();
-            });
-        }
+
 
         // Restart button click
         if (restartBtn) {
@@ -3762,7 +3755,6 @@
     function enableControls(enabled) {
         document.getElementById('play-btn').disabled = !enabled;
         document.getElementById('pause-btn').disabled = !enabled;
-        document.getElementById('stop-btn').disabled = !enabled;
         document.getElementById('restart-btn').disabled = !enabled;
         document.getElementById('toggle-overlay').disabled = !enabled;
     }
@@ -3771,7 +3763,6 @@
     function updateButtonStates(playing) {
         document.getElementById('play-btn').disabled = playing;
         document.getElementById('pause-btn').disabled = !playing;
-        document.getElementById('stop-btn').disabled = !playing;
         document.getElementById('restart-btn').disabled = !playing;
     }
 
