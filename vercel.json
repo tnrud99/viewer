@@ -28,6 +28,18 @@
       "dest": "src/server/public/viewer.html"
     },
     {
+      "src": "/src/editor/(.*)",
+      "dest": "src/editor/$1"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "assets/$1"
+    },
+    {
+      "src": "/timestamp_1751179878134.json",
+      "dest": "assets/samples/timestamp_1751179878134.json"
+    },
+    {
       "src": "/(.*)",
       "dest": "src/server/server.js"
     }

@@ -38,9 +38,7 @@ export class FileManager {
     }
 
     loadSampleData() {
-        // 샘플 데이터 로드 (개발용) - 배포용으로 비활성화
-        return;
-        
+        // 샘플 데이터 로드 (배포용으로 활성화)
         // 실제 timestamp_1751179878134.json 파일에서 데이터 로드
         fetch('./timestamp_1751179878134.json')
             .then(response => response.json())

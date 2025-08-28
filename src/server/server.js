@@ -653,6 +653,15 @@ app.get('/src/recorder/whitered_mini.png', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'recorder', 'whitered_mini.png'));
 });
 
+// editor 폴더의 파일들 서빙
+app.get('/src/editor/favicon.png', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'favicon.png'));
+});
+
+app.get('/src/editor/whitered_mini.png', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'whitered_mini.png'));
+});
+
 // src/editor/ 경로의 파일들 서빙
 app.get('/src/editor/index.html', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'editor', 'index.html'));
@@ -662,6 +671,48 @@ app.get('/src/editor/css/style.css', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'editor', 'css', 'style.css'));
 });
 
+// 새로운 모듈 시스템 파일들 서빙
+app.get('/src/editor/js/SimpleEditor.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'js', 'SimpleEditor.js'));
+});
+
+app.get('/src/editor/js/config/TimelineConfig.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'js', 'config', 'TimelineConfig.js'));
+});
+
+app.get('/src/editor/js/modules/TimelineRenderer.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'js', 'modules', 'TimelineRenderer.js'));
+});
+
+app.get('/src/editor/js/modules/DragDropManager.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'js', 'modules', 'DragDropManager.js'));
+});
+
+app.get('/src/editor/js/modules/ZoomController.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'js', 'modules', 'ZoomController.js'));
+});
+
+app.get('/src/editor/js/modules/PreviewManager.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'js', 'modules', 'PreviewManager.js'));
+});
+
+app.get('/src/editor/js/modules/AdvancedEditor.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'js', 'modules', 'AdvancedEditor.js'));
+});
+
+app.get('/src/editor/js/modules/FileManager.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'js', 'modules', 'FileManager.js'));
+});
+
+app.get('/src/editor/js/modules/HistoryManager.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'js', 'modules', 'HistoryManager.js'));
+});
+
+app.get('/src/editor/js/modules/LayoutManager.js', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'editor', 'js', 'modules', 'LayoutManager.js'));
+});
+
+// 레거시 파일들 (호환성을 위해 유지)
 app.get('/src/editor/js/app.js', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'editor', 'js', 'app.js'));
 });
@@ -689,6 +740,10 @@ app.get('/assets/samples/sample_ve_timestamp.json', (req, res) => {
 
 app.get('/assets/samples/test_data.json', (req, res) => {
     res.sendFile(path.join(__dirname, '..', '..', 'assets', 'samples', 'test_data.json'));
+});
+
+app.get('/timestamp_1751179878134.json', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', '..', 'assets', 'samples', 'timestamp_1751179878134.json'));
 });
 
 // 로고 파일들 서빙
