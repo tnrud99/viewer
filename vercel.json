@@ -8,6 +8,14 @@
     {
       "src": "src/server/public/**",
       "use": "@vercel/static"
+    },
+    {
+      "src": "src/editor/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "assets/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
