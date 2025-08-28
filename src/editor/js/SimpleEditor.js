@@ -51,7 +51,7 @@ class SimpleEditor {
         this.setupHistoryControls();
         
         // 모든 초기화 완료
-        this.fileManager.loadSampleData(); // 배포용으로 활성화
+        // this.fileManager.loadSampleData(); // 배포용으로 비활성화 - 사용자가 직접 파일 업로드
         
         // Step Progress 초기화
         this.setupStepProgress();
