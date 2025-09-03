@@ -85,6 +85,13 @@ export class PreviewManager {
     }
 
     handlePlayPreview(point) {
+        if (!this.reactionPreviewPlayer || !this.originalPreviewPlayer) {
+            console.warn('Preview players not ready');
+            return;
+        }
+
+        const PREVIEW_LEAD_TIME = 3; // 3초 전부터 시작
+        
         // 현재 PLAY 포인트의 인덱스 찾기
         const currentIndex = this.findPointIndex(point);
         if (currentIndex === -1) return;
@@ -96,42 +103,54 @@ export class PreviewManager {
         // 세그먼트 길이 계산 (PLAY부터 PAUSE까지)
         const segmentDuration = nextPausePoint.reaction_time - point.reaction_time;
         
-        // Reaction video starts at PLAY point
-        this.reactionPreviewPlayer.seekTo(point.reaction_time, true);
+        // 프리뷰 시작 시간 계산 (3초 전부터)
+        const previewStartTime = Math.max(0, point.reaction_time - PREVIEW_LEAD_TIME);
+        
+        // 리액션 비디오: 3초 전부터 시작
+        this.reactionPreviewPlayer.seekTo(previewStartTime, true);
         this.reactionPreviewPlayer.playVideo();
         
+        // 오리지널 비디오: 동시에 시작
         let originalStartTime = 0;
         if (point.relative_youtube_time !== null && point.relative_youtube_time !== undefined) {
-            originalStartTime = point.relative_youtube_time;
+            // 상대적 시간을 사용하여 오리지널 시작 시간 계산
+            originalStartTime = Math.max(0, point.relative_youtube_time - PREVIEW_LEAD_TIME);
         } else if (point.youtube_time !== null) {
-            originalStartTime = point.youtube_time;
+            originalStartTime = Math.max(0, point.youtube_time - PREVIEW_LEAD_TIME);
         }
         
-        // Original video starts 3s after reaction video starts
-        setTimeout(() => {
-            this.originalPreviewPlayer.seekTo(originalStartTime, true);
-            this.originalPreviewPlayer.playVideo();
-        }, 3000);
+        this.originalPreviewPlayer.seekTo(originalStartTime, true);
+        this.originalPreviewPlayer.playVideo();
         
-        // 세그먼트 길이만큼 재생 후 정지
+        // 전체 프리뷰 길이 (3초 전 + 세그먼트 길이)
+        const totalPreviewDuration = PREVIEW_LEAD_TIME + segmentDuration;
+        
+        // 프리뷰 종료 타이머
         if (this.previewState.previewTimer) {
             clearTimeout(this.previewState.previewTimer);
         }
         this.previewState.previewTimer = setTimeout(() => {
             this.stopPreview();
-        }, (segmentDuration + 3) * 1000); // 3초 지연 + 세그먼트 길이
+        }, totalPreviewDuration * 1000);
     }
 
     handlePausePreview(point) {
-        const reactionStartTime = point.reaction_time; // Both start at point
-        this.reactionPreviewPlayer.seekTo(reactionStartTime, true);
+        const PREVIEW_LEAD_TIME = 3; // 3초 전부터 시작
+        
+        // 프리뷰 시작 시간 계산 (3초 전부터)
+        const previewStartTime = Math.max(0, point.reaction_time - PREVIEW_LEAD_TIME);
+        
+        // 리액션 비디오: 3초 전부터 시작
+        this.reactionPreviewPlayer.seekTo(previewStartTime, true);
         this.reactionPreviewPlayer.playVideo();
         
+        // 오리지널 비디오: 동시에 시작
         let originalStartTime = 0;
         if (point.relative_youtube_time !== null && point.relative_youtube_time !== undefined) {
-            originalStartTime = point.relative_youtube_time;
+            // 상대적 시간을 사용하여 오리지널 시작 시간 계산
+            originalStartTime = Math.max(0, point.relative_youtube_time - PREVIEW_LEAD_TIME);
         } else if (point.youtube_time !== null) {
-            originalStartTime = point.youtube_time;
+            originalStartTime = Math.max(0, point.youtube_time - PREVIEW_LEAD_TIME);
         }
         
         this.originalPreviewPlayer.seekTo(originalStartTime, true);
@@ -141,15 +160,15 @@ export class PreviewManager {
             clearTimeout(this.previewState.previewTimer);
         }
         
-        // Pause original video after 3s
+        // 3초 후에 오리지널 비디오 일시정지 (동기화 시점)
         this.previewState.previewTimer = setTimeout(() => {
             this.originalPreviewPlayer.pauseVideo(); // Only original pauses
             
-            // Stop all after 6s (3s after original paused)
+            // 3초 더 후에 전체 정지 (리액션도 정지)
             setTimeout(() => {
                 this.stopPreview();
             }, 3000);
-        }, 3000);
+        }, PREVIEW_LEAD_TIME * 1000);
     }
 
     stopPreview() {

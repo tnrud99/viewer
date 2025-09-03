@@ -1234,6 +1234,180 @@
                 width: 35%;
                 aspect-ratio: 16/9;
             }
+
+            .floating-panel {
+                right: var(--space-sm);
+                max-width: 260px;
+            }
+        }
+
+        /* Layout Settings Panel - Editor 스타일 적용 */
+        .floating-panel {
+            position: fixed;
+            top: 50%;
+            right: var(--space-lg);
+            transform: translateY(-50%);
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-sm);
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            max-width: 280px;
+            max-height: 60vh;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-50%) translateX(100%);
+        }
+
+        .floating-panel.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(-50%) translateX(0);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-sm);
+            padding-bottom: var(--space-xs);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .panel-title {
+            font-size: var(--text-base);
+            font-weight: 600;
+            color: var(--color-text-main);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .panel-toggle {
+            background: none;
+            border: none;
+            color: var(--color-text-main);
+            font-size: var(--text-lg);
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .panel-toggle:hover {
+            background: var(--color-secondary);
+            color: white;
+        }
+
+        .panel-content {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .floating-panel.collapsed .panel-content {
+            display: none;
+        }
+
+        .floating-panel.collapsed .panel-toggle {
+            transform: rotate(180deg);
+        }
+
+        .settings-group {
+            margin-bottom: var(--space-sm);
+        }
+
+        .settings-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .setting-label {
+            font-size: var(--text-xs);
+            margin-bottom: var(--space-xs);
+            color: var(--color-text-main);
+            font-weight: 500;
+        }
+
+        .setting-input {
+            padding: var(--space-xs) var(--space-sm);
+            font-size: var(--text-sm);
+            min-height: 36px;
+            background: var(--color-bg-input);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            color: var(--color-text-main);
+            transition: border-color var(--transition);
+            width: 100%;
+        }
+
+        .setting-input:focus {
+            outline: none;
+            border-color: var(--color-action);
+            box-shadow: 0 0 0 2px rgba(194, 41, 31, 0.1);
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-top: var(--space-xs);
+        }
+
+        .setting-slider {
+            flex-grow: 1;
+            height: 8px;
+            background: var(--color-secondary);
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .setting-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--color-action);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .setting-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--color-action);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .setting-btn {
+            width: 100%;
+            padding: var(--space-xs) var(--space-sm);
+            background: var(--color-secondary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: var(--text-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            min-height: 36px;
+        }
+
+        .setting-btn:hover {
+            background: var(--color-secondary-hover);
         }
 
         /* Bottom Controls Section */
@@ -1319,6 +1493,8 @@
             font-weight: bold;
             margin: 0 8px;
         }
+
+
     </style>
 </head>
 <body>
@@ -1436,7 +1612,7 @@
                             <span class="header-sub">(Your Reaction Video)</span>
                             <div class="overlay-controls">
                                 <button id="overlay-settings-btn" class="btn btn-secondary btn-compact" title="Overlay Settings">
-                                    ⚙️ Overlay Settings
+                                    ⚙️ Layout Settings
                                 </button>
                                 <div class="toggle-switch" title="Toggle mirror mode">
                                     <input type="checkbox" id="mirror-toggle-overlay" class="toggle-input">
@@ -1462,6 +1638,8 @@
                     </div>
                 </div>
             </div>
+
+
 
             <!-- Bottom Controls Section -->
             <div class="bottom-controls">
@@ -1567,45 +1745,41 @@
             </div>
         </div>
 
-        <!-- Overlay Settings Modal -->
-        <div id="overlay-settings-modal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>⚙️ Overlay Settings</h3>
-                    <button class="modal-close" id="overlay-settings-close">&times;</button>
+        <!-- Floating Overlay Settings Panel -->
+        <div id="overlay-settings-panel" class="floating-panel">
+            <div class="panel-header">
+                <span class="panel-title">⚙️ Layout Settings</span>
+                <button class="panel-toggle" id="overlay-settings-toggle">−</button>
+            </div>
+            <div class="panel-content">
+                <div class="settings-group">
+                    <label class="setting-label" for="overlay-position">Position</label>
+                    <select id="overlay-position" class="setting-input">
+                        <option value="top-right">Top Right</option>
+                        <option value="top-left">Top Left</option>
+                        <option value="bottom-right">Bottom Right</option>
+                        <option value="bottom-left">Bottom Left</option>
+                    </select>
                 </div>
-                <div class="modal-body">
-                    <div class="overlay-settings-content">
-                        <div class="input-group">
-                            <label class="input-label" for="overlay-position">Overlay Position</label>
-                            <select id="overlay-position" class="input">
-                                <option value="top-right">Top Right</option>
-                                <option value="top-left">Top Left</option>
-                                <option value="bottom-right">Bottom Right</option>
-                                <option value="bottom-left">Bottom Left</option>
-                            </select>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label class="input-label" for="overlay-size">Overlay Size</label>
-                            <div class="slider-container">
-                                <input type="range" id="overlay-size" class="slider" min="20" max="60" value="40">
-                                <span id="overlay-size-value" class="slider-value">40%</span>
-                            </div>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label class="input-label" for="youtube-volume">YouTube Volume</label>
-                            <div class="slider-container">
-                                <input type="range" id="youtube-volume" class="slider" min="0" max="100" value="100">
-                                <span id="youtube-volume-value" class="slider-value">100%</span>
-                            </div>
-                        </div>
-                        
-                        <div class="input-group">
-                            <button id="toggle-overlay" class="btn btn-secondary">Hide Overlay</button>
-                        </div>
+                
+                <div class="settings-group">
+                    <label class="setting-label" for="overlay-size">Size</label>
+                    <div class="slider-group">
+                        <input type="range" id="overlay-size" class="setting-slider" min="20" max="60" value="45">
+                        <span id="overlay-size-value" class="slider-value">45%</span>
                     </div>
+                </div>
+                
+                <div class="settings-group">
+                    <label class="setting-label" for="youtube-volume">Volume</label>
+                    <div class="slider-group">
+                        <input type="range" id="youtube-volume" class="setting-slider" min="0" max="100" value="100">
+                        <span id="youtube-volume-value" class="slider-value">100%</span>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <button id="toggle-overlay" class="setting-btn">Hide Overlay</button>
                 </div>
             </div>
         </div>

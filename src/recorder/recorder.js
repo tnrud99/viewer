@@ -15,10 +15,14 @@ let isPaused = false;
 let youtubeReady = false;
 let youtubeFirstPlayTime = null; // Time when YouTube video was first played
 
+// Recording format settings
+let currentRecordingFormat = 'mp4'; // 'mp4', 'webm-h264', 'webm-vp9'
+let supportedFormats = [];
+
 // Layout settings
 let currentMode = 'overlay'; // 'split' or 'overlay'
 let overlayPosition = 'top-right';
-let overlaySize = 25;
+let overlaySize = 45;
 let overlayVisible = true;
 let youtubeVolume = 100;
 
@@ -26,11 +30,12 @@ let timestampData = {
     youtube_video_id: '',
     youtube_title: '',
     reaction_video: '',
+    recording_format: '',
     created_at: '',
     layout: {
         mode: 'overlay',
         overlay_position: 'top-right',
-        overlay_size: 25,
+        overlay_size: 45,
         hide_overlay: false
     },
     sync_points: []
@@ -42,8 +47,70 @@ function onYouTubeIframeAPIReady() {
     console.log('YouTube API Ready');
 }
 
+// Check supported video formats
+function checkSupportedFormats() {
+    const formatTests = [
+        { id: 'mp4', mime: 'video/mp4;codecs=h264', name: 'MP4 (H.264)', priority: 1 },
+        { id: 'webm-h264', mime: 'video/webm;codecs=h264,opus', name: 'WebM (H.264)', priority: 2 },
+        { id: 'webm-vp9', mime: 'video/webm;codecs=vp9,opus', name: 'WebM (VP9)', priority: 3 }
+    ];
+    
+    supportedFormats = formatTests.filter(format => 
+        MediaRecorder.isTypeSupported(format.mime)
+    ).sort((a, b) => a.priority - b.priority);
+    
+    console.log('Supported formats:', supportedFormats);
+    return supportedFormats;
+}
+
+// Get optimal recording format
+function getOptimalFormat() {
+    if (supportedFormats.length === 0) {
+        checkSupportedFormats();
+    }
+    
+    // Always try to use MP4 first, fallback to others if not supported
+    const mp4Format = supportedFormats.find(f => f.id === 'mp4');
+    if (mp4Format) {
+        console.log('✅ MP4 supported - using MP4 for optimal compatibility');
+        return mp4Format;
+    }
+    
+    // Fallback to highest priority supported format
+    const fallbackFormat = supportedFormats.length > 0 ? supportedFormats[0] : null;
+    if (fallbackFormat) {
+        console.log(`⚠️ MP4 not supported - using ${fallbackFormat.name} as fallback`);
+        
+        // Show fallback warning to user
+        showFallbackWarning(fallbackFormat);
+    }
+    
+    return fallbackFormat;
+}
+
+// Get recording options for selected format
+function getRecordingOptions(formatId) {
+    const format = supportedFormats.find(f => f.id === formatId);
+    if (!format) {
+        console.warn(`Format ${formatId} not supported, using fallback`);
+        return getOptimalFormat()?.mime || 'video/webm;codecs=vp9,opus';
+    }
+    
+    return format.mime;
+}
+
 // Execute after DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Check supported formats on page load
+    checkSupportedFormats();
+    
+    // Set optimal format as default
+    const optimalFormat = getOptimalFormat();
+    if (optimalFormat) {
+        currentRecordingFormat = optimalFormat.id;
+        console.log(`Default format set to: ${optimalFormat.name}`);
+    }
+    
     // Element references
     const youtubeUrlInput = document.getElementById('youtube-url');
     const webcamBtn = document.getElementById('webcam-btn');
@@ -91,6 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Initialize timestamp data
         timestampData.youtube_video_id = videoId;
+        timestampData.recording_format = currentRecordingFormat;
         timestampData.created_at = new Date().toISOString();
         timestampData.sync_points = [];
         
@@ -259,6 +327,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add first timestamp (start point)
         addTimestamp('start');
         
+        // Show format-specific recording message
+        const formatName = supportedFormats.find(f => f.id === currentRecordingFormat)?.name || currentRecordingFormat;
+        
+        if (currentRecordingFormat === 'mp4') {
+            showAlert(`✅ Recording started with ${formatName}. Your video will be ready for professional editing software.`, 'success');
+        } else {
+            showAlert(`⚠️ Recording started with ${formatName}. This format may require conversion for video editing software.`, 'warning');
+        }
+        
         console.log('Recording...');
     });
 
@@ -366,10 +443,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Overlay settings functionality
+    // Floating panel functionality
+    const overlaySettingsPanel = document.getElementById('overlay-settings-panel');
     const overlaySettingsBtn = document.getElementById('overlay-settings-btn');
-    const overlaySettingsModal = document.getElementById('overlay-settings-modal');
-    const overlaySettingsClose = document.getElementById('overlay-settings-close');
+    const overlaySettingsToggle = document.getElementById('overlay-settings-toggle');
     const overlayPositionSelect = document.getElementById('overlay-position');
     const overlaySizeSlider = document.getElementById('overlay-size');
     const overlaySizeValue = document.getElementById('overlay-size-value');
@@ -377,22 +454,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const youtubeVolumeValue = document.getElementById('youtube-volume-value');
     const toggleOverlayBtn = document.getElementById('toggle-overlay');
 
+    // Panel show/hide functionality
     if (overlaySettingsBtn) {
         overlaySettingsBtn.addEventListener('click', function() {
-            overlaySettingsModal.classList.add('show');
+            overlaySettingsPanel.classList.toggle('show');
         });
     }
 
-    if (overlaySettingsClose) {
-        overlaySettingsClose.addEventListener('click', function() {
-            overlaySettingsModal.classList.remove('show');
+    // Panel toggle functionality (collapse/expand)
+    if (overlaySettingsToggle) {
+        overlaySettingsToggle.addEventListener('click', function() {
+            overlaySettingsPanel.classList.toggle('collapsed');
+            this.textContent = overlaySettingsPanel.classList.contains('collapsed') ? '+' : '−';
         });
     }
 
-    if (overlaySettingsModal) {
-        overlaySettingsModal.addEventListener('click', function(e) {
-            if (e.target === overlaySettingsModal) {
-                overlaySettingsModal.classList.remove('show');
+    // Handle outside clicks to close panel
+    if (overlaySettingsPanel) {
+        document.addEventListener('click', function(e) {
+            if (!overlaySettingsPanel.contains(e.target) && 
+                !overlaySettingsBtn.contains(e.target) && 
+                overlaySettingsPanel.classList.contains('show')) {
+                overlaySettingsPanel.classList.remove('show');
             }
         });
     }
@@ -451,6 +534,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize layout
     initializeLayout();
+
+
 
     // Modal event listeners (이미 위에서 처리됨)
     // urlModalBtn, modalClose, modalCancel, modalConfirm 이벤트는 이미 위에서 처리됨
@@ -629,7 +714,12 @@ function onPlayerStateChange(event) {
 // Start recording
 function startRecording() {
     recordedBlobs = [];
-    const options = { mimeType: 'video/webm;codecs=vp9,opus' };
+    
+    // Get recording options for current format
+    const mimeType = getRecordingOptions(currentRecordingFormat);
+    const options = { mimeType: mimeType };
+    
+    console.log(`Starting recording with format: ${currentRecordingFormat} (${mimeType})`);
     
     try {
         // Apply mirror effect to recording if enabled
@@ -674,6 +764,15 @@ function startRecording() {
         }
     } catch (error) {
         console.error('MediaRecorder creation error:', error);
+        
+        // Try fallback format if current format fails
+        if (currentRecordingFormat !== 'webm-vp9') {
+            console.log('Trying fallback format...');
+            currentRecordingFormat = 'webm-vp9';
+            startRecording(); // Retry with fallback
+            return;
+        }
+        
         showAlert('Cannot start recording: ' + error.message, 'error');
         return;
     }
@@ -878,9 +977,32 @@ function downloadRecordedVideo() {
         return;
     }
     
-    const blob = new Blob(recordedBlobs, { type: 'video/webm' });
-    const filename = `reaction_${Date.now()}.webm`;
+    // Get file extension based on current format
+    const getFileExtension = (format) => {
+        switch(format) {
+            case 'mp4': return 'mp4';
+            case 'webm-h264': return 'webm';
+            case 'webm-vp9': return 'webm';
+            default: return 'webm';
+        }
+    };
+    
+    const getMimeType = (format) => {
+        switch(format) {
+            case 'mp4': return 'video/mp4';
+            case 'webm-h264': return 'video/webm';
+            case 'webm-vp9': return 'video/webm';
+            default: return 'video/webm';
+        }
+    };
+    
+    const extension = getFileExtension(currentRecordingFormat);
+    const mimeType = getMimeType(currentRecordingFormat);
+    const filename = `reaction_${Date.now()}.${extension}`;
+    
+    const blob = new Blob(recordedBlobs, { type: mimeType });
     timestampData.reaction_video = filename;
+    timestampData.recording_format = currentRecordingFormat;
     
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -896,7 +1018,14 @@ function downloadRecordedVideo() {
         URL.revokeObjectURL(url);
     }, 100);
     
-    showAlert('Recorded video has been downloaded.', 'success');
+    const formatName = supportedFormats.find(f => f.id === currentRecordingFormat)?.name || currentRecordingFormat;
+    
+    // Show format-specific download message
+    if (currentRecordingFormat === 'mp4') {
+        showAlert(`✅ Recorded video (${formatName}) has been downloaded. Ready for Final Cut Pro, Premiere Pro, and other editing software.`, 'success');
+    } else {
+        showAlert(`⚠️ Recorded video (${formatName}) has been downloaded. This format may require conversion for video editing software.`, 'warning');
+    }
 }
 
 // Download timestamp data
@@ -1053,5 +1182,46 @@ function hideInfoMessage() {
         }, 200);
     }
 }
+
+// Show fallback warning when MP4 is not supported
+function showFallbackWarning(fallbackFormat) {
+    const userAgent = navigator.userAgent;
+    let browserInfo = '';
+    let osInfo = '';
+    
+    // Detect browser
+    if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+        browserInfo = 'Safari';
+    } else if (userAgent.includes('Chrome')) {
+        browserInfo = 'Chrome';
+    } else if (userAgent.includes('Firefox')) {
+        browserInfo = 'Firefox';
+    } else if (userAgent.includes('Edge')) {
+        browserInfo = 'Edge';
+    } else {
+        browserInfo = 'your browser';
+    }
+    
+    // Detect OS
+    if (userAgent.includes('Mac')) {
+        osInfo = 'macOS';
+    } else if (userAgent.includes('Windows')) {
+        osInfo = 'Windows';
+    } else if (userAgent.includes('Linux')) {
+        osInfo = 'Linux';
+    } else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
+        osInfo = 'iOS';
+    } else if (userAgent.includes('Android')) {
+        osInfo = 'Android';
+    } else {
+        osInfo = 'your system';
+    }
+    
+    const warningMessage = `⚠️ MP4 recording not supported in ${browserInfo} on ${osInfo}. Using ${fallbackFormat.name} format instead. This file may require conversion for video editing software.`;
+    
+    showAlert(warningMessage, 'warning');
+}
+
+
 
 // Modal event listeners (이미 위에서 처리됨)
