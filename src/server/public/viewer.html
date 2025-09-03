@@ -819,33 +819,29 @@
             left: var(--space-md);
         }
 
-        /* Mobile overlay positioning adjustments */
+        /* Mobile overlay positioning adjustments - 데스크탑에 영향 없음 */
         @media (max-width: 768px) {
             #youtube-container {
-                /* 모바일에서 기본 스타일 */
-                width: 50%;
-                min-width: 150px;
-                max-width: 70%;
-                aspect-ratio: 16 / 9;
+                /* 모바일에서도 데스크탑과 동일한 원리 - 제한 없음 */
             }
             
             #youtube-container.overlay-top-right {
-                top: calc(var(--space-sm) + 10px);
+                top: 10px;
                 right: var(--space-sm);
             }
 
             #youtube-container.overlay-top-left {
-                top: calc(var(--space-sm) + 10px);
+                top: 10px;
                 left: var(--space-sm);
             }
 
             #youtube-container.overlay-bottom-right {
-                bottom: 80px; /* 컨트롤 버튼들 위에 위치 */
+                bottom: 10px; /* 테스트: 10px로 설정 */
                 right: var(--space-sm);
             }
 
             #youtube-container.overlay-bottom-left {
-                bottom: 80px; /* 컨트롤 버튼들 위에 위치 */
+                bottom: 10px; /* 테스트: 10px로 설정 */
                 left: var(--space-sm);
             }
         }
@@ -2273,7 +2269,7 @@
                     <div class="input-group">
                         <label for="overlay-size" class="input-label">Size</label>
                     <div class="slider-container">
-                            <input type="range" id="overlay-size" min="10" max="60" value="50">
+                            <input type="range" id="overlay-size" min="10" max="70" value="50">
                         <span id="overlay-size-value" class="slider-value">50%</span>
                     </div>
                 </div>
@@ -2444,32 +2440,7 @@
                 });
             }
             
-            // Alternative method for older browsers
-            if (window.orientation !== undefined) {
-                window.addEventListener('orientationchange', function() {
-                    if (window.orientation === 90 || window.orientation === -90) {
-                        // Force portrait mode
-                        document.body.style.transform = 'rotate(-90deg)';
-                        document.body.style.transformOrigin = 'left top';
-                        document.body.style.width = '100vh';
-                        document.body.style.height = '100vw';
-                        document.body.style.overflowX = 'hidden';
-                        document.body.style.position = 'absolute';
-                        document.body.style.top = '100%';
-                        document.body.style.left = '0';
-                    } else {
-                        // Portrait mode - reset
-                        document.body.style.transform = '';
-                        document.body.style.transformOrigin = '';
-                        document.body.style.width = '';
-                        document.body.style.height = '';
-                        document.body.style.overflowX = '';
-                        document.body.style.position = '';
-                        document.body.style.top = '';
-                        document.body.style.left = '';
-                    }
-                });
-            }
+            // 회전 방지 코드 완전 제거 - 모바일에서 자연스러운 화면 표시
         }
         // Overlay settings panel controls
         const overlayToggleBtn = document.getElementById('overlayToggleBtn');
@@ -3742,9 +3713,14 @@
     function updateOverlaySize() {
         const container = document.getElementById('youtube-container');
         if (container) {
-            // 간단하고 안정적인 크기 조정
+            // 데스크탑과 모바일 모두에서 동일하게 작동
             const sizeValue = Math.max(10, Math.min(overlaySize, 70)) + '%';
             container.style.width = sizeValue;
+            
+            // 모바일에서 크기 조정이 제대로 작동하도록 강제 적용 (제한 없음)
+            if (window.innerWidth <= 768) {
+                container.style.setProperty('width', sizeValue, 'important');
+            }
         }
     }
 
