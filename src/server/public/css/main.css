@@ -307,25 +307,8 @@ body {
     aspect-ratio: 16 / 9;
 }
 
-#youtube-container.overlay-top-right {
-    top: var(--space-sm);
-    right: var(--space-md);
-}
-
-#youtube-container.overlay-top-left {
-    top: var(--space-sm);
-    left: var(--space-md);
-}
-
-#youtube-container.overlay-bottom-right {
-    bottom: 60px;
-    right: var(--space-md);
-}
-
-#youtube-container.overlay-bottom-left {
-    bottom: 60px;
-    left: var(--space-md);
-}
+/* YouTube 오버레이 위치는 viewer.html에서 통일 관리 */
+/* 위치 설정 제거하여 퍼센트 기반 위치가 정상 작동하도록 함 */
 
 /* Quick Controls */
 .quick-controls {

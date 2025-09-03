@@ -801,23 +801,27 @@
         }
 
         #youtube-container.overlay-top-right {
-            top: 3%;        /* 모든 화면에서 3% - 모바일과 데스크탑 통일 */
-            right: 2%;      /* 모든 화면에서 2% - 모바일과 데스크탑 통일 */
+            top: 3% !important;        /* 모든 화면에서 3% 강제 적용 */
+            right: 2% !important;      /* 모든 화면에서 2% 강제 적용 */
+            height: auto !important;   /* 16:9 비율 보장 */
         }
 
         #youtube-container.overlay-top-left {
-            top: 3%;        /* 모든 화면에서 3% - 모바일과 데스크탑 통일 */
-            left: 2%;       /* 모든 화면에서 2% - 모바일과 데스크탑 통일 */
+            top: 3% !important;        /* 모든 화면에서 3% 강제 적용 */
+            left: 2% !important;       /* 모든 화면에서 2% 강제 적용 */
+            height: auto !important;   /* 16:9 비율 보장 */
         }
 
         #youtube-container.overlay-bottom-right {
-            bottom: 8%;     /* 모든 화면에서 8% - 모바일과 데스크탑 통일 */
-            right: 2%;      /* 모든 화면에서 2% - 모바일과 데스크탑 통일 */
+            bottom: 8% !important;     /* 모든 화면에서 8% 강제 적용 */
+            right: 2% !important;      /* 모든 화면에서 2% 강제 적용 */
+            height: auto !important;   /* 16:9 비율 보장 */
         }
 
         #youtube-container.overlay-bottom-left {
-            bottom: 8%;     /* 모든 화면에서 8% - 모바일과 데스크탑 통일 */
-            left: 2%;       /* 모든 화면에서 2% - 모바일과 데스크탑 통일 */
+            bottom: 8% !important;     /* 모든 화면에서 8% 강제 적용 */
+            left: 2% !important;       /* 모든 화면에서 2% 강제 적용 */
+            height: auto !important;   /* 16:9 비율 보장 */
         }
 
         /* 모든 화면에서 동일한 퍼센트 기반 위치 사용 - 모바일과 데스크탑 통일 */
@@ -1472,15 +1476,8 @@
                 border-radius: var(--radius-sm);
             }
             
-            /* Overlay Mobile Optimization */
-            .overlay-top-right,
-            .overlay-top-left,
-            .overlay-bottom-right,
-            .overlay-bottom-left {
-                /* 모바일에서도 데스크탑과 동일한 동작 - 크기 조정 가능 */
-                aspect-ratio: 16 / 9; /* 모바일에서도 16:9 비율 유지 */
-                /* 크기 제한 제거 - 오버레이 설정에서 사용자가 조정 가능 */
-            }
+            /* Overlay Mobile Optimization - 위치는 #youtube-container에서 통일 관리 */
+            /* 크기와 비율만 모바일 최적화 */
             
             /* Controls Mobile Optimization */
             .quick-controls {
@@ -1886,12 +1883,12 @@
             }
             
             .header {
-                height: 6vh; /* 35px → 6vh로 통일 */
+                height: 35px; /* 픽셀 기반으로 되돌림 */
                 padding: 3px var(--space-xs);
             }
             
             .container {
-                margin-top: 6%; /* 35px → 6%로 통일 */
+                margin-top: 35px; /* 헤더 높이와 동일하게 픽셀 기반 */
             }
             
             .quick-controls {
@@ -1902,13 +1899,8 @@
                 width: 100%;
             }
             
-            .overlay-top-right,
-            .overlay-top-left,
-            .overlay-bottom-right,
-            .overlay-bottom-left {
-                width: 35% !important;
-                height: 25% !important;
-            }
+            /* 오버레이 크기만 설정 - 위치는 #youtube-container에서 통일 관리 */
+            /* width와 height만 설정하여 위치 충돌 방지 */
         }
         
         /* Mobile Video UX Enhancements */
@@ -2040,7 +2032,7 @@
                 padding: 4px var(--space-xs);
                 opacity: 1;
                 transition: all 0.3s ease;
-                height: 6vh; /* 뷰포트 높이의 6% - 반응형 헤더 */
+                height: 40px; /* 픽셀 기반으로 되돌림 */
             }
             
             .header h1 {
@@ -2081,9 +2073,9 @@
                 flex-shrink: 0;
             }
             
-            /* Add top margin to container for fixed header - 퍼센트 기반 */
+            /* Add top margin to container for fixed header - 픽셀 기반 */
             .container {
-                margin-top: 6%; /* 화면 높이의 6% - 반응형 여백 */
+                margin-top: 40px; /* 헤더 높이와 동일하게 픽셀 기반 */
             }
             
                          /* Beta notice less intrusive */
@@ -3217,7 +3209,7 @@
         
         // Create new YouTube player
         youtubePlayer = new YT.Player('youtube-player', {
-            height: '100%',
+            height: 'auto',        /* 16:9 비율 보장을 위해 auto로 변경 */
             width: '100%',
             videoId: videoId,
             playerVars: {
