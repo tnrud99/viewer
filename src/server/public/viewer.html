@@ -81,9 +81,10 @@
             text-size-adjust: 100%;
         }
         
-        /* Force portrait orientation on mobile */
+        /* Force portrait orientation on mobile - 완화된 버전 */
         @media screen and (orientation: landscape) and (max-width: 768px) {
             body {
+                /* 회전 방지를 더 부드럽게 처리 */
                 transform: rotate(-90deg);
                 transform-origin: left top;
                 width: 100vh;
@@ -92,6 +93,12 @@
                 position: absolute;
                 top: 100%;
                 left: 0;
+            }
+            
+            /* 오버레이가 회전에 영향을 받지 않도록 보정 */
+            #youtube-container {
+                transform: rotate(90deg);
+                transform-origin: center;
             }
         }
 
@@ -831,6 +838,29 @@
             left: var(--space-md);
         }
 
+        /* Mobile overlay positioning adjustments */
+        @media (max-width: 768px) {
+            #youtube-container.overlay-top-right {
+                top: calc(var(--space-sm) + 10px);
+                right: var(--space-sm);
+            }
+
+            #youtube-container.overlay-top-left {
+                top: calc(var(--space-sm) + 10px);
+                left: var(--space-sm);
+            }
+
+            #youtube-container.overlay-bottom-right {
+                bottom: 80px; /* 컨트롤 버튼들 위에 위치 */
+                right: var(--space-sm);
+            }
+
+            #youtube-container.overlay-bottom-left {
+                bottom: 80px; /* 컨트롤 버튼들 위에 위치 */
+                left: var(--space-sm);
+            }
+        }
+
         /* Quick Playback Controls - Right below video */
         .quick-controls {
             display: flex;
@@ -1486,7 +1516,7 @@
             .overlay-top-left,
             .overlay-bottom-right,
             .overlay-bottom-left {
-                width: 40% !important;
+                /* 모바일에서도 데스크탑과 동일한 동작 - 크기 조정 가능 */
                 aspect-ratio: 16 / 9 !important; /* 모바일에서도 16:9 비율 유지 */
                 /* 크기 제한 제거 - 오버레이 설정에서 사용자가 조정 가능 */
             }
@@ -2615,18 +2645,32 @@
             });
         });
 
-        // Overlay position change event
-        overlayPositionSelect.addEventListener('change', function() {
-            overlayPosition = this.value;
-            updateOverlayPosition();
-        });
+                    // Overlay position change event
+            overlayPositionSelect.addEventListener('change', function() {
+                overlayPosition = this.value;
+                updateOverlayPosition();
+                
+                // 모바일에서 포지션 변경 후 크기도 다시 적용
+                if (window.innerWidth <= 768) {
+                    setTimeout(() => {
+                        updateOverlaySize();
+                    }, 100);
+                }
+            });
 
-        // Overlay size change event
-        overlaySizeSlider.addEventListener('input', function() {
-            overlaySize = parseInt(this.value);
-            overlaySizeValue.textContent = overlaySize + '%';
-            updateOverlaySize();
-        });
+                    // Overlay size change event
+            overlaySizeSlider.addEventListener('input', function() {
+                overlaySize = parseInt(this.value);
+                overlaySizeValue.textContent = overlaySize + '%';
+                updateOverlaySize();
+                
+                // 모바일에서 즉시 반영되도록 추가 업데이트
+                if (window.innerWidth <= 768) {
+                    setTimeout(() => {
+                        updateOverlaySize();
+                    }, 50);
+                }
+            });
         
         // Overlay toggle button event
         toggleOverlayBtn.addEventListener('click', function() {
@@ -3010,6 +3054,13 @@
         // Initial overlay size display and slider value
         overlaySizeSlider.value = overlaySize; // Set slider to 50
         overlaySizeValue.textContent = overlaySize + '%'; // Display 50%
+        
+        // 모바일에서 초기 로드 시 크기 적용
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                updateOverlaySize();
+            }, 200);
+        }
         
         // Initial YouTube volume display
         youtubeVolumeValue.textContent = youtubeVolume + '%';
@@ -3722,7 +3773,17 @@
     // Update overlay size
     function updateOverlaySize() {
         const container = document.getElementById('youtube-container');
-        container.style.width = overlaySize + '%';
+        if (container) {
+            container.style.width = overlaySize + '%';
+            
+            // 모바일에서도 크기 조정이 제대로 적용되도록 강제 업데이트
+            if (window.innerWidth <= 768) {
+                // 모바일에서는 약간의 지연을 두고 다시 적용
+                setTimeout(() => {
+                    container.style.width = overlaySize + '%';
+                }, 10);
+            }
+        }
     }
 
     // Update overlay visibility
@@ -3955,17 +4016,24 @@
                     }
                 }
                 
-                // Apply overlay size
-                if (veUrlData.settings.overlay_size) {
-                    const overlaySizeSlider = document.getElementById('overlay-size');
-                    const overlaySizeValue = document.getElementById('overlay-size-value');
-                    if (overlaySizeSlider) {
-                        overlaySizeSlider.value = veUrlData.settings.overlay_size;
-                        overlaySizeValue.textContent = veUrlData.settings.overlay_size + '%';
-                        overlaySize = veUrlData.settings.overlay_size;
+                        // Apply overlay size
+        if (veUrlData.settings.overlay_size) {
+            const overlaySizeSlider = document.getElementById('overlay-size');
+            const overlaySizeValue = document.getElementById('overlay-size-value');
+            if (overlaySizeSlider) {
+                overlaySizeSlider.value = veUrlData.settings.overlay_size;
+                overlaySizeValue.textContent = veUrlData.settings.overlay_size + '%';
+                overlaySize = veUrlData.settings.overlay_size;
+                updateOverlaySize();
+                
+                // 모바일에서 VE URL 로드 시 크기 적용
+                if (window.innerWidth <= 768) {
+                    setTimeout(() => {
                         updateOverlaySize();
-                    }
+                    }, 300);
                 }
+            }
+        }
                 
                 // Apply YouTube volume
                 if (veUrlData.settings.youtube_volume) {
