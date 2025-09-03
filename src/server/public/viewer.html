@@ -655,7 +655,7 @@
             flex-wrap: wrap;
         }
 
-        /* Video Container - Centered */
+        /* Video Container - Centered - 터치 보장 */
         .video-container {
             position: relative;
             margin: var(--space-xl) auto var(--space-lg) auto;
@@ -665,6 +665,7 @@
             border: 1px solid var(--color-border);
             max-width: 1200px;
             box-shadow: var(--shadow-md);
+            z-index: 100; /* 헤더보다 높은 z-index로 터치 보장 */
         }
 
         .main-video-box {
@@ -781,13 +782,13 @@
             height: 100% !important;
         }
 
-        /* Overlay styles */
+        /* Overlay styles - 터치 보장 */
         #youtube-container {
             position: absolute;
             background-color: #000;
             border-radius: var(--radius-md);
             overflow: hidden;
-            z-index: 10;
+            z-index: 200; /* 헤더와 비디오 컨테이너보다 높은 z-index */
             box-shadow: var(--shadow-lg);
             width: 50%;
             transition: all 0.3s ease;
@@ -1885,12 +1886,12 @@
             }
             
             .header {
-                height: 35px;
+                height: 6vh; /* 35px → 6vh로 통일 */
                 padding: 3px var(--space-xs);
             }
             
             .container {
-                margin-top: 35px;
+                margin-top: 6%; /* 35px → 6%로 통일 */
             }
             
             .quick-controls {
@@ -2026,20 +2027,20 @@
                 box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
             }
             
-            /* Compact fixed header */
+            /* Compact fixed header - 터치 방해 방지 */
             .header {
                 position: fixed;
                 top: 0;
                 left: 0;
                 right: 0;
-                z-index: 1000;
+                z-index: 50; /* 비디오 터치 방해 방지 */
                 background: rgba(0, 0, 0, 0.9);
                 backdrop-filter: blur(10px);
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
                 padding: 4px var(--space-xs);
                 opacity: 1;
                 transition: all 0.3s ease;
-                height: 40px;
+                height: 6vh; /* 뷰포트 높이의 6% - 반응형 헤더 */
             }
             
             .header h1 {
@@ -2080,9 +2081,9 @@
                 flex-shrink: 0;
             }
             
-            /* Add top margin to container for fixed header */
+            /* Add top margin to container for fixed header - 퍼센트 기반 */
             .container {
-                margin-top: 40px;
+                margin-top: 6%; /* 화면 높이의 6% - 반응형 여백 */
             }
             
                          /* Beta notice less intrusive */
@@ -2244,7 +2245,7 @@
                     <div class="input-group">
                         <label for="overlay-size" class="input-label">Size</label>
                     <div class="slider-container">
-                            <input type="range" id="overlay-size" min="10" max="70" value="50">
+                            <input type="range" id="overlay-size" min="10" max="60" value="50">
                         <span id="overlay-size-value" class="slider-value">50%</span>
                     </div>
                 </div>
@@ -3688,7 +3689,7 @@
     function updateOverlaySize() {
         const container = document.getElementById('youtube-container');
         if (container) {
-            const sizeValue = Math.max(10, Math.min(overlaySize, 70)) + '%';
+            const sizeValue = Math.max(10, Math.min(overlaySize, 60)) + '%';
             container.style.width = sizeValue;
             
             // 모든 화면에서 16:9 비율 보장 (모바일과 데스크탑 통일)

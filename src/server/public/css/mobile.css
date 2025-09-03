@@ -114,18 +114,8 @@
         max-height: 120px;
     }
     
-    /* 모바일에서 오리지널 영상 위치 조정 */
-    .overlay-top-right,
-    .overlay-top-left {
-        top: var(--space-md) !important;
-        bottom: auto !important;
-    }
-    
-    .overlay-bottom-right,
-    .overlay-bottom-left {
-        bottom: var(--space-lg) !important;
-        top: auto !important;
-    }
+    /* 모바일에서도 데스크탑과 동일한 퍼센트 기반 위치 사용 */
+    /* 위치 설정은 viewer.html에서 통일 관리 */
     
     /* Controls Mobile Optimization */
     .quick-controls {
