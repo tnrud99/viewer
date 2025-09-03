@@ -800,51 +800,26 @@
         }
 
         #youtube-container.overlay-top-right {
-            top: 3%;        /* 화면 상단에서 3% 아래 - 완벽한 반응형 */
-            right: 2%;      /* 화면 우측에서 2% 왼쪽 */
+            top: 3%;        /* 모든 화면에서 3% - 모바일과 데스크탑 통일 */
+            right: 2%;      /* 모든 화면에서 2% - 모바일과 데스크탑 통일 */
         }
 
         #youtube-container.overlay-top-left {
-            top: 3%;        /* 화면 상단에서 3% 아래 - 완벽한 반응형 */
-            left: 2%;       /* 화면 좌측에서 2% 오른쪽 */
+            top: 3%;        /* 모든 화면에서 3% - 모바일과 데스크탑 통일 */
+            left: 2%;       /* 모든 화면에서 2% - 모바일과 데스크탑 통일 */
         }
 
         #youtube-container.overlay-bottom-right {
-            bottom: 8%;     /* 화면 하단에서 8% 위 - 완벽한 반응형 */
-            right: 2%;      /* 화면 우측에서 2% 왼쪽 */
+            bottom: 8%;     /* 모든 화면에서 8% - 모바일과 데스크탑 통일 */
+            right: 2%;      /* 모든 화면에서 2% - 모바일과 데스크탑 통일 */
         }
 
         #youtube-container.overlay-bottom-left {
-            bottom: 8%;     /* 화면 하단에서 8% 위 - 완벽한 반응형 */
-            left: 2%;       /* 화면 좌측에서 2% 오른쪽 */
+            bottom: 8%;     /* 모든 화면에서 8% - 모바일과 데스크탑 통일 */
+            left: 2%;       /* 모든 화면에서 2% - 모바일과 데스크탑 통일 */
         }
 
-        /* Mobile overlay positioning adjustments - 데스크탑에 영향 없음 */
-        @media (max-width: 768px) {
-            #youtube-container {
-                /* 모바일에서도 데스크탑과 동일한 원리 - 제한 없음 */
-            }
-            
-            #youtube-container.overlay-top-right {
-                top: 10px !important;
-                right: 12px !important; /* var(--space-sm) = 0.75rem = 12px */
-            }
-
-            #youtube-container.overlay-top-left {
-                top: 10px !important;
-                left: 12px !important; /* var(--space-sm) = 0.75rem = 12px */
-            }
-
-            #youtube-container.overlay-bottom-right {
-                bottom: 10px !important; /* 테스트: 10px로 설정 */
-                right: 12px !important; /* var(--space-sm) = 0.75rem = 12px */
-            }
-
-            #youtube-container.overlay-bottom-left {
-                bottom: 10px !important; /* 테스트: 10px로 설정 */
-                left: 12px !important; /* var(--space-sm) = 0.75rem = 12px */
-            }
-        }
+        /* 모든 화면에서 동일한 퍼센트 기반 위치 사용 - 모바일과 데스크탑 통일 */
 
         /* Quick Playback Controls - Right below video */
         .quick-controls {
@@ -3709,21 +3684,16 @@
         container.classList.add('overlay-' + overlayPosition);
     }
 
-    // Update overlay size
+    // Update overlay size - 모든 화면에서 동일하게 작동
     function updateOverlaySize() {
         const container = document.getElementById('youtube-container');
         if (container) {
-            // 데스크탑과 모바일 모두에서 동일하게 작동
             const sizeValue = Math.max(10, Math.min(overlaySize, 70)) + '%';
             container.style.width = sizeValue;
             
-            // 모바일에서 크기 조정이 제대로 작동하도록 강제 적용
-            if (window.innerWidth <= 768) {
-                container.style.setProperty('width', sizeValue, 'important');
-                // 모바일에서 높이도 함께 설정하여 16:9 비율 보장
-                container.style.setProperty('height', 'auto', 'important');
-                container.style.setProperty('aspect-ratio', '16 / 9', 'important');
-            }
+            // 모든 화면에서 16:9 비율 보장 (모바일과 데스크탑 통일)
+            container.style.height = 'auto';
+            container.style.aspectRatio = '16 / 9';
         }
     }
 
