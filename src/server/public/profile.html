@@ -6,6 +6,7 @@
     <title>My Profile - React Central</title>
     <link rel="icon" href="favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <style>
         :root {
@@ -69,6 +70,13 @@
             padding: 8px;
             border-radius: 50%;
             transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn .material-icons {
+            font-size: 20px;
         }
 
         .back-btn:hover {
@@ -86,14 +94,8 @@
         .logo-icon {
             width: 32px;
             height: 32px;
-            background: var(--primary);
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
+            object-fit: contain;
         }
 
         .logo-text {
@@ -461,15 +463,19 @@
     <!-- Header -->
     <header class="header">
         <div class="header-left">
-            <button class="back-btn" onclick="goBack()">←</button>
+            <button class="back-btn" onclick="goBack()">
+                <span class="material-icons">arrow_back</span>
+            </button>
             <a href="react-central.html" class="logo">
-                <div class="logo-icon">RC</div>
+                <img src="logo/blackred_mini.png" alt="React Central" class="logo-icon">
                 <div class="logo-text">React Central</div>
             </a>
         </div>
 
         <div class="header-right">
-            <button class="profile-btn" id="profileBtn" onclick="toggleProfileMenu()">👤</button>
+            <button class="profile-btn" id="profileBtn" onclick="toggleProfileMenu()">
+                <span class="material-icons">account_circle</span>
+            </button>
         </div>
     </header>
 

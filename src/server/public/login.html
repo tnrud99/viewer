@@ -6,6 +6,7 @@
     <title>Sign In - React Central</title>
     <link rel="icon" href="favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <style>
         :root {
@@ -70,14 +71,8 @@
         .logo-icon {
             width: 40px;
             height: 40px;
-            background: var(--primary);
             border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 20px;
+            object-fit: contain;
         }
 
         .logo-text {
@@ -262,6 +257,13 @@
             cursor: pointer;
             font-size: 14px;
             transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-btn .material-icons {
+            font-size: 18px;
         }
 
         .back-btn:hover {
@@ -332,12 +334,15 @@
     </style>
 </head>
 <body>
-    <button class="back-btn" onclick="goBack()">← Back</button>
+    <button class="back-btn" onclick="goBack()">
+        <span class="material-icons">arrow_back</span>
+        Back
+    </button>
 
     <div class="auth-container">
         <div class="auth-header">
             <div class="logo">
-                <div class="logo-icon">RC</div>
+                <img src="logo/blackred_mini.png" alt="React Central" class="logo-icon">
                 <div class="logo-text">React Central</div>
             </div>
             <h1 class="auth-title">Welcome Back</h1>
