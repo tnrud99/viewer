@@ -204,8 +204,40 @@
             position: relative;
         }
 
-        .notification-btn:hover, .profile-btn:hover {
+        .notification-btn:hover,         .profile-btn:hover {
             background: rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border);
+            min-width: 180px;
+            z-index: 1000;
+        }
+
+        .profile-menu-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .profile-menu-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .profile-menu-item:first-child {
+            border-radius: 12px 12px 0 0;
+        }
+
+        .profile-menu-item:last-child {
+            border-radius: 0 0 12px 12px;
         }
 
         .notification-badge {
@@ -568,7 +600,12 @@
                 🔔
                 <span class="notification-badge">9+</span>
             </button>
-            <button class="profile-btn">👤</button>
+            <button class="profile-btn" id="profileBtn" onclick="toggleProfileMenu()">👤</button>
+            <div class="profile-menu" id="profileMenu" style="display: none;">
+                <div class="profile-menu-item" onclick="goToProfile()">My Profile</div>
+                <div class="profile-menu-item" onclick="goToMyVideos()">My Videos</div>
+                <div class="profile-menu-item" onclick="logout()">Sign Out</div>
+            </div>
         </div>
     </header>
 
@@ -922,9 +959,74 @@
             });
         }
 
+        // Authentication functions
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profileMenu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function goToProfile() {
+            window.location.href = 'profile.html';
+        }
+
+        function goToMyVideos() {
+            // Filter to show only user's videos
+            currentCategory = 'my';
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.category === 'my') {
+                    tab.classList.add('active');
+                }
+            });
+            loadVideos();
+            toggleProfileMenu();
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
+        function checkAuthStatus() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('user');
+            
+            if (token && user) {
+                // User is logged in
+                const userData = JSON.parse(user);
+                console.log('User logged in:', userData.username);
+                
+                // Update profile button to show user info
+                const profileBtn = document.getElementById('profileBtn');
+                profileBtn.textContent = userData.username.charAt(0).toUpperCase();
+                profileBtn.title = `Logged in as ${userData.username}`;
+            } else {
+                // User is not logged in
+                console.log('User not logged in');
+                
+                // Show login button instead of profile
+                const profileBtn = document.getElementById('profileBtn');
+                profileBtn.textContent = '👤';
+                profileBtn.title = 'Sign in';
+                profileBtn.onclick = () => window.location.href = 'login.html';
+            }
+        }
+
+        // Close profile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const profileBtn = document.getElementById('profileBtn');
+            const profileMenu = document.getElementById('profileMenu');
+            
+            if (!profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
+                profileMenu.style.display = 'none';
+            }
+        });
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             console.log('React Central initialized');
+            checkAuthStatus();
             loadVideos();
         });
     </script>

@@ -748,6 +748,74 @@ app.post('/api/react-central/videos/:id/bookmark', ensureMongoConnection, async 
     }
 });
 
+// User profile API
+app.get('/api/user/profile', authenticateToken, ensureMongoConnection, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId).select('-password_hash');
+        
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Get user's videos
+        const userVideos = await VEUrl.find({ creator_id: req.user.userId })
+            .select('ve_id title description metadata creator_info react_central')
+            .sort({ 'metadata.created_at': -1 });
+
+        // Calculate statistics
+        const totalViews = userVideos.reduce((sum, video) => sum + (video.metadata?.view_count || 0), 0);
+        const totalLikes = userVideos.reduce((sum, video) => sum + (video.react_central?.likes || 0), 0);
+
+        res.json({
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                created_at: user.created_at
+            },
+            stats: {
+                videos_count: userVideos.length,
+                total_views: totalViews,
+                total_likes: totalLikes,
+                member_since: user.created_at
+            },
+            videos: userVideos
+        });
+    } catch (error) {
+        console.error('User profile error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// User videos API
+app.get('/api/user/videos', authenticateToken, ensureMongoConnection, async (req, res) => {
+    try {
+        const { page = 1, limit = 12 } = req.query;
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        const videos = await VEUrl.find({ creator_id: req.user.userId })
+            .select('ve_id title description reaction_url original_url metadata creator_info react_central')
+            .sort({ 'metadata.created_at': -1 })
+            .skip(skip)
+            .limit(parseInt(limit));
+
+        const totalCount = await VEUrl.countDocuments({ creator_id: req.user.userId });
+
+        res.json({
+            videos: videos,
+            pagination: {
+                current_page: parseInt(page),
+                total_pages: Math.ceil(totalCount / parseInt(limit)),
+                total_count: totalCount,
+                has_next: skip + videos.length < totalCount
+            }
+        });
+    } catch (error) {
+        console.error('User videos error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // 정적 파일 서빙
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -777,6 +845,20 @@ app.get('/create-ve-url-enhanced.html', (req, res) => {
 // React Central page
 app.get('/react-central.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'react-central.html'));
+});
+
+// Authentication pages
+app.get('/signup.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'signup.html'));
+});
+
+app.get('/login.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// Profile page
+app.get('/profile.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'profile.html'));
 });
 
 // Server status page

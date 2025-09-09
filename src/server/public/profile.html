@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - React Central</title>
+    <link rel="icon" href="favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #c12a1f;
+            --primary-dark: #a01f17;
+            --primary-light: #e63946;
+            --accent: #00d4ff;
+            --text: #0f0f0f;
+            --text-secondary: #1a1a1a;
+            --text-muted: #4a4a4a;
+            --bg: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --border: rgba(193, 42, 31, 0.2);
+            --shadow: 0 20px 40px rgba(193, 42, 31, 0.15);
+            --error: #dc3545;
+            --success: #28a745;
+            --warning: #ffc107;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-btn {
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: background 0.2s ease;
+            position: relative;
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+        }
+
+        .profile-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 60px;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Profile Header */
+        .profile-header {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+            margin: 0 auto 20px;
+            border: 4px solid white;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .profile-name {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .profile-email {
+            color: var(--text-muted);
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .profile-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            transform: translateY(-1px);
+        }
+
+        /* Profile Sections */
+        .profile-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .profile-section {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        /* Recent Videos */
+        .video-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .video-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .video-item:hover {
+            background: var(--border);
+            transform: translateY(-2px);
+        }
+
+        .video-thumbnail {
+            width: 80px;
+            height: 60px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .video-info {
+            flex: 1;
+        }
+
+        .video-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .video-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .video-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            font-size: 12px;
+        }
+
+        .action-btn:hover {
+            background: var(--bg-secondary);
+            color: var(--text);
+        }
+
+        /* Account Info */
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .info-value {
+            color: var(--text-muted);
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            font-size: 18px;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--bg-secondary);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px 15px;
+            }
+
+            .profile-header {
+                padding: 30px 20px;
+            }
+
+            .profile-sections {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .profile-stats {
+                gap: 20px;
+            }
+
+            .profile-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: rgba(40, 167, 69, 0.9);
+        }
+
+        .toast.error {
+            background: rgba(220, 53, 69, 0.9);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="goBack()">←</button>
+            <a href="react-central.html" class="logo">
+                <div class="logo-icon">RC</div>
+                <div class="logo-text">React Central</div>
+            </a>
+        </div>
+
+        <div class="header-right">
+            <button class="profile-btn" id="profileBtn" onclick="toggleProfileMenu()">👤</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar" id="profileAvatar">?</div>
+            <h1 class="profile-name" id="profileName">Loading...</h1>
+            <p class="profile-email" id="profileEmail">Loading...</p>
+            
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="videosCount">0</span>
+                    <span class="stat-label">Videos</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="totalViews">0</span>
+                    <span class="stat-label">Total Views</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="totalLikes">0</span>
+                    <span class="stat-label">Total Likes</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="memberSince">0</span>
+                    <span class="stat-label">Days Active</span>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <button class="btn btn-primary" onclick="editProfile()">
+                    <span>✏️</span>
+                    <span>Edit Profile</span>
+                </button>
+                <button class="btn btn-secondary" onclick="goToMyVideos()">
+                    <span>🎥</span>
+                    <span>My Videos</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Profile Sections -->
+        <div class="profile-sections">
+            <!-- Recent Videos -->
+            <div class="profile-section">
+                <h2 class="section-title">
+                    <div class="section-icon">🎥</div>
+                    <span>Recent Videos</span>
+                </h2>
+                <div id="recentVideos" class="video-list">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <span>Loading videos...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Information -->
+            <div class="profile-section">
+                <h2 class="section-title">
+                    <div class="section-icon">ℹ️</div>
+                    <span>Account Information</span>
+                </h2>
+                <div class="info-item">
+                    <span class="info-label">Username</span>
+                    <span class="info-value" id="accountUsername">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email</span>
+                    <span class="info-value" id="accountEmail">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Member Since</span>
+                    <span class="info-value" id="accountMemberSince">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Account Status</span>
+                    <span class="info-value" style="color: var(--success);">Active</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let userVideos = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            loadUserProfile();
+            loadUserVideos();
+        });
+
+        // Check authentication status
+        function checkAuthStatus() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('user');
+            
+            if (!token || !user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            currentUser = JSON.parse(user);
+            console.log('User logged in:', currentUser.username);
+        }
+
+        // Load user profile data
+        async function loadUserProfile() {
+            try {
+                // Update profile header
+                const profileAvatar = document.getElementById('profileAvatar');
+                const profileName = document.getElementById('profileName');
+                const profileEmail = document.getElementById('profileEmail');
+                
+                profileAvatar.textContent = currentUser.username.charAt(0).toUpperCase();
+                profileName.textContent = currentUser.username;
+                profileEmail.textContent = currentUser.email;
+
+                // Update account information
+                document.getElementById('accountUsername').textContent = currentUser.username;
+                document.getElementById('accountEmail').textContent = currentUser.email;
+                
+                // Calculate member since
+                const memberSince = new Date(currentUser.created_at || Date.now());
+                const daysSince = Math.floor((Date.now() - memberSince.getTime()) / (1000 * 60 * 60 * 24));
+                document.getElementById('accountMemberSince').textContent = `${daysSince} days ago`;
+                document.getElementById('memberSince').textContent = daysSince;
+
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+                showToast('Error loading profile data', 'error');
+            }
+        }
+
+        // Load user videos
+        async function loadUserVideos() {
+            try {
+                const token = localStorage.getItem('authToken');
+                
+                // For now, we'll use the existing API to get user's videos
+                // In a real implementation, you'd have a dedicated user videos API
+                const response = await fetch('/api/react-central/videos?category=my', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    userVideos = data.videos || [];
+                    displayUserVideos(userVideos);
+                    updateStats(userVideos);
+                } else {
+                    throw new Error('Failed to load user videos');
+                }
+
+            } catch (error) {
+                console.error('Error loading user videos:', error);
+                document.getElementById('recentVideos').innerHTML = `
+                    <div class="loading">
+                        <span>No videos found</span>
+                    </div>
+                `;
+            }
+        }
+
+        // Display user videos
+        function displayUserVideos(videos) {
+            const recentVideosContainer = document.getElementById('recentVideos');
+            
+            if (videos.length === 0) {
+                recentVideosContainer.innerHTML = `
+                    <div class="loading">
+                        <span>No videos uploaded yet</span>
+                    </div>
+                `;
+                return;
+            }
+
+            const videosHTML = videos.slice(0, 5).map(video => `
+                <div class="video-item" onclick="openVideo('${video.ve_id}')">
+                    <div class="video-thumbnail">
+                        🎵
+                    </div>
+                    <div class="video-info">
+                        <div class="video-title">${video.title || 'Untitled Video'}</div>
+                        <div class="video-meta">
+                            ${formatViewCount(video.metadata?.view_count || 0)} views • 
+                            ${formatTimeAgo(video.metadata?.created_at)}
+                        </div>
+                    </div>
+                    <div class="video-actions">
+                        <button class="action-btn" onclick="event.stopPropagation(); editVideo('${video.ve_id}')" title="Edit">
+                            ✏️
+                        </button>
+                        <button class="action-btn" onclick="event.stopPropagation(); deleteVideo('${video.ve_id}')" title="Delete">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            recentVideosContainer.innerHTML = videosHTML;
+        }
+
+        // Update user statistics
+        function updateStats(videos) {
+            const totalViews = videos.reduce((sum, video) => sum + (video.metadata?.view_count || 0), 0);
+            const totalLikes = videos.reduce((sum, video) => sum + (video.react_central?.likes || 0), 0);
+            
+            document.getElementById('videosCount').textContent = videos.length;
+            document.getElementById('totalViews').textContent = formatCount(totalViews);
+            document.getElementById('totalLikes').textContent = formatCount(totalLikes);
+        }
+
+        // Utility functions
+        function formatViewCount(count) {
+            if (count >= 10000) {
+                return `${Math.floor(count / 10000)}만회`;
+            } else if (count >= 1000) {
+                return `${Math.floor(count / 1000)}천회`;
+            } else {
+                return `${count}회`;
+            }
+        }
+
+        function formatCount(count) {
+            if (count >= 1000) {
+                return `${(count / 1000).toFixed(1)}K`;
+            }
+            return count.toString();
+        }
+
+        function formatTimeAgo(dateString) {
+            if (!dateString) return 'Unknown';
+            
+            const now = new Date();
+            const date = new Date(dateString);
+            const diffMs = now - date;
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffDays > 0) {
+                return `${diffDays}일 전`;
+            } else if (diffHours > 0) {
+                return `${diffHours}시간 전`;
+            } else {
+                return '방금 전';
+            }
+        }
+
+        // Action functions
+        function goBack() {
+            window.history.back();
+        }
+
+        function editProfile() {
+            alert('Profile editing will be implemented soon.');
+        }
+
+        function goToMyVideos() {
+            window.location.href = 'react-central.html?category=my';
+        }
+
+        function openVideo(videoId) {
+            window.open(`/viewer.html?ve=${videoId}`, '_blank');
+        }
+
+        function editVideo(videoId) {
+            alert(`Edit video ${videoId} - This will be implemented soon.`);
+        }
+
+        function deleteVideo(videoId) {
+            if (confirm('Are you sure you want to delete this video?')) {
+                alert(`Delete video ${videoId} - This will be implemented soon.`);
+            }
+        }
+
+        function toggleProfileMenu() {
+            // This would show a profile menu similar to React Central
+            alert('Profile menu - This will be implemented soon.');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
