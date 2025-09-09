@@ -457,6 +457,14 @@
             color: var(--primary);
         }
 
+        .action-btn.bookmarked {
+            color: #ffd700;
+        }
+
+        .action-btn.bookmarked:hover {
+            color: #ffed4e;
+        }
+
         /* Loading State */
         .loading {
             display: flex;
@@ -630,6 +638,7 @@
             <div class="profile-menu" id="profileMenu" style="display: none;">
                 <div class="profile-menu-item" onclick="goToProfile()">My Profile</div>
                 <div class="profile-menu-item" onclick="goToMyVideos()">My Videos</div>
+                <div class="profile-menu-item" onclick="goToMyBookmarks()">My Bookmarks</div>
                 <div class="profile-menu-item" onclick="logout()">Sign Out</div>
             </div>
         </div>
@@ -762,8 +771,18 @@
             const videoGrid = document.getElementById('videoGrid');
             videoGrid.innerHTML = '';
 
+            // Get current bookmarks from localStorage
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+
             videos.forEach(video => {
                 const videoCard = createVideoCard(video);
+                
+                // Check if video is bookmarked and update button state
+                const bookmarkBtn = videoCard.querySelector('.action-btn:nth-child(2)');
+                if (bookmarks.includes(video.ve_id)) {
+                    bookmarkBtn.classList.add('bookmarked');
+                }
+                
                 videoGrid.appendChild(videoCard);
             });
 
@@ -1003,6 +1022,86 @@
             });
         }
 
+        // Video interaction functions
+        function toggleLike(veId, button) {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('Please log in to like videos');
+                return;
+            }
+
+            // Toggle like state
+            const isLiked = button.classList.contains('liked');
+            const likeCountSpan = button.querySelector('span:last-child');
+            let currentCount = parseInt(likeCountSpan.textContent.replace('K', '').replace('.', '')) || 0;
+            
+            if (isLiked) {
+                button.classList.remove('liked');
+                currentCount = Math.max(0, currentCount - 1);
+            } else {
+                button.classList.add('liked');
+                currentCount += 1;
+            }
+            
+            likeCountSpan.textContent = formatCount(currentCount);
+            
+            // TODO: Send to server
+            console.log(`${isLiked ? 'Unliked' : 'Liked'} video:`, veId);
+        }
+
+        function toggleBookmark(veId, button) {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('Please log in to bookmark videos');
+                return;
+            }
+
+            // Get current bookmarks from localStorage
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            const isBookmarked = bookmarks.includes(veId);
+            
+            if (isBookmarked) {
+                // Remove bookmark
+                const updatedBookmarks = bookmarks.filter(id => id !== veId);
+                localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
+                button.classList.remove('bookmarked');
+                console.log('Removed bookmark:', veId);
+            } else {
+                // Add bookmark
+                bookmarks.push(veId);
+                localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+                button.classList.add('bookmarked');
+                console.log('Added bookmark:', veId);
+            }
+        }
+
+        function shareVideo(veId) {
+            const shareUrl = `${window.location.origin}/viewer.html?ve_id=${veId}`;
+            
+            if (navigator.share) {
+                // Use native share API if available
+                navigator.share({
+                    title: 'Check out this reaction video!',
+                    text: 'Watch this synchronized reaction video',
+                    url: shareUrl
+                }).catch(err => console.log('Error sharing:', err));
+            } else {
+                // Fallback to clipboard
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    alert('Link copied to clipboard!');
+                }).catch(() => {
+                    // Final fallback
+                    const textArea = document.createElement('textarea');
+                    textArea.value = shareUrl;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('Link copied to clipboard!');
+                });
+            }
+        }
+
         // Authentication functions
         function toggleProfileMenu() {
             const menu = document.getElementById('profileMenu');
@@ -1024,6 +1123,49 @@
             });
             loadVideos();
             toggleProfileMenu();
+        }
+
+        function goToMyBookmarks() {
+            // Filter to show only bookmarked videos
+            currentCategory = 'bookmarks';
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            loadBookmarkedVideos();
+            toggleProfileMenu();
+        }
+
+        async function loadBookmarkedVideos() {
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            
+            if (bookmarks.length === 0) {
+                showEmptyState('No bookmarked videos yet');
+                return;
+            }
+
+            showLoading();
+            
+            try {
+                // Load all videos and filter by bookmarks
+                const response = await fetch('/api/react-central/videos?category=all');
+                if (!response.ok) {
+                    throw new Error('Failed to load videos');
+                }
+                
+                const data = await response.json();
+                const bookmarkedVideos = data.videos.filter(video => 
+                    bookmarks.includes(video.ve_id)
+                );
+                
+                if (bookmarkedVideos.length === 0) {
+                    showEmptyState('No bookmarked videos found');
+                } else {
+                    displayVideos(bookmarkedVideos);
+                }
+            } catch (error) {
+                console.error('Error loading bookmarked videos:', error);
+                showEmptyState('Failed to load bookmarked videos');
+            }
         }
 
         function logout() {
