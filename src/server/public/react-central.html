@@ -6,6 +6,7 @@
     <title>React Central - Discover Shared Video Experiences</title>
     <link rel="icon" href="favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <style>
         :root {
@@ -13,9 +14,9 @@
             --primary-dark: #a01f17;
             --primary-light: #e63946;
             --accent: #00d4ff;
-            --text: #0f0f0f;
-            --text-secondary: #1a1a1a;
-            --text-muted: #4a4a4a;
+            --text: #1a1a1a;
+            --text-secondary: #2a2a2a;
+            --text-muted: #666666;
             --bg: #ffffff;
             --bg-secondary: #f8f9fa;
             --bg-card: rgba(255, 255, 255, 0.9);
@@ -465,6 +466,36 @@
             color: #ffed4e;
         }
 
+        /* Material Icons */
+        .material-icons {
+            font-size: 20px;
+            vertical-align: middle;
+        }
+
+        .search-btn .material-icons {
+            font-size: 18px;
+        }
+
+        .action-btn .material-icons {
+            font-size: 18px;
+        }
+
+        .menu-btn .material-icons {
+            font-size: 24px;
+        }
+
+        .create-btn .material-icons {
+            font-size: 18px;
+        }
+
+        .notification-btn .material-icons {
+            font-size: 20px;
+        }
+
+        .profile-btn .material-icons {
+            font-size: 24px;
+        }
+
         /* Loading State */
         .loading {
             display: flex;
@@ -611,7 +642,9 @@
     <!-- Header -->
     <header class="header">
         <div class="header-left">
-            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <button class="menu-btn" onclick="toggleSidebar()">
+                <span class="material-icons">menu</span>
+            </button>
             <a href="/studio.html" class="logo">
                 <img src="logo/whitered_mini.png" alt="React Central" class="logo-icon">
                 <div class="logo-text">React Central</div>
@@ -621,20 +654,24 @@
         <div class="header-center">
             <div class="search-container">
                 <input type="text" class="search-bar" placeholder="Search" id="searchInput">
-                <button class="search-btn" onclick="performSearch()">🔍</button>
+                <button class="search-btn" onclick="performSearch()">
+                    <span class="material-icons">search</span>
+                </button>
             </div>
         </div>
 
         <div class="header-right">
             <a href="/create-ve-url-enhanced.html" class="create-btn">
-                <span>➕</span>
-                <span>만들기</span>
+                <span class="material-icons">add</span>
+                <span>Create</span>
             </a>
             <button class="notification-btn">
-                🔔
+                <span class="material-icons">notifications</span>
                 <span class="notification-badge">9+</span>
             </button>
-            <button class="profile-btn" id="profileBtn" onclick="toggleProfileMenu()">👤</button>
+            <button class="profile-btn" id="profileBtn" onclick="toggleProfileMenu()">
+                <span class="material-icons">account_circle</span>
+            </button>
             <div class="profile-menu" id="profileMenu" style="display: none;">
                 <div class="profile-menu-item" onclick="goToProfile()">My Profile</div>
                 <div class="profile-menu-item" onclick="goToMyVideos()">My Videos</div>
@@ -835,14 +872,14 @@
                     <div class="video-stats">${viewCount} • ${timeAgo}</div>
                     <div class="video-actions">
                         <button class="action-btn" onclick="event.stopPropagation(); toggleLike('${video.ve_id}', this)">
-                            <span>👍</span>
+                            <span class="material-icons">thumb_up</span>
                             <span>${formatCount(likes)}</span>
                         </button>
                         <button class="action-btn" onclick="event.stopPropagation(); toggleBookmark('${video.ve_id}', this)">
-                            <span>🔖</span>
+                            <span class="material-icons">bookmark</span>
                         </button>
                         <button class="action-btn" onclick="event.stopPropagation(); shareVideo('${video.ve_id}')">
-                            <span>📤</span>
+                            <span class="material-icons">share</span>
                         </button>
                     </div>
                 </div>
@@ -1185,7 +1222,7 @@
                 
                 // Update profile button to show user info
                 const profileBtn = document.getElementById('profileBtn');
-                profileBtn.textContent = userData.username.charAt(0).toUpperCase();
+                profileBtn.innerHTML = `<span class="material-icons">account_circle</span>`;
                 profileBtn.title = `Logged in as ${userData.username}`;
             } else {
                 // User is not logged in
@@ -1193,7 +1230,7 @@
                 
                 // Show login button instead of profile
                 const profileBtn = document.getElementById('profileBtn');
-                profileBtn.textContent = '👤';
+                profileBtn.innerHTML = `<span class="material-icons">account_circle</span>`;
                 profileBtn.title = 'Sign in';
                 profileBtn.onclick = () => window.location.href = 'login.html';
             }
