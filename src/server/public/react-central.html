@@ -99,6 +99,18 @@
             color: var(--primary);
         }
 
+        .beta-badge {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .region-badge {
             background: var(--bg-secondary);
             padding: 4px 8px;
@@ -456,6 +468,15 @@
             color: #ffd700;
         }
 
+        .action-btn.manage-btn {
+            color: var(--text-muted);
+        }
+
+        .action-btn.manage-btn:hover {
+            color: var(--primary);
+            background: rgba(193, 42, 31, 0.1);
+        }
+
         .action-btn.bookmarked:hover {
             color: #ffed4e;
         }
@@ -638,7 +659,7 @@
             </button>
             <a href="/studio.html" class="logo">
                 <img src="logo/whitered_mini.png" alt="React Central" class="logo-icon">
-                <div class="logo-text">React Central</div>
+                <div class="logo-text">React Central <span class="beta-badge">BETA</span></div>
             </a>
         </div>
 
@@ -686,7 +707,7 @@
         <!-- Loading State -->
         <div id="loadingState" class="loading" style="display: none;">
             <div class="spinner"></div>
-            <span>반응 영상을 불러오는 중...</span>
+            <span>Loading reaction videos...</span>
         </div>
 
         <!-- Empty State -->
@@ -875,6 +896,11 @@
                         <button class="action-btn" onclick="event.stopPropagation(); shareVideo('${video.ve_id}')">
                             <span class="material-icons">share</span>
                         </button>
+                        ${currentCategory === 'my' ? `
+                        <button class="action-btn manage-btn" onclick="event.stopPropagation(); manageVideo('${video.ve_id}')">
+                            <span class="material-icons">settings</span>
+                        </button>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -1131,6 +1157,10 @@
                     alert('Link copied to clipboard!');
                 });
             }
+        }
+
+        function manageVideo(veId) {
+            window.location.href = `video-management.html?ve=${veId}`;
         }
 
         // Authentication functions

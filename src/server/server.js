@@ -619,6 +619,117 @@ app.post('/api/analytics/view', ensureMongoConnection, async (req, res) => {
     }
 });
 
+// Video Management API - 영상 정보 조회
+app.get('/api/videos/:veId/manage', ensureMongoConnection, async (req, res) => {
+    try {
+        const { veId } = req.params;
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        
+        if (!token) {
+            return res.status(401).json({ error: 'Authentication required' });
+        }
+
+        const decoded = jwt.verify(token, JWT_SECRET);
+        
+        const video = await VEUrl.findOne({ 
+            ve_id: veId,
+            'creator_info.user_id': decoded.userId 
+        });
+
+        if (!video) {
+            return res.status(404).json({ error: 'Video not found or access denied' });
+        }
+
+        res.json(video);
+    } catch (error) {
+        console.error('Error fetching video for management:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Video Management API - 영상 정보 업데이트
+app.put('/api/videos/:veId/manage', ensureMongoConnection, async (req, res) => {
+    try {
+        const { veId } = req.params;
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        const { title, description, is_public, category } = req.body;
+        
+        if (!token) {
+            return res.status(401).json({ error: 'Authentication required' });
+        }
+
+        const decoded = jwt.verify(token, JWT_SECRET);
+        
+        const updateData = {};
+        
+        // 제목 업데이트 (YouTube에서 가져온 제목 사용)
+        if (title !== undefined) {
+            updateData.title = title;
+        }
+        
+        // 설명 업데이트
+        if (description !== undefined) {
+            updateData.description = description;
+        }
+        
+        // 공개/비공개 설정
+        if (is_public !== undefined) {
+            updateData['creator_info.is_public'] = is_public;
+        }
+        
+        // 카테고리 설정
+        if (category !== undefined) {
+            updateData['react_central.category'] = category || null;
+        }
+
+        const video = await VEUrl.findOneAndUpdate(
+            { 
+                ve_id: veId,
+                'creator_info.user_id': decoded.userId 
+            },
+            { $set: updateData },
+            { new: true }
+        );
+
+        if (!video) {
+            return res.status(404).json({ error: 'Video not found or access denied' });
+        }
+
+        res.json({ message: 'Video updated successfully', video });
+    } catch (error) {
+        console.error('Error updating video:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Video Management API - 영상 삭제
+app.delete('/api/videos/:veId', ensureMongoConnection, async (req, res) => {
+    try {
+        const { veId } = req.params;
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        
+        if (!token) {
+            return res.status(401).json({ error: 'Authentication required' });
+        }
+
+        const decoded = jwt.verify(token, JWT_SECRET);
+        
+        const result = await VEUrl.findOneAndDelete({ 
+            ve_id: veId,
+            'creator_info.user_id': decoded.userId 
+        });
+
+        if (!result) {
+            return res.status(404).json({ error: 'Video not found or access denied' });
+        }
+
+        res.json({ message: 'Video deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting video:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // React Central API 엔드포인트들
 // 공개된 반응 영상 목록 조회
 app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => {
@@ -632,11 +743,11 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
         } = req.query;
 
         // 쿼리 조건 구성
-        let query = { 'creator_info.is_public': true };
+        let query = {};
         
         // 카테고리 필터링
         if (category === 'my') {
-            // My Videos: 로그인한 사용자의 비디오만 표시
+            // My Videos: 로그인한 사용자의 비디오만 표시 (공개/비공개 모두)
             const token = req.headers.authorization?.replace('Bearer ', '');
             if (!token) {
                 return res.status(401).json({ error: 'Authentication required for My Videos' });
@@ -648,8 +759,13 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
             } catch (error) {
                 return res.status(401).json({ error: 'Invalid token' });
             }
-        } else if (category !== 'all' && category !== 'latest') {
-            query['react_central.category'] = category;
+        } else {
+            // 다른 카테고리는 공개 영상만 표시
+            query['creator_info.is_public'] = true;
+            
+            if (category !== 'all' && category !== 'latest') {
+                query['react_central.category'] = category;
+            }
         }
         
         // 검색 필터링
