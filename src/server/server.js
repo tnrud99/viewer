@@ -182,7 +182,8 @@ const generateVEId = () => {
             email: processedEmail,
             password: password || '',
             password_length: password ? password.length : 0,
-            isPublic: isPublic !== false // Default to true if not specified
+            isPublic: isPublic !== false, // Default to true if not specified
+            userId: userInfo.userId || null // 사용자 ID 추가
         };
     } catch (error) {
         console.error('❌ User info validation error:', error);

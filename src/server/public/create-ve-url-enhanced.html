@@ -2116,7 +2116,7 @@
             messageDiv.style.display = 'none';
         }
 
-        // Get video title from custom input or use default
+        // Get video title from custom input or use reaction video title
         async function getVideoTitle() {
             const titleEnabled = document.getElementById('titleEnabled');
             const customTitle = document.getElementById('customTitle');
@@ -2131,8 +2131,25 @@
                 return null;
             }
             
+            // Try to get the actual reaction video title
+            try {
+                const reactionUrl = reactionUrlInput.value.trim();
+                if (reactionUrl) {
+                    const videoId = extractYouTubeVideoId(reactionUrl);
+                    if (videoId) {
+                        const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            return data.title || 'Reaction Video';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('Could not fetch video title:', error);
+            }
+            
             // Fallback to default
-            return 'Synchronized Reaction Video';
+            return 'Reaction Video';
         }
 
         // Get video description from custom input or use default

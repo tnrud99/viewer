@@ -328,12 +328,13 @@
             width: 100%;
             height: 180px;
             display: flex;
+            flex-direction: column;
         }
 
         .thumbnail-half {
             position: relative;
             flex: 1;
-            height: 100%;
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -811,7 +812,7 @@
                     </div>
                 </div>
                 <div class="video-info">
-                    <h3 class="video-title">${video.title || 'No Title'} - Reaction Video</h3>
+                    <h3 class="video-title">${video.title || 'No Title'}</h3>
                     <div class="video-meta">
                         <div class="creator-info">
                             <div class="creator-avatar">${creatorInitial}</div>
