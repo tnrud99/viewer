@@ -341,7 +341,7 @@ app.post('/api/auth/register', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, rememberMe } = req.body;
 
         // 사용자 찾기
         const user = await User.findOne({ email });
@@ -355,11 +355,12 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(400).json({ error: 'Invalid credentials' });
         }
 
-        // JWT 토큰 생성
+        // JWT 토큰 생성 (Remember Me에 따라 만료 시간 조정)
+        const tokenExpiry = rememberMe ? '30d' : '24h'; // 30일 vs 24시간
         const token = jwt.sign(
             { userId: user._id, username: user.username },
             process.env.JWT_SECRET || 'your-secret-key',
-            { expiresIn: '24h' }
+            { expiresIn: tokenExpiry }
         );
 
         res.json({

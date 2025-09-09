@@ -6,6 +6,7 @@
     <title>Sign Up - React Central</title>
     <link rel="icon" href="favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <style>
         :root {
@@ -70,14 +71,20 @@
         .logo-icon {
             width: 40px;
             height: 40px;
-            background: var(--primary);
             border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            object-fit: contain;
+        }
+
+        .beta-badge {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
             color: white;
-            font-weight: bold;
-            font-size: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .logo-text {
@@ -312,6 +319,13 @@
             cursor: pointer;
             font-size: 14px;
             transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-btn .material-icons {
+            font-size: 18px;
         }
 
         .back-btn:hover {
@@ -346,6 +360,83 @@
             background: rgba(220, 53, 69, 0.9);
         }
 
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary);
+            font-size: 24px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--text);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-body h3 {
+            color: var(--primary);
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .modal-body h3:first-child {
+            margin-top: 0;
+        }
+
+        .modal-body p {
+            line-height: 1.6;
+            color: var(--text);
+            margin-bottom: 15px;
+        }
+
         /* Responsive */
         @media (max-width: 480px) {
             .auth-container {
@@ -367,13 +458,16 @@
     </style>
 </head>
 <body>
-    <button class="back-btn" onclick="goBack()">← Back</button>
+    <button class="back-btn" onclick="goBack()">
+        <span class="material-icons">arrow_back</span>
+        Back
+    </button>
 
     <div class="auth-container">
         <div class="auth-header">
             <div class="logo">
-                <div class="logo-icon">RC</div>
-                <div class="logo-text">React Central</div>
+                <img src="logo/blackred_mini.png" alt="React Central" class="logo-icon">
+                <div class="logo-text">React Central <span class="beta-badge">BETA</span></div>
             </div>
             <h1 class="auth-title">Create Account</h1>
             <p class="auth-subtitle">Join the React Central community</p>
@@ -467,6 +561,69 @@
 
         <div class="auth-footer">
             Already have an account? <a href="login.html">Sign in</a>
+        </div>
+    </div>
+
+    <!-- Terms of Service Modal -->
+    <div id="termsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Terms of Service</h2>
+                <button class="modal-close" onclick="closeModal('termsModal')">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h3>1. Acceptance of Terms</h3>
+                <p>By accessing and using React Central, you accept and agree to be bound by the terms and provision of this agreement.</p>
+                
+                <h3>2. Use License</h3>
+                <p>Permission is granted to temporarily download one copy of React Central for personal, non-commercial transitory viewing only.</p>
+                
+                <h3>3. User Content</h3>
+                <p>Users are responsible for their own content and must ensure it complies with applicable laws and regulations. We reserve the right to remove content that violates our policies.</p>
+                
+                <h3>4. Privacy</h3>
+                <p>Your privacy is important to us. Please review our Privacy Policy, which also governs your use of the service.</p>
+                
+                <h3>5. Modifications</h3>
+                <p>We reserve the right to modify these terms at any time. Changes will be effective immediately upon posting.</p>
+                
+                <p><strong>Last updated:</strong> December 2024</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Privacy Policy</h2>
+                <button class="modal-close" onclick="closeModal('privacyModal')">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h3>1. Information We Collect</h3>
+                <p>We collect information you provide directly to us, such as when you create an account, upload content, or contact us for support.</p>
+                
+                <h3>2. How We Use Your Information</h3>
+                <p>We use the information we collect to provide, maintain, and improve our services, communicate with you, and ensure platform security.</p>
+                
+                <h3>3. Information Sharing</h3>
+                <p>We do not sell, trade, or otherwise transfer your personal information to third parties without your consent, except as described in this policy.</p>
+                
+                <h3>4. Data Security</h3>
+                <p>We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p>
+                
+                <h3>5. Cookies and Tracking</h3>
+                <p>We use cookies and similar technologies to enhance your experience and analyze how our service is used.</p>
+                
+                <h3>6. Your Rights</h3>
+                <p>You have the right to access, update, or delete your personal information. You can also opt out of certain communications from us.</p>
+                
+                <p><strong>Last updated:</strong> December 2024</p>
+            </div>
         </div>
     </div>
 
@@ -747,12 +904,25 @@
         }
 
         function showTerms() {
-            alert('Terms of Service will be displayed here.');
+            document.getElementById('termsModal').style.display = 'flex';
         }
 
         function showPrivacy() {
-            alert('Privacy Policy will be displayed here.');
+            document.getElementById('privacyModal').style.display = 'flex';
         }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        });
+
+
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {

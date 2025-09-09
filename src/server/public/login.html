@@ -528,7 +528,8 @@
                     },
                     body: JSON.stringify({
                         email,
-                        password
+                        password,
+                        rememberMe: document.getElementById('rememberCheckbox').classList.contains('checked')
                     })
                 });
 
