@@ -64,5 +64,13 @@
     "src/server/server.js": {
       "maxDuration": 30
     }
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": false,
+      "development": true,
+      "production": true,
+      "homepage": true
+    }
   }
 } 
