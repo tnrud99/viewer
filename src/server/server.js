@@ -263,7 +263,7 @@ const veUrlSchema = new mongoose.Schema({
     },
     // React Central을 위한 추가 필드들
     react_central: {
-        category: { type: String, default: 'music' }, // 'kpop', 'mv', 'music', 'idol', 'latest', 'popular'
+        categories: [{ type: String }], // ['mv', 'kpop'] - 다중 카테고리 지원
         tags: [{ type: String }], // ['BTS', 'Dynamite', 'K-POP']
         thumbnail_url: { type: String }, // 썸네일 URL
         likes: { type: Number, default: 0 },
@@ -455,7 +455,7 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
                 user_id: processedUserInfo.userId || null // 사용자 ID 저장
             },
             react_central: {
-                category: processedUserInfo.category || null, // 카테고리 정보
+                categories: processedUserInfo.category ? [processedUserInfo.category] : [], // 카테고리 정보 (배열)
                 likes: 0, // 초기 좋아요 수
                 bookmarks: 0 // 초기 북마크 수
             },
@@ -652,7 +652,7 @@ app.put('/api/videos/:veId/manage', ensureMongoConnection, async (req, res) => {
     try {
         const { veId } = req.params;
         const token = req.headers.authorization?.replace('Bearer ', '');
-        const { title, description, is_public, category } = req.body;
+        const { title, description, is_public, categories } = req.body;
         
         if (!token) {
             return res.status(401).json({ error: 'Authentication required' });
@@ -677,9 +677,9 @@ app.put('/api/videos/:veId/manage', ensureMongoConnection, async (req, res) => {
             updateData['creator_info.is_public'] = is_public;
         }
         
-        // 카테고리 설정
-        if (category !== undefined) {
-            updateData['react_central.category'] = category || null;
+        // 카테고리 설정 (배열로 저장)
+        if (categories !== undefined) {
+            updateData['react_central.categories'] = categories || [];
         }
 
         const video = await VEUrl.findOneAndUpdate(
@@ -764,7 +764,8 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
             query['creator_info.is_public'] = true;
             
             if (category !== 'all' && category !== 'latest') {
-                query['react_central.category'] = category;
+                // 다중 카테고리 지원: 배열에 해당 카테고리가 포함된 영상 검색
+                query['react_central.categories'] = { $in: [category] };
             }
         }
         

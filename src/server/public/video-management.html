@@ -551,13 +551,30 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="categorySelect">Category</label>
-                    <select id="categorySelect" class="form-select">
-                        <option value="">No category</option>
-                        <option value="mv">Music Videos</option>
-                        <option value="kpop">K-POP</option>
-                    </select>
-                    <div class="input-hint">Choose a category to help others find your video</div>
+                    <label class="form-label">Categories</label>
+                    <div class="category-checkboxes">
+                        <div class="toggle-label">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="categoryMv">
+                                <span class="slider"></span>
+                            </label>
+                            <div>
+                                <div class="toggle-text">Music Videos</div>
+                                <div class="toggle-description">General music video reactions</div>
+                            </div>
+                        </div>
+                        <div class="toggle-label">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="categoryKpop">
+                                <span class="slider"></span>
+                            </label>
+                            <div>
+                                <div class="toggle-text">K-POP</div>
+                                <div class="toggle-description">Korean pop music reactions</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-hint">💡 Select one or both categories, or leave empty for no category</div>
                 </div>
             </div>
 
@@ -646,7 +663,11 @@
             document.getElementById('videoTitleInput').value = video.title || '';
             document.getElementById('videoDescription').value = video.description || '';
             document.getElementById('isPublicToggle').checked = video.creator_info?.is_public || false;
-            document.getElementById('categorySelect').value = video.react_central?.category || '';
+            
+            // Set category checkboxes
+            const categories = video.react_central?.categories || [];
+            document.getElementById('categoryMv').checked = categories.includes('mv');
+            document.getElementById('categoryKpop').checked = categories.includes('kpop');
 
             // Update thumbnail
             if (video.reaction_url) {
@@ -698,11 +719,16 @@
             if (!checkAuth()) return;
 
             const token = localStorage.getItem('authToken');
+            // Get selected categories
+            const categories = [];
+            if (document.getElementById('categoryMv').checked) categories.push('mv');
+            if (document.getElementById('categoryKpop').checked) categories.push('kpop');
+
             const updateData = {
                 title: document.getElementById('videoTitleInput').value.trim(),
                 description: document.getElementById('videoDescription').value.trim(),
                 is_public: document.getElementById('isPublicToggle').checked,
-                category: document.getElementById('categorySelect').value
+                categories: categories
             };
 
             try {

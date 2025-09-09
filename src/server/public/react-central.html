@@ -851,7 +851,7 @@
             // 썸네일 생성 (오리지널 비디오 썸네일)
             const originalThumbnailUrl = getThumbnailUrl(video.original_url);
             const reactionThumbnailUrl = getThumbnailUrl(video.reaction_url);
-            const categoryIcon = getCategoryIcon(video.react_central?.category || 'music');
+            const categoryIcon = getCategoryIcon(video.react_central?.categories || []);
             
             // 조회수 포맷팅
             const viewCount = formatViewCount(video.metadata?.view_count || 0);
@@ -921,7 +921,11 @@
             return match ? match[1] : null;
         }
 
-        function getCategoryIcon(category) {
+        function getCategoryIcon(categories) {
+            if (!categories || categories.length === 0) {
+                return '🎵'; // 기본 아이콘
+            }
+            
             const icons = {
                 'kpop': '🎵',
                 'mv': '🎤',
@@ -930,7 +934,9 @@
                 'latest': '🆕',
                 'popular': '🔥'
             };
-            return icons[category] || '🎵';
+            
+            // 첫 번째 카테고리의 아이콘을 사용
+            return icons[categories[0]] || '🎵';
         }
 
         function formatViewCount(count) {
