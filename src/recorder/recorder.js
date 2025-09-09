@@ -18,7 +18,7 @@ let youtubeFirstPlayTime = null; // Time when YouTube video was first played
 // Recording format settings
 let currentRecordingFormat = 'mp4'; // 'mp4', 'webm-h264', 'webm-vp9'
 let supportedFormats = [];
-
+ㅓㅁ토해
 // Layout settings
 let currentMode = 'overlay'; // 'split' or 'overlay'
 let overlayPosition = 'top-right';
