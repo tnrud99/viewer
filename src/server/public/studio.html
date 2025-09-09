@@ -495,11 +495,10 @@
                     <p>Create shareable synchronized video links</p>
                 </a>
 
-                <a href="#" class="nav-item coming-soon" onclick="showComingSoon()">
+                <a href="react-central.html" class="nav-item">
                     <div class="icon">🌐</div>
                     <h3>REACT CENTRAL</h3>
                     <p>Browse and discover shared video experiences</p>
-                    <div class="coming-soon-badge">Under Development</div>
                 </a>
             </div>
 
@@ -590,26 +589,6 @@
             content.classList.toggle('collapsed');
         }
 
-        function showComingSoon() {
-            // Create toast notification
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = '🌐 REACT CENTRAL - Coming Soon!';
-            document.body.appendChild(toast);
-
-            // Show toast
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 100);
-
-            // Hide toast after 3 seconds
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    document.body.removeChild(toast);
-                }, 300);
-            }, 3000);
-        }
 
         // 페이지 로드 시 가이드 박스를 열린 상태로 시작
         window.addEventListener('load', function() {

@@ -259,6 +259,16 @@ const veUrlSchema = new mongoose.Schema({
         password: { type: String }, // 개발용 - 직접 저장
         is_public: { type: Boolean, default: true }
     },
+    // React Central을 위한 추가 필드들
+    react_central: {
+        category: { type: String, default: 'music' }, // 'kpop', 'mv', 'music', 'idol', 'latest', 'popular'
+        tags: [{ type: String }], // ['BTS', 'Dynamite', 'K-POP']
+        thumbnail_url: { type: String }, // 썸네일 URL
+        likes: { type: Number, default: 0 },
+        bookmarks: { type: Number, default: 0 },
+        comments: { type: Number, default: 0 },
+        shares: { type: Number, default: 0 }
+    },
 
 });
 
@@ -601,6 +611,143 @@ app.post('/api/analytics/view', ensureMongoConnection, async (req, res) => {
     }
 });
 
+// React Central API 엔드포인트들
+// 공개된 반응 영상 목록 조회
+app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => {
+    try {
+        const { 
+            category = 'all', 
+            search = '', 
+            sort = 'latest', 
+            page = 1, 
+            limit = 12 
+        } = req.query;
+
+        // 쿼리 조건 구성
+        let query = { 'creator_info.is_public': true };
+        
+        // 카테고리 필터링
+        if (category !== 'all') {
+            query['react_central.category'] = category;
+        }
+        
+        // 검색 필터링
+        if (search) {
+            query.$or = [
+                { title: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } },
+                { 'react_central.tags': { $in: [new RegExp(search, 'i')] } }
+            ];
+        }
+
+        // 정렬 옵션
+        let sortOption = {};
+        switch (sort) {
+            case 'latest':
+                sortOption = { 'metadata.created_at': -1 };
+                break;
+            case 'popular':
+                sortOption = { 'metadata.view_count': -1 };
+                break;
+            case 'likes':
+                sortOption = { 'react_central.likes': -1 };
+                break;
+            default:
+                sortOption = { 'metadata.created_at': -1 };
+        }
+
+        // 페이지네이션
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        // 데이터 조회
+        const videos = await VEUrl.find(query)
+            .select('ve_id title description reaction_url original_url metadata creator_info react_central')
+            .sort(sortOption)
+            .skip(skip)
+            .limit(parseInt(limit));
+
+        // 전체 개수 조회
+        const totalCount = await VEUrl.countDocuments(query);
+
+        res.json({
+            videos: videos,
+            pagination: {
+                current_page: parseInt(page),
+                total_pages: Math.ceil(totalCount / parseInt(limit)),
+                total_count: totalCount,
+                has_next: skip + videos.length < totalCount
+            }
+        });
+    } catch (error) {
+        console.error('React Central videos fetch error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// React Central 비디오 상세 조회
+app.get('/api/react-central/videos/:id', ensureMongoConnection, async (req, res) => {
+    try {
+        const video = await VEUrl.findOne({ 
+            ve_id: req.params.id,
+            'creator_info.is_public': true 
+        }).select('ve_id title description reaction_url original_url timestamp_data settings metadata creator_info react_central');
+
+        if (!video) {
+            return res.status(404).json({ error: 'Video not found' });
+        }
+
+        // 조회수 증가
+        video.metadata.view_count += 1;
+        await video.save();
+
+        res.json({ video });
+    } catch (error) {
+        console.error('React Central video detail error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// 좋아요/북마크 기능 (간단한 구현)
+app.post('/api/react-central/videos/:id/like', ensureMongoConnection, async (req, res) => {
+    try {
+        const { action } = req.body; // 'like' or 'unlike'
+        
+        const update = action === 'like' 
+            ? { $inc: { 'react_central.likes': 1 } }
+            : { $inc: { 'react_central.likes': -1 } };
+
+        await VEUrl.findOneAndUpdate(
+            { ve_id: req.params.id },
+            update
+        );
+
+        res.json({ message: `Video ${action}d successfully` });
+    } catch (error) {
+        console.error('Like action error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.post('/api/react-central/videos/:id/bookmark', ensureMongoConnection, async (req, res) => {
+    try {
+        const { action } = req.body; // 'bookmark' or 'unbookmark'
+        
+        const update = action === 'bookmark' 
+            ? { $inc: { 'react_central.bookmarks': 1 } }
+            : { $inc: { 'react_central.bookmarks': -1 } };
+
+        await VEUrl.findOneAndUpdate(
+            { ve_id: req.params.id },
+            update
+        );
+
+        res.json({ message: `Video ${action}ed successfully` });
+    } catch (error) {
+        console.error('Bookmark action error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // 정적 파일 서빙
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -625,6 +772,11 @@ app.get('/create-ve-url-server.html', (req, res) => {
 // Enhanced VE URL creator
 app.get('/create-ve-url-enhanced.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'create-ve-url-enhanced.html'));
+});
+
+// React Central page
+app.get('/react-central.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'react-central.html'));
 });
 
 // Server status page
