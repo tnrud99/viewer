@@ -642,7 +642,7 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
             } catch (error) {
                 return res.status(401).json({ error: 'Invalid token' });
             }
-        } else if (category !== 'all') {
+        } else if (category !== 'all' && category !== 'latest') {
             query['react_central.category'] = category;
         }
         

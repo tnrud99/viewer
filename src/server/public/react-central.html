@@ -683,13 +683,10 @@
 
     <!-- Category Tabs -->
     <div class="category-tabs">
-        <button class="category-tab active" data-category="all">All</button>
-        <button class="category-tab" data-category="kpop">K-POP</button>
-        <button class="category-tab" data-category="mv">Music Videos</button>
-        <button class="category-tab" data-category="music">Music Reactions</button>
-        <button class="category-tab" data-category="idol">Idol</button>
-        <button class="category-tab" data-category="latest">Latest</button>
+        <button class="category-tab active" data-category="latest">Latest</button>
         <button class="category-tab" data-category="popular">Popular</button>
+        <button class="category-tab" data-category="mv">Music Videos</button>
+        <button class="category-tab" data-category="kpop">K-POP</button>
         <button class="category-tab" data-category="my">My Videos</button>
     </div>
 
@@ -718,7 +715,7 @@
 
     <script>
         // 전역 변수
-        let currentCategory = 'all';
+        let currentCategory = 'latest';
         let currentSearch = '';
         let currentSort = 'latest';
         let currentPage = 1;
@@ -736,10 +733,10 @@
                 
                 // Handle sort-based tabs (Latest, Popular)
                 if (category === 'latest' || category === 'popular') {
-                    currentCategory = 'all'; // Show all videos
+                    currentCategory = 'latest'; // Show all videos with sort
                     currentSort = category; // Set sort order
                 } else {
-                    // Handle category-based tabs
+                    // Handle category-based tabs (mv, kpop, my)
                     currentCategory = category;
                     currentSort = 'latest'; // Default sort for categories
                 }
@@ -1267,10 +1264,10 @@
             if (categoryParam) {
                 // Handle sort-based tabs (Latest, Popular)
                 if (categoryParam === 'latest' || categoryParam === 'popular') {
-                    currentCategory = 'all'; // Show all videos
+                    currentCategory = 'latest'; // Show all videos with sort
                     currentSort = categoryParam; // Set sort order
                 } else {
-                    // Handle category-based tabs
+                    // Handle category-based tabs (mv, kpop, my)
                     currentCategory = categoryParam;
                     currentSort = 'latest'; // Default sort for categories
                 }
