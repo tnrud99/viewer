@@ -4513,6 +4513,15 @@
             }
         }
 
+        // 페이지 로드 시 맨 위로 스크롤
+        window.addEventListener('load', () => {
+            window.scrollTo(0, 0);
+        });
+
+        // DOM이 완전히 로드된 후에도 한 번 더 확인
+        document.addEventListener('DOMContentLoaded', () => {
+            window.scrollTo(0, 0);
+        });
 
     </script>
 </body>
