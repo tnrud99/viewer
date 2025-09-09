@@ -59,5 +59,13 @@
     "env": {
       "NODE_ENV": "production"
     }
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "development": true,
+      "production": true,
+      "homepage": true
+    }
   }
 } 
