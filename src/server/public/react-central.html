@@ -88,14 +88,8 @@
         .logo-icon {
             width: 32px;
             height: 32px;
-            background: var(--primary);
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
+            object-fit: contain;
         }
 
         .logo-text {
@@ -611,15 +605,14 @@
         <div class="header-left">
             <button class="menu-btn" onclick="toggleSidebar()">☰</button>
             <a href="/studio.html" class="logo">
-                <div class="logo-icon">RC</div>
+                <img src="logo/whitered_mini.png" alt="React Central" class="logo-icon">
                 <div class="logo-text">React Central</div>
             </a>
-            <div class="region-badge">KR</div>
         </div>
 
         <div class="header-center">
             <div class="search-container">
-                <input type="text" class="search-bar" placeholder="검색" id="searchInput">
+                <input type="text" class="search-bar" placeholder="Search" id="searchInput">
                 <button class="search-btn" onclick="performSearch()">🔍</button>
             </div>
         </div>
