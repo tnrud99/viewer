@@ -1604,14 +1604,6 @@
                         <div class="step-status">Choose sharing</div>
                     </div>
                 </div>
-                <div class="step-arrow">→</div>
-                <div class="step-item locked" id="step-3">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                        <div class="step-title">Advanced Settings</div>
-                        <div class="step-status">Optional</div>
-                    </div>
-                </div>
             </div>
 
             <!-- Step Forms -->
@@ -1660,6 +1652,7 @@
                             </label>
                         <div class="info-message compact">
                             <p>📝 Your video will be publicly visible on React Central for others to discover and enjoy</p>
+                            <p>🔧 You can manage and edit your shared videos later in React Central</p>
                         </div>
                     </div>
                     
@@ -1668,105 +1661,11 @@
                             <button class="btn btn-ghost" id="prev-step-2">← Previous</button>
                         </div>
                         <div class="action-buttons">
-                            <button class="btn btn-primary" id="next-step-2">Next →</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 3: Advanced Settings (Optional) -->
-                <div class="step-form" id="step-form-3">
-                    <div class="step-header">
-                        <h3>⚙️ Advanced Settings (Optional)</h3>
-                        <p>Customize your VE URL settings</p>
-                    </div>
-                    
-                    <div class="settings-section">
-                        <div class="settings-header" id="playbackSettingsToggle">
-                            <h4 class="settings-title">🎬 Original Video Playback Settings</h4>
-                            <p class="settings-subtitle">Configure how the original video will be displayed and played (viewers can adjust individually)</p>
-                            <span class="toggle-icon">▼</span>
-                        </div>
-                        <div class="settings-content" id="playbackSettingsContent">
-                        
-                        <div class="settings-buttons">
-                            <label class="setting-checkbox">
-                                <input type="checkbox" id="positionEnabled" data-setting="position">
-                                <span class="setting-text">Position</span>
-                                <span class="tooltip" data-tooltip="Choose where the original video appears on screen during playback">ⓘ</span>
-                            </label>
-                            <label class="setting-checkbox">
-                                <input type="checkbox" id="sizeEnabled" data-setting="size">
-                                <span class="setting-text">Size</span>
-                                <span class="tooltip" data-tooltip="Control the size of the original video overlay (10-60% of screen)">ⓘ</span>
-                            </label>
-                            <label class="setting-checkbox">
-                                <input type="checkbox" id="volumeEnabled" data-setting="volume">
-                                <span class="setting-text">Volume</span>
-                                <span class="tooltip" data-tooltip="Set the default volume for the original video (50-100%)">ⓘ</span>
-                            </label>
-                            <label class="setting-checkbox">
-                                <input type="checkbox" id="hideEnabled" data-setting="hide">
-                                <span class="setting-text">Hide</span>
-                                <span class="tooltip" data-tooltip="Hide overlay for BGM-only mode">ⓘ</span>
-                            </label>
-                        </div>
-
-                        <div class="settings-panels">
-                            <div class="setting-panel" id="position-panel">
-                                <div class="panel-content">
-                                    <label for="overlayPosition">Overlay Position</label>
-                                    <select id="overlayPosition" class="input">
-                                        <option value="top-right">Top Right</option>
-                                        <option value="top-left">Top Left</option>
-                                        <option value="bottom-right">Bottom Right</option>
-                                        <option value="bottom-left">Bottom Left</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="setting-panel" id="size-panel">
-                                <div class="panel-content">
-                                    <label>Overlay Size</label>
-                                    <div class="slider-container">
-                                        <input type="range" id="overlaySizeSlider" min="10" max="60" value="50">
-                                        <span class="slider-value" id="overlaySizeValue">50%</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="setting-panel" id="volume-panel">
-                                <div class="panel-content">
-                                    <label>Original Video Volume</label>
-                                    <div class="slider-container">
-                                        <input type="range" id="volumeSlider" min="50" max="100" value="100">
-                                        <span class="slider-value" id="volumeValue">100%</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="setting-panel" id="hide-panel">
-                                <div class="panel-content">
-                                    <label>Hide Overlay (BGM Mode)</label>
-                                    <label class="toggle-switch">
-                                        <input type="checkbox" id="hideOverlayEnabled">
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                    <p class="setting-description">Hide the original video overlay for BGM-only playback</p>
-                                </div>
-                            </div>
-                        </div>
-                        </div>
-                    </div>
-                    
-                    <div class="step-actions">
-                        <div class="nav-buttons">
-                            <button class="btn btn-ghost" id="prev-step-3">← Previous</button>
-                        </div>
-                        <div class="action-buttons">
                             <button class="btn btn-primary btn-large" id="generateBtn">Create VE URL</button>
                         </div>
                     </div>
                 </div>
+
             </div>
 
             <div class="loading-spinner" id="loadingSpinner">
@@ -1857,11 +1756,6 @@
         // DOM elements
         const reactionUrlInput = document.getElementById('reactionUrl');
         const timestampFileInput = document.getElementById('timestampFile');
-        const overlayPositionSelect = document.getElementById('overlayPosition');
-        const overlaySizeSlider = document.getElementById('overlaySizeSlider');
-        const overlaySizeValue = document.getElementById('overlaySizeValue');
-        const volumeSlider = document.getElementById('volumeSlider');
-        const volumeValue = document.getElementById('volumeValue');
         const publicConsentCheckbox = document.getElementById('publicConsent');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const reactCentralInfo = document.getElementById('reactCentralInfo');
@@ -1893,7 +1787,7 @@
 
         // Current step tracking
         let currentStep = 1;
-        const totalSteps = 3;
+        const totalSteps = 2;
         let currentUser = null;
 
         // Authentication functions
@@ -2053,8 +1947,6 @@
                     return reactionUrl !== '' && extractYouTubeVideoId(reactionUrl) && timestampFileInput.files[0];
                 case 2:
                     return true; // Share settings are optional
-                case 3:
-                    return true; // Advanced settings are optional
                 default:
                     return true;
             }
@@ -2093,14 +1985,6 @@
         });
 
 
-        // Slider event listeners
-        overlaySizeSlider.addEventListener('input', function() {
-            overlaySizeValue.textContent = this.value + '%';
-        });
-
-        volumeSlider.addEventListener('input', function() {
-            volumeValue.textContent = this.value + '%';
-        });
 
 
 
@@ -2312,10 +2196,10 @@
                             // - sync_points_count: can be calculated from sync_points.length
                         },
                         settings: {
-                            overlay_position: overlayPositionSelect.value,
-                            overlay_size: parseInt(overlaySizeSlider.value),
-                            youtube_volume: parseInt(volumeSlider.value),
-                            hide_overlay: document.getElementById('hideOverlayEnabled')?.checked || false
+                            overlay_position: 'top-right', // Default position
+                            overlay_size: 50, // Default size
+                            youtube_volume: 100, // Default volume
+                            hide_overlay: false // Default: show overlay
                         },
                         metadata: {
                             title: await getVideoTitle(),
@@ -2326,7 +2210,8 @@
                             nickname: currentUser.username,
                             email: currentUser.email,
                             password: '', // No longer needed for logged-in users
-                            isPublic: publicConsentCheckbox.checked // React Central 체크 = 공개
+                            isPublic: publicConsentCheckbox.checked, // React Central 체크 = 공개
+                            userId: currentUser.id // 사용자 ID 추가
                         }
                     };
 

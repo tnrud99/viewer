@@ -449,7 +449,8 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
                 nickname: processedUserInfo.nickname,
                 email: processedUserInfo.email,
                 password: processedUserInfo.password || null, // 개발용 - 직접 저장
-                is_public: processedUserInfo.isPublic
+                is_public: processedUserInfo.isPublic,
+                user_id: processedUserInfo.userId || null // 사용자 ID 저장
             },
 
         });
@@ -627,7 +628,20 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
         let query = { 'creator_info.is_public': true };
         
         // 카테고리 필터링
-        if (category !== 'all') {
+        if (category === 'my') {
+            // My Videos: 로그인한 사용자의 비디오만 표시
+            const token = req.headers.authorization?.replace('Bearer ', '');
+            if (!token) {
+                return res.status(401).json({ error: 'Authentication required for My Videos' });
+            }
+            
+            try {
+                const decoded = jwt.verify(token, JWT_SECRET);
+                query['creator_info.user_id'] = decoded.userId;
+            } catch (error) {
+                return res.status(401).json({ error: 'Invalid token' });
+            }
+        } else if (category !== 'all') {
             query['react_central.category'] = category;
         }
         
