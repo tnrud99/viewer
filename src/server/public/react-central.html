@@ -213,7 +213,7 @@
         }
 
         .profile-btn .material-icons {
-            color: var(--text);
+            color: var(--primary);
             font-size: 24px;
         }
 
@@ -327,7 +327,7 @@
         .video-thumbnail-split {
             position: relative;
             width: 100%;
-            height: 240px;
+            aspect-ratio: 16/9; /* 16:9 비율로 고정하여 YouTube 썸네일 최적화 */
             display: flex;
             flex-direction: column;
         }
@@ -505,6 +505,7 @@
 
 
         .profile-btn .material-icons {
+            color: var(--primary);
             font-size: 24px;
         }
 
