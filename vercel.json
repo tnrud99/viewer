@@ -60,11 +60,6 @@
       "NODE_ENV": "production"
     }
   },
-  "functions": {
-    "src/server/server.js": {
-      "maxDuration": 30
-    }
-  },
   "git": {
     "deploymentEnabled": {
       "main": false,
