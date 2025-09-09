@@ -327,20 +327,30 @@
         .video-thumbnail-split {
             position: relative;
             width: 100%;
-            aspect-ratio: 16/9; /* 16:9 비율로 고정하여 YouTube 썸네일 최적화 */
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 비율 (9/16 * 100%) */
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .thumbnail-half {
-            position: relative;
-            flex: 1;
+            position: absolute;
             width: 100%;
+            height: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-size: 24px;
+        }
+
+        .thumbnail-half:first-child {
+            top: 0;
+        }
+
+        .thumbnail-half:last-child {
+            bottom: 0;
         }
 
         .reaction-thumbnail {
@@ -845,6 +855,7 @@
 
         // 비디오 카드 생성
         function createVideoCard(video) {
+            console.log('Creating video card for:', video); // 디버깅용 로그
             const card = document.createElement('div');
             card.className = 'video-card';
             card.onclick = () => openVideo(video.ve_id);

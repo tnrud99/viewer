@@ -804,6 +804,11 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
             .sort(sortOption)
             .skip(skip)
             .limit(parseInt(limit));
+        
+        console.log('Found videos:', videos.length); // 디버깅용 로그
+        if (videos.length > 0) {
+            console.log('First video data:', JSON.stringify(videos[0], null, 2)); // 첫 번째 비디오 데이터 로그
+        }
 
         // 전체 개수 조회
         const totalCount = await VEUrl.countDocuments(query);
