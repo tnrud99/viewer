@@ -661,7 +661,7 @@
         </div>
 
         <div class="header-right">
-            <a href="/create-ve-url-enhanced.html" class="create-btn">
+            <a href="/studio.html" class="create-btn">
                 <span class="material-icons">add</span>
                 <span>Create</span>
             </a>
@@ -732,8 +732,18 @@
                 // Add active class to clicked tab
                 this.classList.add('active');
                 
-                // Filter videos based on category
-                currentCategory = this.dataset.category;
+                const category = this.dataset.category;
+                
+                // Handle sort-based tabs (Latest, Popular)
+                if (category === 'latest' || category === 'popular') {
+                    currentCategory = 'all'; // Show all videos
+                    currentSort = category; // Set sort order
+                } else {
+                    // Handle category-based tabs
+                    currentCategory = category;
+                    currentSort = 'latest'; // Default sort for categories
+                }
+                
                 currentPage = 1; // Reset to first page
                 loadVideos();
             });
@@ -1255,8 +1265,15 @@
             const categoryParam = urlParams.get('category');
             
             if (categoryParam) {
-                // Set the category from URL parameter
-                currentCategory = categoryParam;
+                // Handle sort-based tabs (Latest, Popular)
+                if (categoryParam === 'latest' || categoryParam === 'popular') {
+                    currentCategory = 'all'; // Show all videos
+                    currentSort = categoryParam; // Set sort order
+                } else {
+                    // Handle category-based tabs
+                    currentCategory = categoryParam;
+                    currentSort = 'latest'; // Default sort for categories
+                }
                 
                 // Update active tab
                 document.querySelectorAll('.category-tab').forEach(tab => {
