@@ -1993,6 +1993,111 @@
         // Current step tracking
         let currentStep = 1;
         const totalSteps = 4;
+        let currentUser = null;
+
+        // Authentication functions
+        function checkAuthStatus() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('user');
+            
+            if (!token || !user) {
+                // User is not logged in, redirect to login
+                showMessage('Please log in to create VE URLs', 'error');
+                setTimeout(() => {
+                    window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href);
+                }, 2000);
+                return false;
+            }
+            
+            currentUser = JSON.parse(user);
+            console.log('User logged in:', currentUser.username);
+            
+            // Update UI to show logged in user
+            updateUserInfo();
+            return true;
+        }
+
+        function updateUserInfo() {
+            if (currentUser) {
+                // Update nickname field with user's username
+                const nicknameInput = document.getElementById('nickname');
+                if (nicknameInput) {
+                    nicknameInput.value = currentUser.username;
+                    nicknameInput.disabled = true;
+                    nicknameInput.style.backgroundColor = 'var(--color-bg-input)';
+                    nicknameInput.style.color = 'var(--color-text-muted)';
+                }
+
+                // Update email field with user's email
+                const emailInput = document.getElementById('email');
+                if (emailInput) {
+                    emailInput.value = currentUser.email;
+                    emailInput.disabled = true;
+                    emailInput.style.backgroundColor = 'var(--color-bg-input)';
+                    emailInput.style.color = 'var(--color-text-muted)';
+                }
+
+                // Add user info display
+                addUserInfoDisplay();
+            }
+        }
+
+        function addUserInfoDisplay() {
+            // Add user info display at the top of the form
+            const formContainer = document.querySelector('.form-container');
+            if (formContainer && !document.getElementById('userInfoDisplay')) {
+                const userInfoDiv = document.createElement('div');
+                userInfoDiv.id = 'userInfoDisplay';
+                userInfoDiv.style.cssText = `
+                    background: var(--color-bg-card);
+                    border: 1px solid var(--color-border);
+                    border-radius: var(--radius-md);
+                    padding: var(--space-md);
+                    margin-bottom: var(--space-lg);
+                    display: flex;
+                    align-items: center;
+                    gap: var(--space-md);
+                `;
+                
+                userInfoDiv.innerHTML = `
+                    <div style="
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        background: var(--color-action);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-weight: bold;
+                        font-size: 18px;
+                    ">${currentUser.username.charAt(0).toUpperCase()}</div>
+                    <div>
+                        <div style="font-weight: 600; color: var(--color-text-main);">${currentUser.username}</div>
+                        <div style="font-size: var(--text-sm); color: var(--color-text-muted);">${currentUser.email}</div>
+                    </div>
+                    <div style="margin-left: auto;">
+                        <button onclick="logout()" style="
+                            background: none;
+                            border: 1px solid var(--color-border);
+                            color: var(--color-text-sub);
+                            padding: var(--space-xs) var(--space-sm);
+                            border-radius: var(--radius-sm);
+                            cursor: pointer;
+                            font-size: var(--text-sm);
+                        ">Sign Out</button>
+                    </div>
+                `;
+                
+                formContainer.insertBefore(userInfoDiv, formContainer.firstChild);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
 
         // Step navigation functions
         function updateStepProgress() {
@@ -2422,8 +2527,8 @@
                             createdAt: new Date().toISOString()
                         },
                         userInfo: {
-                            nickname: usernameInput.value.trim(),
-                            email: emailInput.value.trim(),
+                            nickname: currentUser ? currentUser.username : usernameInput.value.trim(),
+                            email: currentUser ? currentUser.email : emailInput.value.trim(),
                             password: accessPasswordInput.value.trim(),
                             isPublic: publicConsentCheckbox.checked // React Central 체크 = 공개
                         }
@@ -2744,6 +2849,15 @@
             });
         }
 
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication status first
+            if (checkAuthStatus()) {
+                // Initialize the form if user is authenticated
+                updateStepProgress();
+                showStep(1);
+            }
+        });
 
     </script>
 </body>

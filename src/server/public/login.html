@@ -536,9 +536,13 @@
                     localStorage.setItem('authToken', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
 
-                    // Redirect to React Central
+                    // Redirect to original page or React Central
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirectUrl = urlParams.get('redirect');
+                    const targetUrl = redirectUrl || 'react-central.html';
+                    
                     setTimeout(() => {
-                        window.location.href = 'react-central.html';
+                        window.location.href = targetUrl;
                     }, 1500);
                 } else {
                     showToast(data.error || 'Login failed', 'error');
