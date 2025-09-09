@@ -1592,29 +1592,21 @@
                 <div class="step-item active" id="step-1">
                     <div class="step-number">1</div>
                     <div class="step-content">
-                        <div class="step-title">Basic Info</div>
-                        <div class="step-status">Enter nickname</div>
+                        <div class="step-title">Video & Timestamp</div>
+                        <div class="step-status">Upload files</div>
                     </div>
                 </div>
                 <div class="step-arrow">→</div>
                 <div class="step-item locked" id="step-2">
                     <div class="step-number">2</div>
                     <div class="step-content">
-                        <div class="step-title">Video & Timestamp</div>
-                        <div class="step-status">Upload files</div>
+                        <div class="step-title">Share Settings</div>
+                        <div class="step-status">Choose sharing</div>
                     </div>
                 </div>
                 <div class="step-arrow">→</div>
                 <div class="step-item locked" id="step-3">
                     <div class="step-number">3</div>
-                    <div class="step-content">
-                        <div class="step-title">Share & Access</div>
-                        <div class="step-status">Choose sharing & credentials</div>
-                    </div>
-                </div>
-                <div class="step-arrow">→</div>
-                <div class="step-item locked" id="step-4">
-                    <div class="step-number">4</div>
                     <div class="step-content">
                         <div class="step-title">Advanced Settings</div>
                         <div class="step-status">Optional</div>
@@ -1624,33 +1616,8 @@
 
             <!-- Step Forms -->
             <div class="step-forms">
-                <!-- Step 1: Basic Information -->
+                <!-- Step 1: Video & Timestamp -->
                 <div class="step-form active" id="step-form-1">
-                    <div class="step-header">
-                        <h3>📝 Basic Information</h3>
-                        <p>Enter your nickname for the video creator (English only, 3-20 characters)</p>
-                    </div>
-                        <div class="form-field wide">
-                            <label for="username" class="field-label">
-                                Nickname *
-                            <span class="tooltip" data-tooltip="English letters, numbers, and underscores only (3-20 characters)">ⓘ</span>
-                            </label>
-                        <input type="text" id="username" placeholder="Your nickname (English only)" 
-                               pattern="[a-zA-Z0-9_]{3,20}" 
-                               title="English letters, numbers, and underscores only (3-20 characters)"
-                               maxlength="20" required>
-                        <div class="input-hint">English letters, numbers, and underscores only (3-20 characters)</div>
-                    </div>
-                    <div class="step-actions">
-                        <div class="nav-buttons"></div>
-                        <div class="action-buttons">
-                            <button class="btn btn-primary" id="next-step-1">Next →</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 2: Video & Timestamp -->
-                <div class="step-form" id="step-form-2">
                     <div class="step-header">
                         <h3>🎬 Video & Timestamp</h3>
                         <p>Upload your reaction video and timestamp file</p>
@@ -1670,71 +1637,55 @@
                             <input type="file" id="timestampFile" accept=".json" required>
                         </div>
                     <div class="step-actions">
-                        <div class="nav-buttons">
-                            <button class="btn btn-ghost" id="prev-step-2">← Previous</button>
-                    </div>
+                        <div class="nav-buttons"></div>
                         <div class="action-buttons">
-                            <button class="btn btn-primary" id="next-step-2">Next →</button>
+                            <button class="btn btn-primary" id="next-step-1">Next →</button>
+                        </div>
+                    </div>
                 </div>
-                        </div>
-                        </div>
 
-                <!-- Step 3: Share & Access -->
-                <div class="step-form" id="step-form-3">
-                    <div class="step-header compact">
-                        <h3>🌐 Share & Access</h3>
-                        <p>Choose sharing options and set up access credentials</p>
+                <!-- Step 2: Share Settings -->
+                <div class="step-form" id="step-form-2">
+                    <div class="step-header">
+                        <h3>🌐 Share Settings</h3>
+                        <p>Choose how to share your VE URL</p>
                     </div>
                     
                     <div class="share-section">
                         <label class="checkbox-label compact">
                                 <input type="checkbox" id="publicConsent">
                                 <span class="checkmark"></span>
-                            <span class="checkbox-text">Make URL public and share on React Central</span>
-                            <span class="tooltip" data-tooltip="React Central: A reaction video URL platform (coming soon) for sharing and discovering synchronized reaction videos with timestamp data.">ⓘ</span>
+                            <span class="checkbox-text">Share on React Central</span>
+                            <span class="tooltip" data-tooltip="Make your video discoverable on React Central platform">ⓘ</span>
                             </label>
-                        
-                        <div class="access-controls" id="accessControls" style="display: none;">
-                            <div class="compact-form-row">
-                                <div class="form-field">
-                                    <label for="email" class="field-label">Email *</label>
-                                    <input type="email" id="email" placeholder="your@email.com" required>
-                                    <small class="input-hint">English characters only (e.g., user@example.com)</small>
+                        <div class="info-message compact">
+                            <p>📝 Your video will be publicly visible on React Central for others to discover and enjoy</p>
                         </div>
-                                <div class="form-field">
-                                    <label for="accessPassword" class="field-label">Password *</label>
-                                    <input type="password" id="accessPassword" placeholder="min 4 characters" minlength="4" required>
-                                    <small class="input-hint">English characters only, minimum 4 characters</small>
                     </div>
-                            </div>
-                            <div class="info-message compact">
-                                <p>📝 Remember your credentials for React Central Upload management <span class="tooltip" data-tooltip="Beta service - Official registration system will be available upon launch">ⓘ</span></p>
-                        </div>
-                </div>
-            </div>
-            
+                    
                     <div class="step-actions">
                         <div class="nav-buttons">
-                            <button class="btn btn-ghost" id="prev-step-3">← Previous</button>
+                            <button class="btn btn-ghost" id="prev-step-2">← Previous</button>
                         </div>
                         <div class="action-buttons">
-                            <button class="btn btn-primary" id="next-step-3">Next →</button>
-            </div>
-        </div>
+                            <button class="btn btn-primary" id="next-step-2">Next →</button>
+                        </div>
+                    </div>
                 </div>
-                
-                <!-- Step 4: Advanced Settings -->
-                <div class="step-form" id="step-form-4">
+
+                <!-- Step 3: Advanced Settings (Optional) -->
+                <div class="step-form" id="step-form-3">
                     <div class="step-header">
                         <h3>⚙️ Advanced Settings (Optional)</h3>
-            </div>
-            
+                        <p>Customize your VE URL settings</p>
+                    </div>
+                    
                     <div class="settings-section">
                         <div class="settings-header" id="playbackSettingsToggle">
                             <h4 class="settings-title">🎬 Original Video Playback Settings</h4>
                             <p class="settings-subtitle">Configure how the original video will be displayed and played (viewers can adjust individually)</p>
                             <span class="toggle-icon">▼</span>
-            </div>
+                        </div>
                         <div class="settings-content" id="playbackSettingsContent">
                         
                         <div class="settings-buttons">
@@ -1758,41 +1709,41 @@
                                 <span class="setting-text">Hide</span>
                                 <span class="tooltip" data-tooltip="Hide overlay for BGM-only mode">ⓘ</span>
                             </label>
-        </div>
+                        </div>
 
                         <div class="settings-panels">
                             <div class="setting-panel" id="position-panel">
                                 <div class="panel-content">
-                        <label for="overlayPosition">Overlay Position</label>
-                        <select id="overlayPosition" class="input">
-                    <option value="top-right">Top Right</option>
-                    <option value="top-left">Top Left</option>
-                    <option value="bottom-right">Bottom Right</option>
-                    <option value="bottom-left">Bottom Left</option>
-                </select>
+                                    <label for="overlayPosition">Overlay Position</label>
+                                    <select id="overlayPosition" class="input">
+                                        <option value="top-right">Top Right</option>
+                                        <option value="top-left">Top Left</option>
+                                        <option value="bottom-right">Bottom Right</option>
+                                        <option value="bottom-left">Bottom Left</option>
+                                    </select>
                                 </div>
-            </div>
-            
+                            </div>
+                            
                             <div class="setting-panel" id="size-panel">
                                 <div class="panel-content">
-                        <label>Overlay Size</label>
-                <div class="slider-container">
-                            <input type="range" id="overlaySizeSlider" min="10" max="60" value="50">
-                            <span class="slider-value" id="overlaySizeValue">50%</span>
+                                    <label>Overlay Size</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="overlaySizeSlider" min="10" max="60" value="50">
+                                        <span class="slider-value" id="overlaySizeValue">50%</span>
                                     </div>
-                </div>
-            </div>
-            
+                                </div>
+                            </div>
+                            
                             <div class="setting-panel" id="volume-panel">
                                 <div class="panel-content">
-                        <label>Original Video Volume</label>
-                <div class="slider-container">
+                                    <label>Original Video Volume</label>
+                                    <div class="slider-container">
                                         <input type="range" id="volumeSlider" min="50" max="100" value="100">
-                            <span class="slider-value" id="volumeValue">100%</span>
+                                        <span class="slider-value" id="volumeValue">100%</span>
                                     </div>
-                </div>
-            </div>
-            
+                                </div>
+                            </div>
+                            
                             <div class="setting-panel" id="hide-panel">
                                 <div class="panel-content">
                                     <label>Hide Overlay (BGM Mode)</label>
@@ -1805,61 +1756,14 @@
                             </div>
                         </div>
                         </div>
-            </div>
-            
-                    <div class="settings-section">
-                        <div class="settings-header" id="titleSettingsToggle">
-                            <h4 class="settings-title">📝 URL Title & Description</h4>
-                            <p class="settings-subtitle">Set a custom title and description for your VE URL. These will be displayed when sharing the link. If not set, your reaction video's title and description will be used.</p>
-                            <span class="toggle-icon">▼</span>
-                        </div>
-                        <div class="settings-content" id="titleSettingsContent">
-                        
-                        <div class="settings-buttons">
-                            <label class="setting-checkbox">
-                                <input type="checkbox" id="titleEnabled" data-setting="title">
-                                <span class="setting-text">Custom Title</span>
-                                <span class="tooltip" data-tooltip="Set a custom title for your VE URL that will appear when sharing">ⓘ</span>
-                            </label>
-                            <label class="setting-checkbox">
-                                <input type="checkbox" id="descriptionEnabled" data-setting="description">
-                                <span class="setting-text">Custom Description</span>
-                                <span class="tooltip" data-tooltip="Add a description that explains what this reaction video is about">ⓘ</span>
-                            </label>
-                </div>
-                        
-                        <div class="settings-panels">
-                            <div class="setting-panel" id="title-panel">
-                                <div class="panel-content">
-                                    <div class="form-field">
-                                        <label for="customTitle">Title</label>
-                                        <input type="text" id="customTitle" placeholder="Enter custom title..." maxlength="100">
-                                        <small>Maximum 100 characters</small>
-            </div>
-                                </div>
-                            </div>
-                            <div class="setting-panel" id="description-panel">
-                                <div class="panel-content">
-                                    <div class="form-field">
-                                        <label for="customDescription">Description</label>
-                                        <textarea id="customDescription" placeholder="Enter custom description..." maxlength="500" rows="3"></textarea>
-                                        <small>Maximum 500 characters</small>
-                                    </div>
-                                </div>
-                            </div>
-            </div>
-            </div>
-        </div>
-                    
-
+                    </div>
                     
                     <div class="step-actions">
                         <div class="nav-buttons">
-                            <button class="btn btn-ghost" id="prev-step-4">← Previous</button>
+                            <button class="btn btn-ghost" id="prev-step-3">← Previous</button>
                         </div>
                         <div class="action-buttons">
                             <button class="btn btn-primary btn-large" id="generateBtn">Create VE URL</button>
-                            <button class="btn btn-ghost" id="previewBtn">Preview</button>
                         </div>
                     </div>
                 </div>
@@ -1951,8 +1855,6 @@
 
     <script>
         // DOM elements
-        const usernameInput = document.getElementById('username');
-        const emailInput = document.getElementById('email');
         const reactionUrlInput = document.getElementById('reactionUrl');
         const timestampFileInput = document.getElementById('timestampFile');
         const overlayPositionSelect = document.getElementById('overlayPosition');
@@ -1960,7 +1862,6 @@
         const overlaySizeValue = document.getElementById('overlaySizeValue');
         const volumeSlider = document.getElementById('volumeSlider');
         const volumeValue = document.getElementById('volumeValue');
-        const accessPasswordInput = document.getElementById('accessPassword');
         const publicConsentCheckbox = document.getElementById('publicConsent');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const reactCentralInfo = document.getElementById('reactCentralInfo');
@@ -1992,7 +1893,7 @@
 
         // Current step tracking
         let currentStep = 1;
-        const totalSteps = 4;
+        const totalSteps = 3;
         let currentUser = null;
 
         // Authentication functions
@@ -2019,24 +1920,6 @@
 
         function updateUserInfo() {
             if (currentUser) {
-                // Update nickname field with user's username
-                const nicknameInput = document.getElementById('nickname');
-                if (nicknameInput) {
-                    nicknameInput.value = currentUser.username;
-                    nicknameInput.disabled = true;
-                    nicknameInput.style.backgroundColor = 'var(--color-bg-input)';
-                    nicknameInput.style.color = 'var(--color-text-muted)';
-                }
-
-                // Update email field with user's email
-                const emailInput = document.getElementById('email');
-                if (emailInput) {
-                    emailInput.value = currentUser.email;
-                    emailInput.disabled = true;
-                    emailInput.style.backgroundColor = 'var(--color-bg-input)';
-                    emailInput.style.color = 'var(--color-text-muted)';
-                }
-
                 // Add user info display
                 addUserInfoDisplay();
             }
@@ -2166,17 +2049,11 @@
         function validateStep(stepNumber) {
             switch(stepNumber) {
                 case 1:
-                    const username = usernameInput.value.trim();
-                    return username !== '' && /^[a-zA-Z0-9_]{3,20}$/.test(username);
-                case 2:
                     const reactionUrl = reactionUrlInput.value.trim();
                     return reactionUrl !== '' && extractYouTubeVideoId(reactionUrl) && timestampFileInput.files[0];
+                case 2:
+                    return true; // Share settings are optional
                 case 3:
-                    if (publicConsentCheckbox.checked) {
-                        return emailInput.value.trim() !== '' && accessPasswordInput.value.trim() !== '';
-                    }
-                    return true;
-                case 4:
                     return true; // Advanced settings are optional
                 default:
                     return true;
@@ -2193,9 +2070,7 @@
             } else {
                 let errorMessage = 'Please complete all required fields before proceeding.';
                 if (currentStep === 1) {
-                    errorMessage = 'Please enter a valid nickname (English letters, numbers, and underscores only, 3-20 characters).';
-                } else if (currentStep === 3 && publicConsentCheckbox.checked) {
-                    errorMessage = 'Please enter both email and password for React Central access.';
+                    errorMessage = 'Please enter a valid reaction video URL and upload a timestamp file.';
                 }
                 showMessage(errorMessage, 'error');
             }
@@ -2207,21 +2082,6 @@
             }
         }
 
-        // React Central checkbox event listener
-        publicConsentCheckbox.addEventListener('change', function() {
-            const accessControls = document.getElementById('accessControls');
-            if (this.checked) {
-                accessControls.style.display = 'block';
-                emailInput.setAttribute('required', 'required');
-                accessPasswordInput.setAttribute('required', 'required');
-            } else {
-                accessControls.style.display = 'none';
-                emailInput.removeAttribute('required');
-                accessPasswordInput.removeAttribute('required');
-                emailInput.value = '';
-                accessPasswordInput.value = '';
-            }
-        });
 
         // Step navigation event listeners
         nextButtons.forEach(button => {
@@ -2232,70 +2092,6 @@
             button.addEventListener('click', goToPrevStep);
         });
 
-        // Username input validation
-        usernameInput.addEventListener('input', function() {
-            const value = this.value;
-            const isValid = /^[a-zA-Z0-9_]{0,20}$/.test(value);
-            
-            if (value.length > 0 && !isValid) {
-                this.value = value.replace(/[^a-zA-Z0-9_]/g, '');
-            }
-            
-            if (value.length > 20) {
-                this.value = value.substring(0, 20);
-            }
-        });
-
-        // Email input validation (English only + format check)
-        emailInput.addEventListener('input', function() {
-            const value = this.value;
-            // 영어, 숫자, 특수문자만 허용 (이메일 형식)
-            const englishOnly = /^[a-zA-Z0-9@._-]*$/.test(value);
-            
-            if (!englishOnly) {
-                this.value = value.replace(/[^a-zA-Z0-9@._-]/g, '');
-            }
-            
-            // 이메일 형식 검증
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (value.length > 0) {
-                if (!emailRegex.test(value)) {
-                    this.style.borderColor = '#ff3b30';
-                    this.title = 'Please enter a valid email format (e.g., user@example.com)';
-                } else {
-                    this.style.borderColor = '#4CAF50';
-                    this.title = '';
-                }
-            } else {
-                this.style.borderColor = '';
-                this.title = '';
-            }
-        });
-
-        // Password input validation (English only + length check)
-        accessPasswordInput.addEventListener('input', function() {
-            const value = this.value;
-            // 영어, 숫자, 특수문자만 허용
-            const englishOnly = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/.test(value);
-            
-            if (!englishOnly) {
-                this.value = value.replace(/[^a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, '');
-            }
-            
-            // 길이 검증
-            if (value.length > 0) {
-                if (value.length < 4) {
-                    this.style.borderColor = '#ff3b30';
-                    this.title = 'Password must be at least 4 characters long';
-                } else {
-                    this.style.borderColor = '#4CAF50';
-                    this.title = '';
-                }
-            } else {
-                this.style.borderColor = '';
-                this.title = '';
-            }
-        });
 
         // Slider event listeners
         overlaySizeSlider.addEventListener('input', function() {
@@ -2527,9 +2323,9 @@
                             createdAt: new Date().toISOString()
                         },
                         userInfo: {
-                            nickname: currentUser ? currentUser.username : usernameInput.value.trim(),
-                            email: currentUser ? currentUser.email : emailInput.value.trim(),
-                            password: accessPasswordInput.value.trim(),
+                            nickname: currentUser.username,
+                            email: currentUser.email,
+                            password: '', // No longer needed for logged-in users
                             isPublic: publicConsentCheckbox.checked // React Central 체크 = 공개
                         }
                     };
