@@ -129,7 +129,7 @@ const generateVEId = () => {
         // 사용자 정보 검증 및 처리 함수
         const processUserInfo = (userInfo) => {
             try {
-                const { nickname, email, password, isPublic } = userInfo;
+                const { nickname, email, password, isPublic, category } = userInfo;
         
         // 닉네임 검증 (영어만 허용)
         if (!nickname || nickname.trim().length === 0) {
@@ -183,7 +183,8 @@ const generateVEId = () => {
             password: password || '',
             password_length: password ? password.length : 0,
             isPublic: isPublic !== false, // Default to true if not specified
-            userId: userInfo.userId || null // 사용자 ID 추가
+            userId: userInfo.userId || null, // 사용자 ID 추가
+            category: category || null // 카테고리 정보 추가
         };
     } catch (error) {
         console.error('❌ User info validation error:', error);
@@ -452,6 +453,11 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
                 password: processedUserInfo.password || null, // 개발용 - 직접 저장
                 is_public: processedUserInfo.isPublic,
                 user_id: processedUserInfo.userId || null // 사용자 ID 저장
+            },
+            react_central: {
+                category: processedUserInfo.category || null, // 카테고리 정보
+                likes: 0, // 초기 좋아요 수
+                bookmarks: 0 // 초기 북마크 수
             },
 
         });

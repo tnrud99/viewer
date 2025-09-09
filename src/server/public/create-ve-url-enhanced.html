@@ -1628,6 +1628,20 @@
                             </label>
                             <input type="file" id="timestampFile" accept=".json" required>
                         </div>
+                        
+                        <!-- Category Selection (Optional) -->
+                        <div class="form-field wide" id="categoryField" style="display: none;">
+                            <label for="categorySelect" class="field-label">
+                                Category (Optional)
+                                <span class="tooltip" data-tooltip="Choose a category to help others discover your video">ⓘ</span>
+                            </label>
+                            <select id="categorySelect">
+                                <option value="">No category</option>
+                                <option value="mv">Music Videos</option>
+                                <option value="kpop">K-POP</option>
+                            </select>
+                            <small class="input-hint">Selecting a category helps others find your video on React Central</small>
+                        </div>
                     <div class="step-actions">
                         <div class="nav-buttons"></div>
                         <div class="action-buttons">
@@ -1757,6 +1771,8 @@
         const reactionUrlInput = document.getElementById('reactionUrl');
         const timestampFileInput = document.getElementById('timestampFile');
         const publicConsentCheckbox = document.getElementById('publicConsent');
+        const categoryField = document.getElementById('categoryField');
+        const categorySelect = document.getElementById('categorySelect');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const reactCentralInfo = document.getElementById('reactCentralInfo');
         const generateBtn = document.getElementById('generateBtn');
@@ -2228,7 +2244,8 @@
                             email: currentUser.email,
                             password: '', // No longer needed for logged-in users
                             isPublic: publicConsentCheckbox.checked, // React Central 체크 = 공개
-                            userId: currentUser.id // 사용자 ID 추가
+                            userId: currentUser.id, // 사용자 ID 추가
+                            category: categorySelect.value // 카테고리 정보 추가
                         }
                     };
 
@@ -2554,6 +2571,16 @@
                 // Initialize the form if user is authenticated
                 updateStepProgress();
                 showStep(1);
+                
+                // Add event listener for category field visibility
+                publicConsentCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        categoryField.style.display = 'block';
+                    } else {
+                        categoryField.style.display = 'none';
+                        categorySelect.value = ''; // Reset category selection
+                    }
+                });
             }
         });
 
