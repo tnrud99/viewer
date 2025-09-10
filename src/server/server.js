@@ -829,6 +829,7 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
             const token = req.headers.authorization?.replace('Bearer ', '');
             console.log('🔍 My Videos API called');
             console.log('🔍 Token exists:', !!token);
+            console.log('🔍 Token (first 20 chars):', token ? token.substring(0, 20) + '...' : 'null');
             
             if (!token) {
                 console.error('❌ No token provided for My Videos');
@@ -838,10 +839,19 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
             try {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
                 console.log('🔍 Decoded user ID:', decoded.userId);
+                console.log('🔍 Decoded user ID type:', typeof decoded.userId);
                 query['creator_info.user_id'] = decoded.userId;
                 console.log('🔍 Query for My Videos:', query);
+                
+                // 해당 사용자의 모든 VE URL 조회 (디버깅용)
+                const allUserVeUrls = await VEUrl.find({ 'creator_info.user_id': decoded.userId });
+                console.log('🔍 All VE URLs for this user:', allUserVeUrls.length);
+                console.log('🔍 VE URL IDs:', allUserVeUrls.map(v => v._id));
+                console.log('🔍 VE URL titles:', allUserVeUrls.map(v => v.title));
+                
             } catch (error) {
                 console.error('❌ JWT verification failed for My Videos:', error.message);
+                console.error('❌ JWT error details:', error);
                 return res.status(401).json({ error: 'Invalid token' });
             }
         } else {
