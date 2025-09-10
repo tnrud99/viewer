@@ -504,7 +504,7 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
                 user_id: processedUserInfo.userId || null // 사용자 ID 저장
             },
             react_central: {
-                categories: processedUserInfo.category ? [processedUserInfo.category] : [], // 카테고리 정보 (배열)
+                categories: Array.isArray(processedUserInfo.category) ? processedUserInfo.category : (processedUserInfo.category ? [processedUserInfo.category] : []), // 카테고리 정보 (배열)
                 likes: 0, // 초기 좋아요 수
                 bookmarks: 0 // 초기 북마크 수
             },
@@ -514,6 +514,11 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
         // 데이터베이스 저장
         await veUrlDoc.save();
         console.log('✅ VE URL saved to database:', veId);
+        console.log('✅ VE URL creator_info:', {
+            nickname: veUrlDoc.creator_info.nickname,
+            user_id: veUrlDoc.creator_info.user_id,
+            is_public: veUrlDoc.creator_info.is_public
+        });
 
         // 사용자의 ve_urls 배열에 추가 (userId가 있는 경우에만)
         if (processedUserInfo.userId) {
@@ -813,14 +818,21 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
         if (category === 'my') {
             // My Videos: 로그인한 사용자의 비디오만 표시 (공개/비공개 모두)
             const token = req.headers.authorization?.replace('Bearer ', '');
+            console.log('🔍 My Videos API called');
+            console.log('🔍 Token exists:', !!token);
+            
             if (!token) {
+                console.error('❌ No token provided for My Videos');
                 return res.status(401).json({ error: 'Authentication required for My Videos' });
             }
             
             try {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+                console.log('🔍 Decoded user ID:', decoded.userId);
                 query['creator_info.user_id'] = decoded.userId;
+                console.log('🔍 Query for My Videos:', query);
             } catch (error) {
+                console.error('❌ JWT verification failed for My Videos:', error.message);
                 return res.status(401).json({ error: 'Invalid token' });
             }
         } else {
@@ -868,7 +880,15 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
             .skip(skip)
             .limit(parseInt(limit));
         
-        console.log('Found videos:', videos.length); // 디버깅용 로그
+        console.log('📊 Found videos:', videos.length);
+        if (category === 'my') {
+            console.log('📊 My Videos query result:', videos.map(v => ({
+                ve_id: v.ve_id,
+                title: v.title,
+                user_id: v.creator_info?.user_id,
+                is_public: v.creator_info?.is_public
+            })));
+        }
         if (videos.length > 0) {
             console.log('First video data:', JSON.stringify(videos[0], null, 2)); // 첫 번째 비디오 데이터 로그
         }

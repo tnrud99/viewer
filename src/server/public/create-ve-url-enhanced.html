@@ -1468,6 +1468,24 @@
             font-weight: bold;
         }
 
+        /* Category checkboxes specific styles */
+        .category-checkboxes {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            margin-top: var(--space-sm);
+        }
+
+        .category-checkboxes .checkbox-label {
+            padding: var(--space-sm);
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .category-checkboxes .checkbox-label:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
 
 
         /* Responsive Design */
@@ -1631,16 +1649,23 @@
                         
                         <!-- Category Selection (Optional) -->
                         <div class="form-field wide" id="categoryField" style="display: none;">
-                            <label for="categorySelect" class="field-label">
-                                Category (Optional)
-                                <span class="tooltip" data-tooltip="Choose a category to help others discover your video">ⓘ</span>
+                            <label class="field-label">
+                                Categories (Optional)
+                                <span class="tooltip" data-tooltip="Choose categories to help others discover your video">ⓘ</span>
                             </label>
-                            <select id="categorySelect">
-                                <option value="">No category</option>
-                                <option value="mv">Music Videos</option>
-                                <option value="kpop">K-POP</option>
-                            </select>
-                            <small class="input-hint">Selecting a category helps others find your video on React Central</small>
+                            <div class="category-checkboxes">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="categoryMv" value="mv">
+                                    <span class="checkmark"></span>
+                                    <span class="checkbox-text">Music Videos</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="categoryKpop" value="kpop">
+                                    <span class="checkmark"></span>
+                                    <span class="checkbox-text">K-POP</span>
+                                </label>
+                            </div>
+                            <small class="input-hint">You can select 0, 1, or both categories. This helps others find your video on React Central.</small>
                         </div>
                     <div class="step-actions">
                         <div class="nav-buttons"></div>
@@ -1772,7 +1797,8 @@
         const timestampFileInput = document.getElementById('timestampFile');
         const publicConsentCheckbox = document.getElementById('publicConsent');
         const categoryField = document.getElementById('categoryField');
-        const categorySelect = document.getElementById('categorySelect');
+        const categoryMv = document.getElementById('categoryMv');
+        const categoryKpop = document.getElementById('categoryKpop');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const reactCentralInfo = document.getElementById('reactCentralInfo');
         const generateBtn = document.getElementById('generateBtn');
@@ -2125,6 +2151,18 @@
             messageDiv.style.display = 'none';
         }
 
+        // Get selected categories
+        function getSelectedCategories() {
+            const categories = [];
+            if (categoryMv && categoryMv.checked) {
+                categories.push('mv');
+            }
+            if (categoryKpop && categoryKpop.checked) {
+                categories.push('kpop');
+            }
+            return categories;
+        }
+
         // Get video title from YouTube oEmbed API
         async function getVideoTitle() {
             try {
@@ -2223,7 +2261,7 @@
                             email: currentUser.email,
                             isPublic: publicConsentCheckbox.checked, // React Central 체크 = 공개
                             userId: currentUser.id, // 사용자 ID 추가
-                            category: categorySelect.value // 카테고리 정보 추가
+                            category: getSelectedCategories() // 카테고리 정보 추가
                         }
                     };
 
@@ -2544,7 +2582,9 @@
                         categoryField.style.display = 'block';
                     } else {
                         categoryField.style.display = 'none';
-                        categorySelect.value = ''; // Reset category selection
+                        // Reset category selection
+                        if (categoryMv) categoryMv.checked = false;
+                        if (categoryKpop) categoryKpop.checked = false;
                     }
                 });
             }
