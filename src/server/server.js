@@ -838,8 +838,11 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
             
             try {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+                console.log('🔍 Decoded JWT payload:', decoded);
                 console.log('🔍 Decoded user ID:', decoded.userId);
                 console.log('🔍 Decoded user ID type:', typeof decoded.userId);
+                console.log('🔍 Decoded user ID string:', String(decoded.userId));
+                
                 query['creator_info.user_id'] = decoded.userId;
                 console.log('🔍 Query for My Videos:', query);
                 
@@ -848,6 +851,15 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
                 console.log('🔍 All VE URLs for this user:', allUserVeUrls.length);
                 console.log('🔍 VE URL IDs:', allUserVeUrls.map(v => v._id));
                 console.log('🔍 VE URL titles:', allUserVeUrls.map(v => v.title));
+                console.log('🔍 VE URL creator_info.user_id:', allUserVeUrls.map(v => v.creator_info?.user_id));
+                
+                // 사용자 정보도 조회해보기
+                const user = await User.findById(decoded.userId);
+                console.log('🔍 User found:', user ? 'Yes' : 'No');
+                if (user) {
+                    console.log('🔍 User ve_urls array:', user.ve_urls);
+                    console.log('🔍 User ve_urls length:', user.ve_urls?.length || 0);
+                }
                 
             } catch (error) {
                 console.error('❌ JWT verification failed for My Videos:', error.message);

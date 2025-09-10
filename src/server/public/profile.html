@@ -472,17 +472,27 @@
                 console.log('🔍 Token (first 20 chars):', token ? token.substring(0, 20) + '...' : 'null');
                 
                 // 디버깅: 현재 사용자 데이터 직접 확인
+                console.log('🔍 currentUser object:', currentUser);
+                console.log('🔍 currentUser._id:', currentUser?._id);
+                console.log('🔍 currentUser keys:', currentUser ? Object.keys(currentUser) : 'null');
+                
                 if (currentUser && currentUser._id) {
                     console.log('🔍 Current user ID:', currentUser._id);
                     try {
                         const debugResponse = await fetch(`/api/debug/user-data/${currentUser._id}`);
+                        console.log('🔍 Debug API response status:', debugResponse.status);
                         if (debugResponse.ok) {
                             const debugData = await debugResponse.json();
                             console.log('🔍 Debug data:', debugData);
+                        } else {
+                            const errorText = await debugResponse.text();
+                            console.error('❌ Debug API error response:', errorText);
                         }
                     } catch (debugError) {
                         console.error('❌ Debug API error:', debugError);
                     }
+                } else {
+                    console.log('⚠️ No currentUser._id available for debugging');
                 }
                 
                 console.log('📡 Fetching user videos from /api/react-central/videos?category=my...');
