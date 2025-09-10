@@ -595,13 +595,16 @@
             console.log('🚀 DOMContentLoaded - Starting profile page initialization...');
             const authResult = await checkAuthStatus();
             console.log('🔍 Auth result:', authResult);
+            console.log('🔍 currentUser after checkAuthStatus:', currentUser);
             
-            if (authResult) {
+            if (authResult && currentUser) {
                 console.log('✅ Auth successful, loading profile data...');
                 loadUserProfile();
                 loadUserVideos();
             } else {
-                console.log('❌ Auth failed, redirecting to login...');
+                console.log('❌ Auth failed or currentUser not set, redirecting to login...');
+                console.log('❌ authResult:', authResult, 'currentUser:', currentUser);
+                window.location.href = 'login.html';
             }
         });
 
@@ -636,6 +639,13 @@
                     currentUser = userData.user;
                     console.log('✅ User logged in:', currentUser.username);
                     console.log('✅ Current user set:', currentUser);
+                    
+                    // currentUser가 제대로 설정되었는지 확인
+                    if (!currentUser || !currentUser.username) {
+                        console.error('❌ currentUser not properly set:', currentUser);
+                        return false;
+                    }
+                    
                     return true;
                 } else if (response.status === 401) {
                     console.error('❌ Authentication failed - token expired');
@@ -662,10 +672,24 @@
         // Load user profile data
         async function loadUserProfile() {
             try {
+                console.log('🔍 loadUserProfile called, currentUser:', currentUser);
+                
                 // Check if currentUser exists
                 if (!currentUser) {
-                    console.error('No user data found');
+                    console.error('❌ No user data found in loadUserProfile');
+                    console.error('❌ currentUser is:', currentUser);
                     showToast('User data not found. Please login again.', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
+                }
+                
+                // Additional validation
+                if (!currentUser.username && !currentUser.nickname) {
+                    console.error('❌ Invalid user data - no username or nickname');
+                    console.error('❌ currentUser:', currentUser);
+                    showToast('Invalid user data. Please login again.', 'error');
                     setTimeout(() => {
                         window.location.href = 'login.html';
                     }, 2000);
