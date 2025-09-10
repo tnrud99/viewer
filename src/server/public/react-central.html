@@ -441,7 +441,7 @@
         .video-title {
             font-size: 16px;
             font-weight: 700;
-            color: var(--text);
+            color: #ffffff;
             margin-bottom: 12px;
             line-height: 1.4;
             display: -webkit-box;
@@ -449,6 +449,7 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
             transition: color 0.3s ease;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
         }
 
         .video-card:hover .video-title {
@@ -579,15 +580,17 @@
 
         .video-stats {
             font-size: 13px;
-            color: var(--text-muted);
+            color: #c0c0c0;
             font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
 
         .creator-name {
             font-size: 13px;
-            color: var(--text-muted);
+            color: #e0e0e0;
             font-weight: 600;
             transition: color 0.3s ease;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
         }
 
         .video-card:hover .creator-name {
@@ -823,7 +826,7 @@
             <div class="empty-state-icon">🎵</div>
             <h3>No reaction videos yet</h3>
             <p>Create your first reaction video!</p>
-            <button class="empty-state-btn" onclick="window.location.href='/create-ve-url-enhanced.html'">
+            <button class="empty-state-btn" onclick="window.location.href='studio.html'">
                 Create Reaction Video
             </button>
         </div>
@@ -941,6 +944,12 @@
                 const bookmarkBtn = videoCard.querySelector('.action-btn:nth-child(2)');
                 if (bookmarks.includes(video.ve_id)) {
                     bookmarkBtn.classList.add('bookmarked');
+                }
+                
+                // Check if video is liked and update button state
+                const likeBtn = videoCard.querySelector('.action-btn:nth-child(1)');
+                if (localStorage.getItem(`liked_${video.ve_id}`)) {
+                    likeBtn.classList.add('liked');
                 }
                 
                 videoGrid.appendChild(videoCard);
@@ -1094,10 +1103,33 @@
             document.getElementById('videoGrid').style.display = 'grid';
         }
 
-        function showEmptyState() {
+        function showEmptyState(message) {
             document.getElementById('loadingState').style.display = 'none';
             document.getElementById('videoGrid').style.display = 'none';
-            document.getElementById('emptyState').style.display = 'block';
+            
+            const emptyState = document.getElementById('emptyState');
+            emptyState.style.display = 'block';
+            
+            // My Videos 카테고리일 때 다른 메시지 표시
+            if (currentCategory === 'my') {
+                emptyState.innerHTML = `
+                    <div class="empty-state-icon">🎬</div>
+                    <h3>No videos yet</h3>
+                    <p>Create your first reaction video to get started!</p>
+                    <button class="empty-state-btn" onclick="window.location.href='studio.html'">
+                        Create Your First Video
+                    </button>
+                `;
+            } else if (message) {
+                emptyState.innerHTML = `
+                    <div class="empty-state-icon">📚</div>
+                    <h3>${message}</h3>
+                    <p>Try exploring other categories or create a new video!</p>
+                    <button class="empty-state-btn" onclick="window.location.href='studio.html'">
+                        Create Video
+                    </button>
+                `;
+            }
         }
 
         function showError(message) {
@@ -1209,16 +1241,42 @@
             
             if (isLiked) {
                 button.classList.remove('liked');
+                localStorage.removeItem(`liked_${veId}`);
                 currentCount = Math.max(0, currentCount - 1);
             } else {
                 button.classList.add('liked');
+                localStorage.setItem(`liked_${veId}`, 'true');
                 currentCount += 1;
             }
             
             likeCountSpan.textContent = formatCount(currentCount);
             
-            // TODO: Send to server
-            console.log(`${isLiked ? 'Unliked' : 'Liked'} video:`, veId);
+            // Send to server
+            const action = isLiked ? 'unlike' : 'like';
+            fetch(`/api/react-central/videos/${veId}/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ action })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(`${action} successful:`, data);
+            })
+            .catch(error => {
+                console.error('Error updating like:', error);
+                // Revert UI changes on error
+                if (isLiked) {
+                    button.classList.add('liked');
+                    localStorage.setItem(`liked_${veId}`, 'true');
+                } else {
+                    button.classList.remove('liked');
+                    localStorage.removeItem(`liked_${veId}`);
+                }
+                likeCountSpan.textContent = formatCount(currentCount + (isLiked ? 1 : -1));
+            });
         }
 
         function toggleBookmark(veId, button) {
