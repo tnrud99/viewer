@@ -299,6 +299,31 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+// 사용자 프로필 조회 API
+app.get('/api/auth/profile', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId)
+            .select('username email nickname created_at');
+        
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        res.json({
+            user: {
+                id: user._id,
+                username: user.username,
+                nickname: user.nickname || user.username,
+                email: user.email,
+                created_at: user.created_at
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // 닉네임 업데이트 API
 app.put('/api/auth/update-nickname', authenticateToken, async (req, res) => {
     try {

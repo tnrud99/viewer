@@ -1659,7 +1659,7 @@
                     
                     <div class="share-section">
                         <label class="checkbox-label compact">
-                                <input type="checkbox" id="publicConsent">
+                                <input type="checkbox" id="publicConsent" checked>
                                 <span class="checkmark"></span>
                             <span class="checkbox-text">Share on React Central</span>
                             <span class="tooltip" data-tooltip="Make your video discoverable on React Central platform">ⓘ</span>
@@ -2581,6 +2581,17 @@
                         categorySelect.value = ''; // Reset category selection
                     }
                 });
+            }
+        });
+
+        // 페이지 로드 시 기본값 설정
+        document.addEventListener('DOMContentLoaded', function() {
+            // Share on React Central 체크박스가 체크되어 있으면 카테고리 필드 표시
+            const publicConsentCheckbox = document.getElementById('publicConsent');
+            const categoryField = document.getElementById('categoryField');
+            
+            if (publicConsentCheckbox && publicConsentCheckbox.checked && categoryField) {
+                categoryField.style.display = 'block';
             }
         });
 
