@@ -285,6 +285,11 @@
             font-size: 12px;
         }
 
+        .section-icon .material-icons {
+            font-size: 16px;
+            color: white;
+        }
+
         /* Recent Videos */
         .video-list {
             display: flex;
@@ -320,6 +325,11 @@
             flex-shrink: 0;
         }
 
+        .video-thumbnail .material-icons {
+            font-size: 24px;
+            color: white;
+        }
+
         .video-info {
             flex: 1;
         }
@@ -351,11 +361,18 @@
             color: var(--text-muted);
             transition: all 0.2s ease;
             font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .action-btn:hover {
             background: var(--bg-secondary);
             color: var(--text);
+        }
+
+        .action-btn .material-icons {
+            font-size: 16px;
         }
 
         /* Account Info */
@@ -512,11 +529,11 @@
 
             <div class="profile-actions">
                 <button class="btn btn-primary" onclick="editProfile()">
-                    <span>✏️</span>
+                    <span class="material-icons">edit</span>
                     <span>Edit Profile</span>
                 </button>
                 <button class="btn btn-secondary" onclick="goToMyVideos()">
-                    <span>🎥</span>
+                    <span class="material-icons">video_library</span>
                     <span>My Videos</span>
                 </button>
             </div>
@@ -527,7 +544,9 @@
             <!-- Recent Videos -->
             <div class="profile-section">
                 <h2 class="section-title">
-                    <div class="section-icon">🎥</div>
+                    <div class="section-icon">
+                        <span class="material-icons">video_library</span>
+                    </div>
                     <span>Recent Videos</span>
                 </h2>
                 <div id="recentVideos" class="video-list">
@@ -541,7 +560,9 @@
             <!-- Account Information -->
             <div class="profile-section">
                 <h2 class="section-title">
-                    <div class="section-icon">ℹ️</div>
+                    <div class="section-icon">
+                        <span class="material-icons">info</span>
+                    </div>
                     <span>Account Information</span>
                 </h2>
                 <div class="info-item">
@@ -593,18 +614,31 @@
         // Load user profile data
         async function loadUserProfile() {
             try {
+                // Check if currentUser exists
+                if (!currentUser) {
+                    console.error('No user data found');
+                    showToast('User data not found. Please login again.', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
+                }
+
                 // Update profile header
                 const profileAvatar = document.getElementById('profileAvatar');
                 const profileName = document.getElementById('profileName');
                 const profileEmail = document.getElementById('profileEmail');
                 
-                profileAvatar.textContent = (currentUser.nickname || currentUser.username).charAt(0).toUpperCase();
-                profileName.textContent = currentUser.nickname || currentUser.username;
-                profileEmail.textContent = currentUser.email;
+                const displayName = currentUser.nickname || currentUser.username || 'User';
+                const displayEmail = currentUser.email || 'No email';
+                
+                profileAvatar.textContent = displayName.charAt(0).toUpperCase();
+                profileName.textContent = displayName;
+                profileEmail.textContent = displayEmail;
 
                 // Update account information
-                document.getElementById('accountUsername').textContent = currentUser.username;
-                document.getElementById('accountEmail').textContent = currentUser.email;
+                document.getElementById('accountUsername').textContent = currentUser.username || 'Unknown';
+                document.getElementById('accountEmail').textContent = currentUser.email || 'No email';
                 
                 // Calculate member since
                 const memberSince = new Date(currentUser.created_at || Date.now());
@@ -623,11 +657,22 @@
             try {
                 const token = localStorage.getItem('authToken');
                 
+                // Check if token exists
+                if (!token) {
+                    console.error('No auth token found');
+                    showToast('Please login again', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
+                }
+                
                 // For now, we'll use the existing API to get user's videos
                 // In a real implementation, you'd have a dedicated user videos API
                 const response = await fetch('/api/react-central/videos?category=my', {
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
                     }
                 });
 
@@ -636,8 +681,18 @@
                     userVideos = data.videos || [];
                     displayUserVideos(userVideos);
                     updateStats(userVideos);
+                } else if (response.status === 401) {
+                    // Token expired or invalid
+                    console.error('Authentication failed - token expired');
+                    showToast('Session expired. Please login again.', 'error');
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('user');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
                 } else {
-                    throw new Error('Failed to load user videos');
+                    throw new Error(`Failed to load user videos: ${response.status}`);
                 }
 
             } catch (error) {
@@ -666,7 +721,7 @@
             const videosHTML = videos.slice(0, 5).map(video => `
                 <div class="video-item" onclick="openVideo('${video.ve_id}')">
                     <div class="video-thumbnail">
-                        🎵
+                        <span class="material-icons">music_video</span>
                     </div>
                     <div class="video-info">
                         <div class="video-title">${video.title || 'Untitled Video'}</div>
@@ -677,10 +732,10 @@
                     </div>
                     <div class="video-actions">
                         <button class="action-btn" onclick="event.stopPropagation(); editVideo('${video.ve_id}')" title="Edit">
-                            ✏️
+                            <span class="material-icons">edit</span>
                         </button>
                         <button class="action-btn" onclick="event.stopPropagation(); deleteVideo('${video.ve_id}')" title="Delete">
-                            🗑️
+                            <span class="material-icons">delete</span>
                         </button>
                     </div>
                 </div>
@@ -737,7 +792,18 @@
 
         // Edit nickname function
         async function editNickname() {
-            const newNickname = prompt('Enter new nickname:', currentUser.nickname || currentUser.username);
+            // Check if currentUser exists
+            if (!currentUser) {
+                console.error('No user data found');
+                showToast('User data not found. Please login again.', 'error');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+                return;
+            }
+
+            const currentNickname = currentUser.nickname || currentUser.username || 'User';
+            const newNickname = prompt('Enter new nickname:', currentNickname);
             
             if (!newNickname || newNickname.trim() === '') {
                 return;
@@ -759,6 +825,17 @@
             
             try {
                 const token = localStorage.getItem('authToken');
+                
+                // Check if token exists
+                if (!token) {
+                    console.error('No auth token found');
+                    showToast('Please login again', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
+                }
+                
                 const response = await fetch('/api/auth/update-nickname', {
                     method: 'PUT',
                     headers: {
@@ -777,14 +854,24 @@
                     document.getElementById('profileName').textContent = trimmedNickname;
                     document.getElementById('profileAvatar').textContent = trimmedNickname.charAt(0).toUpperCase();
                     
-                    alert('Nickname updated successfully!');
+                    showToast('Nickname updated successfully!', 'success');
+                } else if (response.status === 401) {
+                    // Token expired or invalid
+                    console.error('Authentication failed - token expired');
+                    showToast('Session expired. Please login again.', 'error');
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('user');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                    return;
                 } else {
                     const error = await response.json();
-                    alert(`Error: ${error.error}`);
+                    showToast(`Error: ${error.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Error updating nickname:', error);
-                alert('Failed to update nickname');
+                showToast('Failed to update nickname', 'error');
             }
         }
 
@@ -858,7 +945,8 @@
             // Check authentication status first
             if (checkAuthStatus()) {
                 // Load profile data if user is authenticated
-                loadProfileData();
+                loadUserProfile();
+                loadUserVideos();
             }
         });
     </script>
