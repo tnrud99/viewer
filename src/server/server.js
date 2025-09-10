@@ -515,6 +515,21 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
         await veUrlDoc.save();
         console.log('✅ VE URL saved to database:', veId);
 
+        // 사용자의 ve_urls 배열에 추가 (userId가 있는 경우에만)
+        if (processedUserInfo.userId) {
+            try {
+                await User.findByIdAndUpdate(
+                    processedUserInfo.userId,
+                    { $push: { ve_urls: veUrlDoc._id } },
+                    { new: true }
+                );
+                console.log('✅ VE URL added to user\'s ve_urls array:', processedUserInfo.userId);
+            } catch (error) {
+                console.error('❌ Failed to update user\'s ve_urls array:', error);
+                // 이 오류는 VE URL 생성에는 영향을 주지 않음
+            }
+        }
+
         // 응답 데이터 최적화 (필요한 정보만 반환)
         const responseData = {
             ve_url: {
@@ -985,6 +1000,50 @@ app.get('/api/user/profile', authenticateToken, ensureMongoConnection, async (re
         console.error('❌ User profile error:', error);
         console.error('❌ Error stack:', error.stack);
         res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// 마이그레이션: 기존 VE URL들을 users 배열에 추가
+app.post('/api/migrate/user-ve-urls', ensureMongoConnection, async (req, res) => {
+    try {
+        console.log('🔄 Starting migration: adding VE URLs to users array...');
+        
+        // 모든 VE URL 조회
+        const veUrls = await VEUrl.find({ 'creator_info.user_id': { $exists: true } });
+        console.log(`📊 Found ${veUrls.length} VE URLs with user_id`);
+        
+        let updatedCount = 0;
+        let errorCount = 0;
+        
+        for (const veUrl of veUrls) {
+            try {
+                const userId = veUrl.creator_info.user_id;
+                if (userId) {
+                    // 사용자의 ve_urls 배열에 추가 (중복 방지)
+                    await User.findByIdAndUpdate(
+                        userId,
+                        { $addToSet: { ve_urls: veUrl._id } },
+                        { new: true }
+                    );
+                    updatedCount++;
+                }
+            } catch (error) {
+                console.error(`❌ Failed to update user ${veUrl.creator_info.user_id}:`, error);
+                errorCount++;
+            }
+        }
+        
+        console.log(`✅ Migration completed: ${updatedCount} updated, ${errorCount} errors`);
+        res.json({
+            message: 'Migration completed',
+            total: veUrls.length,
+            updated: updatedCount,
+            errors: errorCount
+        });
+        
+    } catch (error) {
+        console.error('❌ Migration failed:', error);
+        res.status(500).json({ error: 'Migration failed' });
     }
 });
 
