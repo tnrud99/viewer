@@ -132,7 +132,7 @@ const generateVEId = () => {
         // 사용자 정보 검증 및 처리 함수
         const processUserInfo = (userInfo) => {
             try {
-                const { nickname, email, password, isPublic, category } = userInfo;
+                const { nickname, email, isPublic, category } = userInfo;
         
         // 닉네임 검증 (영어만 허용)
         if (!nickname || nickname.trim().length === 0) {
@@ -175,16 +175,9 @@ const generateVEId = () => {
             }
         }
         
-        // 비밀번호 길이 검증 (4자리 이상)
-        if (password && password.length < 4) {
-            throw new Error('Password must be at least 4 characters long');
-        }
-        
         return {
             nickname: trimmedNickname,
             email: processedEmail,
-            password: password || '',
-            password_length: password ? password.length : 0,
             isPublic: isPublic !== false, // Default to true if not specified
             userId: userInfo.userId || null, // 사용자 ID 추가
             category: category || null // 카테고리 정보 추가
@@ -262,7 +255,6 @@ const veUrlSchema = new mongoose.Schema({
     creator_info: {
         nickname: { type: String, required: true },
         email: { type: String },
-        password: { type: String }, // 개발용 - 직접 저장
         is_public: { type: Boolean, default: true }
     },
     // React Central을 위한 추가 필드들
@@ -298,31 +290,6 @@ const authenticateToken = (req, res, next) => {
         next();
     });
 };
-
-// 사용자 프로필 조회 API
-app.get('/api/auth/profile', authenticateToken, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.userId)
-            .select('username email nickname created_at');
-        
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-        
-        res.json({
-            user: {
-                id: user._id,
-                username: user.username,
-                nickname: user.nickname || user.username,
-                email: user.email,
-                created_at: user.created_at
-            }
-        });
-    } catch (error) {
-        console.error('Error fetching user profile:', error);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
 
 // 닉네임 업데이트 API
 app.put('/api/auth/update-nickname', authenticateToken, async (req, res) => {
@@ -526,7 +493,6 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
             creator_info: {
                 nickname: processedUserInfo.nickname,
                 email: processedUserInfo.email,
-                password: processedUserInfo.password || null, // 개발용 - 직접 저장
                 is_public: processedUserInfo.isPublic,
                 user_id: processedUserInfo.userId || null // 사용자 ID 저장
             },
@@ -989,6 +955,7 @@ app.get('/api/user/profile', authenticateToken, ensureMongoConnection, async (re
             user: {
                 id: user._id,
                 username: user.username,
+                nickname: user.nickname || user.username,
                 email: user.email,
                 created_at: user.created_at
             },

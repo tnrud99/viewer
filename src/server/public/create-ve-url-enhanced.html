@@ -2132,22 +2132,8 @@
             messageDiv.style.display = 'none';
         }
 
-        // Get video title from custom input or use reaction video title
+        // Get video title from YouTube oEmbed API
         async function getVideoTitle() {
-            const titleEnabled = document.getElementById('titleEnabled');
-            const customTitle = document.getElementById('customTitle');
-            
-            // If custom title is enabled and has value, use it
-            if (titleEnabled?.checked && customTitle?.value.trim()) {
-                return customTitle.value.trim();
-            }
-            
-            // If custom title is enabled but empty, return null (will use default in server)
-            if (titleEnabled?.checked) {
-                return null;
-            }
-            
-            // Try to get the actual reaction video title
             try {
                 const reactionUrl = reactionUrlInput.value.trim();
                 if (reactionUrl) {
@@ -2242,7 +2228,6 @@
                         userInfo: {
                             nickname: currentUser.nickname || currentUser.username, // 닉네임 우선, 없으면 username
                             email: currentUser.email,
-                            password: '', // No longer needed for logged-in users
                             isPublic: publicConsentCheckbox.checked, // React Central 체크 = 공개
                             userId: currentUser.id, // 사용자 ID 추가
                             category: categorySelect.value // 카테고리 정보 추가
@@ -2534,22 +2519,8 @@
             });
         });
 
-        // Title & Description checkbox functionality
-        const titleEnabled = document.getElementById('titleEnabled');
+        // Description checkbox functionality
         const descriptionEnabled = document.getElementById('descriptionEnabled');
-        
-        if (titleEnabled) {
-            titleEnabled.addEventListener('change', function() {
-                const titlePanel = document.getElementById('title-panel');
-                if (titlePanel) {
-                    if (this.checked) {
-                        titlePanel.classList.add('active');
-                    } else {
-                        titlePanel.classList.remove('active');
-                    }
-                }
-            });
-        }
         
         if (descriptionEnabled) {
             descriptionEnabled.addEventListener('change', function() {
