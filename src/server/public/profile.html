@@ -475,6 +475,7 @@
                 console.log('🔍 currentUser object:', currentUser);
                 console.log('🔍 currentUser._id:', currentUser?._id);
                 console.log('🔍 currentUser keys:', currentUser ? Object.keys(currentUser) : 'null');
+                console.log('🔍 currentUser full structure:', JSON.stringify(currentUser, null, 2));
                 
                 if (currentUser && currentUser._id) {
                     console.log('🔍 Current user ID:', currentUser._id);

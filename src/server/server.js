@@ -1030,7 +1030,7 @@ app.get('/api/user/profile', authenticateToken, ensureMongoConnection, async (re
 
         const responseData = {
             user: {
-                id: user._id,
+                _id: user._id,
                 username: user.username,
                 nickname: user.nickname || user.username,
                 email: user.email,
