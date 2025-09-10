@@ -1114,16 +1114,29 @@ app.put('/api/user/profile', authenticateToken, ensureMongoConnection, async (re
 // 북마크 추가/제거
 app.post('/api/user/bookmark', authenticateToken, ensureMongoConnection, async (req, res) => {
     try {
+        console.log('🔖 Bookmark API called');
         const { ve_id } = req.body;
         const userId = req.user.userId;
         
+        console.log('🔖 Request data:', { ve_id, userId });
+        
         if (!ve_id) {
+            console.log('❌ Missing ve_id');
             return res.status(400).json({ error: 'Video ID is required' });
         }
         
+        console.log('🔖 Finding user:', userId);
         const user = await User.findById(userId);
         if (!user) {
+            console.log('❌ User not found:', userId);
             return res.status(404).json({ error: 'User not found' });
+        }
+        
+        console.log('🔖 User found, current bookmarks:', user.bookmarks);
+        
+        // 북마크 배열이 없으면 초기화
+        if (!user.bookmarks) {
+            user.bookmarks = [];
         }
         
         // 북마크 배열에서 해당 비디오 ID 찾기
@@ -1131,14 +1144,21 @@ app.post('/api/user/bookmark', authenticateToken, ensureMongoConnection, async (
         
         if (bookmarkIndex === -1) {
             // 북마크 추가
+            console.log('🔖 Adding bookmark for:', ve_id);
             user.bookmarks.push(ve_id);
             await user.save();
+            console.log('✅ Bookmark added, new bookmarks:', user.bookmarks);
             
-            // VEUrl의 북마크 카운트 증가
-            await VEUrl.findOneAndUpdate(
-                { ve_id: ve_id },
-                { $inc: { 'react_central.bookmarks': 1 } }
-            );
+            // VEUrl의 북마크 카운트 증가 (선택적)
+            try {
+                await VEUrl.findOneAndUpdate(
+                    { ve_id: ve_id },
+                    { $inc: { 'react_central.bookmarks': 1 } }
+                );
+                console.log('✅ VEUrl bookmark count updated');
+            } catch (veError) {
+                console.log('⚠️ VEUrl update failed (non-critical):', veError.message);
+            }
             
             res.json({ 
                 success: true, 
@@ -1147,14 +1167,21 @@ app.post('/api/user/bookmark', authenticateToken, ensureMongoConnection, async (
             });
         } else {
             // 북마크 제거
+            console.log('🔖 Removing bookmark for:', ve_id);
             user.bookmarks.splice(bookmarkIndex, 1);
             await user.save();
+            console.log('✅ Bookmark removed, new bookmarks:', user.bookmarks);
             
-            // VEUrl의 북마크 카운트 감소
-            await VEUrl.findOneAndUpdate(
-                { ve_id: ve_id },
-                { $inc: { 'react_central.bookmarks': -1 } }
-            );
+            // VEUrl의 북마크 카운트 감소 (선택적)
+            try {
+                await VEUrl.findOneAndUpdate(
+                    { ve_id: ve_id },
+                    { $inc: { 'react_central.bookmarks': -1 } }
+                );
+                console.log('✅ VEUrl bookmark count updated');
+            } catch (veError) {
+                console.log('⚠️ VEUrl update failed (non-critical):', veError.message);
+            }
             
             res.json({ 
                 success: true, 
@@ -1165,7 +1192,15 @@ app.post('/api/user/bookmark', authenticateToken, ensureMongoConnection, async (
         
     } catch (error) {
         console.error('❌ Bookmark API error:', error);
-        res.status(500).json({ error: 'Failed to update bookmark' });
+        console.error('❌ Error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        res.status(500).json({ 
+            error: 'Failed to update bookmark',
+            details: error.message 
+        });
     }
 });
 
