@@ -486,6 +486,10 @@
             <div class="profile-avatar" id="profileAvatar">?</div>
             <h1 class="profile-name" id="profileName">Loading...</h1>
             <p class="profile-email" id="profileEmail">Loading...</p>
+            <button class="btn btn-secondary" onclick="editNickname()" style="margin-top: 10px;">
+                <span class="material-icons">edit</span>
+                Edit Nickname
+            </button>
             
             <div class="profile-stats">
                 <div class="stat-item">
@@ -594,8 +598,8 @@
                 const profileName = document.getElementById('profileName');
                 const profileEmail = document.getElementById('profileEmail');
                 
-                profileAvatar.textContent = currentUser.username.charAt(0).toUpperCase();
-                profileName.textContent = currentUser.username;
+                profileAvatar.textContent = (currentUser.nickname || currentUser.username).charAt(0).toUpperCase();
+                profileName.textContent = currentUser.nickname || currentUser.username;
                 profileEmail.textContent = currentUser.email;
 
                 // Update account information
@@ -728,6 +732,59 @@
                 return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
             } else {
                 return 'Just now';
+            }
+        }
+
+        // Edit nickname function
+        async function editNickname() {
+            const newNickname = prompt('Enter new nickname:', currentUser.nickname || currentUser.username);
+            
+            if (!newNickname || newNickname.trim() === '') {
+                return;
+            }
+            
+            const trimmedNickname = newNickname.trim();
+            
+            // Validate nickname (English only, 1-20 characters)
+            const englishOnlyRegex = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/;
+            if (!englishOnlyRegex.test(trimmedNickname)) {
+                alert('Nickname must contain only English letters, numbers, and special characters');
+                return;
+            }
+            
+            if (trimmedNickname.length < 1 || trimmedNickname.length > 20) {
+                alert('Nickname must be between 1 and 20 characters');
+                return;
+            }
+            
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch('/api/auth/update-nickname', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ nickname: trimmedNickname })
+                });
+                
+                if (response.ok) {
+                    // Update local user data
+                    currentUser.nickname = trimmedNickname;
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    
+                    // Update UI
+                    document.getElementById('profileName').textContent = trimmedNickname;
+                    document.getElementById('profileAvatar').textContent = trimmedNickname.charAt(0).toUpperCase();
+                    
+                    alert('Nickname updated successfully!');
+                } else {
+                    const error = await response.json();
+                    alert(`Error: ${error.error}`);
+                }
+            } catch (error) {
+                console.error('Error updating nickname:', error);
+                alert('Failed to update nickname');
             }
         }
 

@@ -2240,7 +2240,7 @@
                             createdAt: new Date().toISOString()
                         },
                         userInfo: {
-                            nickname: currentUser.username,
+                            nickname: currentUser.nickname || currentUser.username, // 닉네임 우선, 없으면 username
                             email: currentUser.email,
                             password: '', // No longer needed for logged-in users
                             isPublic: publicConsentCheckbox.checked, // React Central 체크 = 공개

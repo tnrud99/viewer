@@ -231,6 +231,7 @@ const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password_hash: { type: String, required: true },
+    nickname: { type: String, required: true }, // 닉네임 필드 추가
     created_at: { type: Date, default: Date.now },
     ve_urls: [{ type: mongoose.Schema.Types.ObjectId, ref: 'VEUrl' }]
 });
@@ -295,6 +296,51 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+// 닉네임 업데이트 API
+app.put('/api/auth/update-nickname', authenticateToken, async (req, res) => {
+    try {
+        const { nickname } = req.body;
+        
+        // 닉네임 검증
+        if (!nickname || nickname.trim().length === 0) {
+            return res.status(400).json({ error: 'Nickname is required' });
+        }
+        
+        const trimmedNickname = nickname.trim();
+        
+        // 영어 + 숫자 + 특수문자만 허용
+        const englishOnlyRegex = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/;
+        if (!englishOnlyRegex.test(trimmedNickname)) {
+            return res.status(400).json({ error: 'Nickname must contain only English letters, numbers, and special characters' });
+        }
+        
+        // 길이 검증 (1-20자)
+        if (trimmedNickname.length < 1 || trimmedNickname.length > 20) {
+            return res.status(400).json({ error: 'Nickname must be between 1 and 20 characters' });
+        }
+        
+        // 사용자 닉네임 업데이트
+        const user = await User.findByIdAndUpdate(
+            req.user.userId,
+            { nickname: trimmedNickname },
+            { new: true }
+        );
+        
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        res.json({ 
+            message: 'Nickname updated successfully',
+            nickname: user.nickname
+        });
+        
+    } catch (error) {
+        console.error('Error updating nickname:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // 인증 라우트
 app.post('/api/auth/register', async (req, res) => {
     try {
@@ -309,11 +355,12 @@ app.post('/api/auth/register', async (req, res) => {
         // 비밀번호 해시화
         const password_hash = await bcrypt.hash(password, 10);
 
-        // 사용자 생성
+        // 사용자 생성 (username을 nickname으로도 설정)
         const user = new User({
             username,
             email,
-            password_hash
+            password_hash,
+            nickname: username // username을 기본 닉네임으로 설정
         });
 
         await user.save();
@@ -369,6 +416,7 @@ app.post('/api/auth/login', async (req, res) => {
             user: {
                 id: user._id,
                 username: user.username,
+                nickname: user.nickname || user.username, // 닉네임 추가
                 email: user.email
             }
         });
@@ -428,7 +476,6 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
 
         // 메타데이터 최적화
         const finalMetadata = {
-            title: metadata?.title || 'Synchronized Reaction Video',
             description: metadata?.description || 'Reaction video synchronized with original video',
             created_at: new Date(),
             view_count: 0
@@ -440,7 +487,7 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
         // VE URL 문서 생성 (최적화된 구조)
         const veUrlDoc = new VEUrl({
             ve_id: veId,
-            title: finalMetadata.title,
+            title: metadata?.title || 'Synchronized Reaction Video', // 제목을 올바른 필드에 저장
             description: finalMetadata.description,
             reaction_url: reactionUrl,
             original_url: originalUrl,
