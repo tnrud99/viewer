@@ -278,14 +278,21 @@ const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
+    console.log('🔐 authenticateToken called for:', req.path);
+    console.log('🔐 Auth header exists:', !!authHeader);
+    console.log('🔐 Token exists:', !!token);
+
     if (!token) {
+        console.error('❌ No token provided');
         return res.status(401).json({ error: 'Access token required' });
     }
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) {
+            console.error('❌ JWT verification failed:', err.message);
             return res.status(403).json({ error: 'Invalid token' });
         }
+        console.log('✅ JWT verification successful, user:', user);
         req.user = user;
         next();
     });
@@ -975,7 +982,8 @@ app.get('/api/user/profile', authenticateToken, ensureMongoConnection, async (re
         console.log('📤 Sending response data:', responseData);
         res.json(responseData);
     } catch (error) {
-        console.error('User profile error:', error);
+        console.error('❌ User profile error:', error);
+        console.error('❌ Error stack:', error.stack);
         res.status(500).json({ error: 'Server error' });
     }
 });
