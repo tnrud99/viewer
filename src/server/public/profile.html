@@ -684,6 +684,17 @@
                 } else if (response.status === 401) {
                     // Token expired or invalid
                     console.error('Authentication failed - token expired');
+                    console.error('Response status:', response.status);
+                    console.error('Response headers:', response.headers);
+                    
+                    // Try to get error details
+                    try {
+                        const errorData = await response.json();
+                        console.error('Error details:', errorData);
+                    } catch (e) {
+                        console.error('Could not parse error response');
+                    }
+                    
                     showToast('Session expired. Please login again.', 'error');
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('user');

@@ -37,6 +37,12 @@
             color: var(--text);
             line-height: 1.6;
             overflow-x: hidden;
+            scroll-behavior: auto !important;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 0;
         }
 
         /* Header */
@@ -4182,6 +4188,32 @@
     </a>
 
     <script>
+        // 즉시 스크롤을 맨 위로 초기화 (스크립트가 실행되는 즉시)
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+
+        // 페이지 로드 시 스크롤을 맨 위로 초기화
+        window.addEventListener('load', function() {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        });
+
+        // DOM이 로드되면 즉시 스크롤을 맨 위로
+        document.addEventListener('DOMContentLoaded', function() {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        });
+
+        // 추가적인 스크롤 초기화 (약간의 지연 후)
+        setTimeout(function() {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        }, 100);
+
         // Smooth scrolling
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -4516,4 +4548,4 @@
     </script>
 </body>
 </html>
-<!-- Development test -->
+<!-- Development test -ㅏ 아지ㄴ 

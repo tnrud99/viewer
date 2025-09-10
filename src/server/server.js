@@ -8,6 +8,9 @@ const path = require('path');
 const crypto = require('crypto');
 require('dotenv').config();
 
+// JWT Secret 상수 정의
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -287,7 +290,7 @@ const authenticateToken = (req, res, next) => {
         return res.status(401).json({ error: 'Access token required' });
     }
 
-    jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key', (err, user) => {
+    jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) {
             return res.status(403).json({ error: 'Invalid token' });
         }
@@ -368,7 +371,7 @@ app.post('/api/auth/register', async (req, res) => {
         // JWT 토큰 생성
         const token = jwt.sign(
             { userId: user._id, username: user.username },
-            process.env.JWT_SECRET || 'your-secret-key',
+            JWT_SECRET,
             { expiresIn: '24h' }
         );
 
@@ -406,7 +409,7 @@ app.post('/api/auth/login', async (req, res) => {
         const tokenExpiry = rememberMe ? '30d' : '24h'; // 30일 vs 24시간
         const token = jwt.sign(
             { userId: user._id, username: user.username },
-            process.env.JWT_SECRET || 'your-secret-key',
+            JWT_SECRET,
             { expiresIn: tokenExpiry }
         );
 
@@ -677,7 +680,7 @@ app.get('/api/videos/:veId/manage', ensureMongoConnection, async (req, res) => {
             return res.status(401).json({ error: 'Authentication required' });
         }
 
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
         
         const video = await VEUrl.findOne({ 
             ve_id: veId,
@@ -706,7 +709,7 @@ app.put('/api/videos/:veId/manage', ensureMongoConnection, async (req, res) => {
             return res.status(401).json({ error: 'Authentication required' });
         }
 
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
         
         const updateData = {};
         
@@ -760,7 +763,7 @@ app.delete('/api/videos/:veId', ensureMongoConnection, async (req, res) => {
             return res.status(401).json({ error: 'Authentication required' });
         }
 
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
         
         const result = await VEUrl.findOneAndDelete({ 
             ve_id: veId,
@@ -802,7 +805,7 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
             }
             
             try {
-                const decoded = jwt.verify(token, JWT_SECRET);
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
                 query['creator_info.user_id'] = decoded.userId;
             } catch (error) {
                 return res.status(401).json({ error: 'Invalid token' });
