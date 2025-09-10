@@ -1174,15 +1174,43 @@
             }
         }
 
-        function toggleBookmark(videoId, button) {
+        async function toggleBookmark(videoId, button) {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('Please log in to bookmark videos');
+                return;
+            }
+
             const isBookmarked = button.classList.contains('bookmarked');
             
-            if (isBookmarked) {
-                button.classList.remove('bookmarked');
-                localStorage.removeItem(`bookmarked_${videoId}`);
-            } else {
-                button.classList.add('bookmarked');
-                localStorage.setItem(`bookmarked_${videoId}`, 'true');
+            try {
+                const response = await fetch('/api/user/bookmark', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ ve_id: videoId })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update bookmark');
+                }
+
+                const data = await response.json();
+                
+                if (data.action === 'added') {
+                    button.classList.add('bookmarked');
+                    // 로컬스토리지에도 저장 (백업용)
+                    localStorage.setItem(`bookmarked_${videoId}`, 'true');
+                } else if (data.action === 'removed') {
+                    button.classList.remove('bookmarked');
+                    localStorage.removeItem(`bookmarked_${videoId}`);
+                }
+                
+            } catch (error) {
+                console.error('Bookmark error:', error);
+                alert('Failed to update bookmark. Please try again.');
             }
         }
 
@@ -1276,29 +1304,52 @@
             });
         }
 
-        function toggleBookmark(veId, button) {
+        async function toggleBookmark(veId, button) {
             const token = localStorage.getItem('authToken');
             if (!token) {
                 alert('Please log in to bookmark videos');
                 return;
             }
 
-            // Get current bookmarks from localStorage
-            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
-            const isBookmarked = bookmarks.includes(veId);
-            
-            if (isBookmarked) {
-                // Remove bookmark
-                const updatedBookmarks = bookmarks.filter(id => id !== veId);
-                localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
-                button.classList.remove('bookmarked');
-                console.log('Removed bookmark:', veId);
-            } else {
-                // Add bookmark
-                bookmarks.push(veId);
-                localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-                button.classList.add('bookmarked');
-                console.log('Added bookmark:', veId);
+            try {
+                const response = await fetch('/api/user/bookmark', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ ve_id: veId })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update bookmark');
+                }
+
+                const data = await response.json();
+                
+                if (data.action === 'added') {
+                    button.classList.add('bookmarked');
+                    // Update localStorage
+                    const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+                    if (!bookmarks.includes(veId)) {
+                        bookmarks.push(veId);
+                        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+                    }
+                    localStorage.setItem(`bookmarked_${veId}`, 'true');
+                    console.log('Added bookmark:', veId);
+                } else if (data.action === 'removed') {
+                    button.classList.remove('bookmarked');
+                    // Update localStorage
+                    const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+                    const updatedBookmarks = bookmarks.filter(id => id !== veId);
+                    localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
+                    localStorage.removeItem(`bookmarked_${veId}`);
+                    console.log('Removed bookmark:', veId);
+                }
+                
+            } catch (error) {
+                console.error('Bookmark error:', error);
+                alert('Failed to update bookmark. Please try again.');
             }
         }
 
@@ -1419,7 +1470,7 @@
             window.location.href = 'login.html';
         }
 
-        function checkAuthStatus() {
+        async function checkAuthStatus() {
             const token = localStorage.getItem('authToken');
             const user = localStorage.getItem('user');
             
@@ -1432,6 +1483,9 @@
                 const profileBtn = document.getElementById('profileBtn');
                 profileBtn.innerHTML = `<span class="material-icons">account_circle</span>`;
                 profileBtn.title = `Logged in as ${userData.username}`;
+                
+                // Load bookmarks from server
+                await loadBookmarksFromServer();
             } else {
                 // User is not logged in
                 console.log('User not logged in');
@@ -1441,6 +1495,37 @@
                 profileBtn.innerHTML = `<span class="material-icons">account_circle</span>`;
                 profileBtn.title = 'Sign in';
                 profileBtn.onclick = () => window.location.href = 'login.html';
+            }
+        }
+
+        // Load bookmarks from server
+        async function loadBookmarksFromServer() {
+            const token = localStorage.getItem('authToken');
+            if (!token) return;
+
+            try {
+                const response = await fetch('/api/user/bookmarks', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const bookmarks = data.bookmarks || [];
+                    
+                    // Update localStorage with server data
+                    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+                    
+                    // Update individual bookmark states
+                    bookmarks.forEach(veId => {
+                        localStorage.setItem(`bookmarked_${veId}`, 'true');
+                    });
+                    
+                    console.log('✅ Bookmarks loaded from server:', bookmarks);
+                }
+            } catch (error) {
+                console.error('❌ Failed to load bookmarks from server:', error);
             }
         }
 

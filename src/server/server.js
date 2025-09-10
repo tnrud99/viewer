@@ -229,7 +229,8 @@ const userSchema = new mongoose.Schema({
     password_hash: { type: String, required: true },
     nickname: { type: String, required: true }, // 닉네임 필드 추가
     created_at: { type: Date, default: Date.now },
-    ve_urls: [{ type: mongoose.Schema.Types.ObjectId, ref: 'VEUrl' }]
+    ve_urls: [{ type: mongoose.Schema.Types.ObjectId, ref: 'VEUrl' }],
+    bookmarks: [{ type: String }] // 북마크한 비디오 ID들
 });
 
 const veUrlSchema = new mongoose.Schema({
@@ -1052,6 +1053,140 @@ app.get('/api/user/profile', authenticateToken, ensureMongoConnection, async (re
         console.error('❌ User profile error:', error);
         console.error('❌ Error stack:', error.stack);
         res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// User profile update API
+app.put('/api/user/profile', authenticateToken, ensureMongoConnection, async (req, res) => {
+    try {
+        const { nickname, email } = req.body;
+        const userId = req.user.userId;
+        
+        console.log('🔍 Profile update request for userId:', userId);
+        console.log('🔍 Update data:', { nickname, email });
+        
+        // 입력 검증
+        if (!nickname || nickname.trim().length === 0) {
+            return res.status(400).json({ error: 'Nickname is required' });
+        }
+        
+        // 사용자 정보 업데이트
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { 
+                nickname: nickname.trim(),
+                ...(email && { email: email.trim() })
+            },
+            { new: true, select: '-password_hash' }
+        );
+        
+        if (!updatedUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        // 해당 사용자의 모든 VEUrl의 creator_info.nickname도 업데이트
+        const updateResult = await VEUrl.updateMany(
+            { 'creator_info.user_id': userId },
+            { $set: { 'creator_info.nickname': nickname.trim() } }
+        );
+        
+        console.log(`✅ Updated ${updateResult.modifiedCount} VEUrls with new nickname`);
+        
+        res.json({
+            message: 'Profile updated successfully',
+            user: {
+                _id: updatedUser._id,
+                username: updatedUser.username,
+                nickname: updatedUser.nickname,
+                email: updatedUser.email,
+                created_at: updatedUser.created_at
+            },
+            updated_videos_count: updateResult.modifiedCount
+        });
+        
+    } catch (error) {
+        console.error('❌ Profile update error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// 북마크 API
+// 북마크 추가/제거
+app.post('/api/user/bookmark', authenticateToken, ensureMongoConnection, async (req, res) => {
+    try {
+        const { ve_id } = req.body;
+        const userId = req.user.userId;
+        
+        if (!ve_id) {
+            return res.status(400).json({ error: 'Video ID is required' });
+        }
+        
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        // 북마크 배열에서 해당 비디오 ID 찾기
+        const bookmarkIndex = user.bookmarks.indexOf(ve_id);
+        
+        if (bookmarkIndex === -1) {
+            // 북마크 추가
+            user.bookmarks.push(ve_id);
+            await user.save();
+            
+            // VEUrl의 북마크 카운트 증가
+            await VEUrl.findOneAndUpdate(
+                { ve_id: ve_id },
+                { $inc: { 'react_central.bookmarks': 1 } }
+            );
+            
+            res.json({ 
+                success: true, 
+                action: 'added',
+                message: 'Video bookmarked successfully' 
+            });
+        } else {
+            // 북마크 제거
+            user.bookmarks.splice(bookmarkIndex, 1);
+            await user.save();
+            
+            // VEUrl의 북마크 카운트 감소
+            await VEUrl.findOneAndUpdate(
+                { ve_id: ve_id },
+                { $inc: { 'react_central.bookmarks': -1 } }
+            );
+            
+            res.json({ 
+                success: true, 
+                action: 'removed',
+                message: 'Bookmark removed successfully' 
+            });
+        }
+        
+    } catch (error) {
+        console.error('❌ Bookmark API error:', error);
+        res.status(500).json({ error: 'Failed to update bookmark' });
+    }
+});
+
+// 사용자의 북마크 목록 조회
+app.get('/api/user/bookmarks', authenticateToken, ensureMongoConnection, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        
+        const user = await User.findById(userId).select('bookmarks');
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        res.json({ 
+            success: true, 
+            bookmarks: user.bookmarks || [] 
+        });
+        
+    } catch (error) {
+        console.error('❌ Get bookmarks API error:', error);
+        res.status(500).json({ error: 'Failed to get bookmarks' });
     }
 });
 
