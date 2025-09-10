@@ -636,13 +636,20 @@
                 if (response.ok) {
                     const userData = await response.json();
                     console.log('📡 User data received:', userData);
+                    console.log('📡 userData.user:', userData.user);
+                    console.log('📡 userData type:', typeof userData);
+                    console.log('📡 userData keys:', Object.keys(userData));
+                    
                     currentUser = userData.user;
-                    console.log('✅ User logged in:', currentUser.username);
+                    console.log('✅ User logged in:', currentUser?.username);
                     console.log('✅ Current user set:', currentUser);
+                    console.log('✅ currentUser type:', typeof currentUser);
                     
                     // currentUser가 제대로 설정되었는지 확인
                     if (!currentUser || !currentUser.username) {
                         console.error('❌ currentUser not properly set:', currentUser);
+                        console.error('❌ userData.user was:', userData.user);
+                        console.error('❌ userData structure:', JSON.stringify(userData, null, 2));
                         return false;
                     }
                     

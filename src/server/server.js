@@ -936,9 +936,13 @@ app.post('/api/react-central/videos/:id/bookmark', ensureMongoConnection, async 
 // User profile API
 app.get('/api/user/profile', authenticateToken, ensureMongoConnection, async (req, res) => {
     try {
+        console.log('🔍 /api/user/profile called for userId:', req.user.userId);
         const user = await User.findById(req.user.userId).select('-password_hash');
         
+        console.log('🔍 User found:', user);
+        
         if (!user) {
+            console.error('❌ User not found for userId:', req.user.userId);
             return res.status(404).json({ error: 'User not found' });
         }
 
@@ -951,7 +955,7 @@ app.get('/api/user/profile', authenticateToken, ensureMongoConnection, async (re
         const totalViews = userVideos.reduce((sum, video) => sum + (video.metadata?.view_count || 0), 0);
         const totalLikes = userVideos.reduce((sum, video) => sum + (video.react_central?.likes || 0), 0);
 
-        res.json({
+        const responseData = {
             user: {
                 id: user._id,
                 username: user.username,
@@ -966,7 +970,10 @@ app.get('/api/user/profile', authenticateToken, ensureMongoConnection, async (re
                 member_since: user.created_at
             },
             videos: userVideos
-        });
+        };
+        
+        console.log('📤 Sending response data:', responseData);
+        res.json(responseData);
     } catch (error) {
         console.error('User profile error:', error);
         res.status(500).json({ error: 'Server error' });
