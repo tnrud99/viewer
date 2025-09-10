@@ -2062,36 +2062,29 @@
             }
         }
 
-        // Required field validation
+        // Required field validation (for logged-in users)
         function validateRequiredFields() {
-            if (!usernameInput.value.trim()) {
-                showMessage('Please enter your nickname.', 'error');
+            // Check if user is logged in
+            if (!currentUser) {
+                showMessage('Please login to create VE URLs.', 'error');
                 return false;
             }
 
-            // Check React Central requirements
+            // Check if user has required data
+            if (!currentUser.username && !currentUser.nickname) {
+                showMessage('User data is incomplete. Please login again.', 'error');
+                return false;
+            }
+
+            // Check React Central requirements (email is optional for logged-in users)
             if (publicConsentCheckbox.checked) {
-                if (!emailInput.value.trim()) {
-                    showMessage('Email is required when sharing on React Central.', 'error');
-                    return false;
-                }
-                
-                // Email format validation
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(emailInput.value.trim())) {
-                    showMessage('Please enter a valid email format (e.g., user@example.com).', 'error');
-                    return false;
-                }
-                
-                if (!accessPasswordInput.value.trim()) {
-                    showMessage('Password is required when sharing on React Central.', 'error');
-                    return false;
-                }
-                
-                // Password length validation
-                if (accessPasswordInput.value.trim().length < 4) {
-                    showMessage('Password must be at least 4 characters long.', 'error');
-                    return false;
+                // Email is optional for logged-in users, but if provided, validate format
+                if (currentUser.email) {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(currentUser.email.trim())) {
+                        showMessage('Invalid email format in user profile.', 'error');
+                        return false;
+                    }
                 }
             }
 
@@ -2370,9 +2363,11 @@
         });
 
         // Preview button
-        previewBtn.addEventListener('click', function() {
-            showMessage('Preview feature is under development. Please create a URL link to test the functionality.', 'info');
-        });
+        if (previewBtn) {
+            previewBtn.addEventListener('click', function() {
+                showMessage('Preview feature is under development. Please create a URL link to test the functionality.', 'info');
+            });
+        }
 
         // Settings toggle functionality
         const settingsToggle = document.getElementById('settingsToggle');
