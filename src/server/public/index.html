@@ -116,6 +116,31 @@
                 font-size: 0.85rem;
                 padding: 0.5rem 0;
             }
+
+            /* Mobile auth menu */
+            .login-btn {
+                padding: 0.5rem 1.2rem;
+                font-size: 0.8rem;
+            }
+
+            .user-menu {
+                gap: 0.5rem;
+            }
+
+            .user-menu a {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+            }
+
+            .user-avatar {
+                width: 28px;
+                height: 28px;
+                font-size: 0.7rem;
+            }
+
+            .user-info span {
+                font-size: 0.8rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -137,6 +162,31 @@
                 font-size: 0.8rem;
                 padding: 0.4rem 0;
             }
+
+            /* Small mobile auth menu */
+            .login-btn {
+                padding: 0.4rem 1rem;
+                font-size: 0.75rem;
+            }
+
+            .user-menu {
+                gap: 0.3rem;
+            }
+
+            .user-menu a {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.6rem;
+            }
+
+            .user-avatar {
+                width: 24px;
+                height: 24px;
+                font-size: 0.65rem;
+            }
+
+            .user-info span {
+                font-size: 0.75rem;
+            }
         }
 
         .nav-menu a:hover {
@@ -156,6 +206,82 @@
 
         .nav-menu a:hover::after {
             width: 100%;
+        }
+
+        /* Login Button Styles */
+        .login-btn {
+            background: var(--primary);
+            color: white;
+            padding: 0.6rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: 2px solid var(--primary);
+        }
+
+        .login-btn:hover {
+            background: transparent;
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(193, 42, 31, 0.3);
+        }
+
+        .login-btn:hover::after {
+            display: none;
+        }
+
+        /* User Menu Styles */
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .user-menu a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .user-menu a:hover {
+            background: var(--bg-secondary);
+            color: var(--primary);
+        }
+
+        .user-menu a.logout-btn {
+            background: var(--primary);
+            color: white;
+        }
+
+        .user-menu a.logout-btn:hover {
+            background: var(--primary-dark);
         }
 
         /* Hero Section */
@@ -3724,6 +3850,22 @@
                 <li><a href="#project">Solution</a></li>
                 <li><a href="#team">Technology</a></li>
             </ul>
+            <!-- Login/User Menu -->
+            <div id="authMenu">
+                <!-- Login button (shown when not logged in) -->
+                <a href="login.html" class="login-btn" id="loginBtn">Login</a>
+                
+                <!-- User menu (shown when logged in) -->
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">U</div>
+                        <span id="userName">User</span>
+                    </div>
+                    <a href="react-central.html">Videos</a>
+                    <a href="profile.html">Profile</a>
+                    <a href="#" onclick="logout()" class="logout-btn">Logout</a>
+                </div>
+            </div>
         </nav>
     </header>
 
@@ -4188,6 +4330,60 @@
     </a>
 
     <script>
+        // Check authentication status and update UI
+        function checkAuthStatus() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('user');
+            const loginBtn = document.getElementById('loginBtn');
+            const userMenu = document.getElementById('userMenu');
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+
+            if (token && user) {
+                try {
+                    const userData = JSON.parse(user);
+                    // Show user menu
+                    loginBtn.style.display = 'none';
+                    userMenu.style.display = 'flex';
+                    
+                    // Update user info
+                    userName.textContent = userData.nickname || userData.email || 'User';
+                    userAvatar.textContent = (userData.nickname || userData.email || 'U').charAt(0).toUpperCase();
+                } catch (error) {
+                    console.error('Error parsing user data:', error);
+                    // Show login button if user data is corrupted
+                    loginBtn.style.display = 'block';
+                    userMenu.style.display = 'none';
+                }
+            } else {
+                // Show login button
+                loginBtn.style.display = 'block';
+                userMenu.style.display = 'none';
+            }
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            
+            // Clear user-specific data
+            localStorage.removeItem('bookmarks');
+            
+            // Clear all liked/bookmarked video states
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('liked_') || key.startsWith('bookmarked_'))) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            // Update UI
+            checkAuthStatus();
+        }
+
         // 즉시 스크롤을 맨 위로 초기화 (스크립트가 실행되는 즉시)
         window.scrollTo(0, 0);
         document.documentElement.scrollTop = 0;
@@ -4205,6 +4401,9 @@
             window.scrollTo(0, 0);
             document.documentElement.scrollTop = 0;
             document.body.scrollTop = 0;
+            
+            // Check authentication status
+            checkAuthStatus();
         });
 
         // 추가적인 스크롤 초기화 (약간의 지연 후)
