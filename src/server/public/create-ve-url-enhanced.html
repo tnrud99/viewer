@@ -1915,6 +1915,20 @@
         function logout() {
             localStorage.removeItem('authToken');
             localStorage.removeItem('user');
+            
+            // Clear user-specific data
+            localStorage.removeItem('bookmarks');
+            
+            // Clear all liked/bookmarked video states
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('liked_') || key.startsWith('bookmarked_'))) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
             window.location.href = 'login.html';
         }
 

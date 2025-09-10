@@ -236,6 +236,44 @@
             align-items: center;
             font-size: 14px;
             color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .video-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 8px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+        }
+
+        .action-btn:hover {
+            background: var(--surface);
+            color: var(--text);
+            border-color: var(--primary);
+        }
+
+        .action-btn.manage-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .action-btn .material-icons {
+            font-size: 16px;
         }
 
         .loading {
@@ -685,15 +723,23 @@
 
                 // Display videos
                 videosContainer.innerHTML = videos.map(video => `
-                    <div class="video-card" onclick="openVideo('${video.ve_id}')">
-                        <div class="video-thumbnail">
+                    <div class="video-card">
+                        <div class="video-thumbnail" onclick="openVideo('${video.ve_id}')">
                             <span class="material-icons">music_video</span>
                         </div>
                         <div class="video-info">
-                            <div class="video-title">${video.title || 'Untitled Video'}</div>
+                            <div class="video-title" onclick="openVideo('${video.ve_id}')">${video.title || 'Untitled Video'}</div>
                             <div class="video-meta">
                                 <span>${video.metadata?.view_count || 0} views</span>
                                 <span>${formatDate(video.metadata?.created_at)}</span>
+                            </div>
+                            <div class="video-actions">
+                                <button class="action-btn" onclick="event.stopPropagation(); openVideo('${video.ve_id}')" title="Watch Video">
+                                    <span class="material-icons">play_arrow</span>
+                                </button>
+                                <button class="action-btn manage-btn" onclick="event.stopPropagation(); manageVideo('${video.ve_id}')" title="Manage Video">
+                                    <span class="material-icons">settings</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -716,6 +762,11 @@
             window.open(`viewer.html?ve=${veId}`, '_blank');
         }
 
+        // Manage video
+        function manageVideo(veId) {
+            window.open(`video-management.html?ve=${veId}`, '_blank');
+        }
+
         // Format date
         function formatDate(dateString) {
             if (!dateString) return 'Unknown';
@@ -727,6 +778,20 @@
         function logout() {
             localStorage.removeItem('authToken');
             localStorage.removeItem('user');
+            
+            // Clear user-specific data
+            localStorage.removeItem('bookmarks');
+            
+            // Clear all liked/bookmarked video states
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('liked_') || key.startsWith('bookmarked_'))) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
             window.location.href = 'login.html';
         }
 

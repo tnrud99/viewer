@@ -141,19 +141,27 @@
             padding: 20px;
             border: 1px solid var(--border);
             margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .video-preview-content {
+            flex: 1;
         }
 
         .video-thumbnail {
-            width: 100%;
-            aspect-ratio: 16/9; /* 16:9 비율로 고정하여 YouTube 썸네일 최적화 */
-            border-radius: 12px;
+            width: 120px;
+            height: 68px;
+            border-radius: 8px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 48px;
-            margin-bottom: 20px;
+            font-size: 24px;
+            margin-bottom: 15px;
+            flex-shrink: 0;
         }
 
         .video-title {
@@ -457,13 +465,13 @@
                 React Central <span class="beta-badge">BETA</span>
             </div>
             <div class="nav-buttons">
-                <a href="profile.html" class="btn btn-secondary">
-                    <span class="material-icons">person</span>
-                    Profile
-                </a>
                 <a href="react-central.html" class="btn btn-secondary">
                     <span class="material-icons">home</span>
                     Home
+                </a>
+                <a href="profile.html" class="btn btn-secondary">
+                    <span class="material-icons">person</span>
+                    Profile
                 </a>
                 <button onclick="logout()" class="btn btn-secondary">
                     <span class="material-icons">logout</span>
@@ -491,11 +499,13 @@
                 <div class="video-thumbnail" id="videoThumbnail">
                     <span class="material-icons">play_circle_outline</span>
                 </div>
-                <h2 class="video-title" id="videoTitle">Loading...</h2>
-                <div class="video-meta">
-                    <span id="videoCreated">Created: Loading...</span>
-                    <span id="videoViews">Views: Loading...</span>
-                    <span id="videoLikes">Likes: Loading...</span>
+                <div class="video-preview-content">
+                    <h2 class="video-title" id="videoTitle">Loading...</h2>
+                    <div class="video-meta">
+                        <span id="videoCreated">Created: Loading...</span>
+                        <span id="videoViews">Views: Loading...</span>
+                        <span id="videoLikes">Likes: Loading...</span>
+                    </div>
                 </div>
             </div>
 
@@ -774,6 +784,20 @@
         function logout() {
             localStorage.removeItem('authToken');
             localStorage.removeItem('user');
+            
+            // Clear user-specific data
+            localStorage.removeItem('bookmarks');
+            
+            // Clear all liked/bookmarked video states
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('liked_') || key.startsWith('bookmarked_'))) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
             window.location.href = 'login.html';
         }
 
