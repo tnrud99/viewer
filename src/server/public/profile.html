@@ -266,14 +266,30 @@
             border-color: var(--primary);
         }
 
-        .action-btn.manage-btn:hover {
+        .action-btn.manage-btn {
             background: var(--primary);
             color: white;
             border-color: var(--primary);
+            min-width: 40px;
+            height: 40px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(193, 42, 31, 0.3);
+        }
+
+        .action-btn.manage-btn:hover {
+            background: var(--primary-dark);
+            color: white;
+            border-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(193, 42, 31, 0.4);
         }
 
         .action-btn .material-icons {
             font-size: 16px;
+        }
+
+        .action-btn.manage-btn .material-icons {
+            font-size: 18px;
         }
 
         .loading {
@@ -500,15 +516,11 @@
 
         <!-- Videos Section -->
         <div class="profile-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="margin-bottom: 20px;">
                 <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
                     <span class="material-icons">video_library</span>
                     My Videos
                 </h2>
-                <a href="video-management.html" class="btn btn-secondary">
-                    <span class="material-icons">settings</span>
-                    Manage Videos
-                </a>
             </div>
             <div id="videosContainer">
                 <div class="loading">
@@ -536,10 +548,6 @@
                     <div class="form-group">
                         <label for="editNickname">Nickname</label>
                         <input type="text" id="editNickname" name="nickname" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editEmail">Email</label>
-                        <input type="email" id="editEmail" name="email">
                     </div>
                 </form>
             </div>
@@ -823,7 +831,6 @@
 
             // Fill form with current data
             document.getElementById('editNickname').value = currentUser.nickname || currentUser.username || '';
-            document.getElementById('editEmail').value = currentUser.email || '';
 
             // Show modal
             document.getElementById('editProfileModal').style.display = 'flex';
@@ -837,7 +844,6 @@
         // Save profile changes
         async function saveProfile() {
             const nickname = document.getElementById('editNickname').value.trim();
-            const email = document.getElementById('editEmail').value.trim();
 
             if (!nickname) {
                 showToast('Nickname is required', 'error');
@@ -853,8 +859,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        nickname: nickname,
-                        email: email || undefined
+                        nickname: nickname
                     })
                 });
 
@@ -867,7 +872,6 @@
                 
                 // Update current user data
                 currentUser.nickname = data.user.nickname;
-                currentUser.email = data.user.email;
 
                 // Update UI
                 const displayName = currentUser.nickname || currentUser.username || 'User';
