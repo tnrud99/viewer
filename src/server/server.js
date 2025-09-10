@@ -1042,6 +1042,61 @@ app.get('/api/user/profile', authenticateToken, ensureMongoConnection, async (re
     }
 });
 
+// 디버깅: 사용자 데이터 직접 조회
+app.get('/api/debug/user-data/:userId', ensureMongoConnection, async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        console.log('🔍 Debug API called for user:', userId);
+        
+        // 사용자 정보 조회
+        const user = await User.findById(userId);
+        console.log('🔍 User found:', user ? 'Yes' : 'No');
+        if (user) {
+            console.log('🔍 User ve_urls array:', user.ve_urls);
+            console.log('🔍 User ve_urls length:', user.ve_urls?.length || 0);
+        }
+        
+        // 해당 사용자의 VE URL들 조회 (creator_info.user_id로)
+        const veUrlsByCreator = await VEUrl.find({ 'creator_info.user_id': userId });
+        console.log('🔍 VE URLs by creator_info.user_id:', veUrlsByCreator.length);
+        console.log('🔍 VE URL IDs by creator:', veUrlsByCreator.map(v => v._id));
+        
+        // users 배열의 ObjectId로 VE URL들 조회
+        if (user && user.ve_urls && user.ve_urls.length > 0) {
+            const veUrlsByArray = await VEUrl.find({ _id: { $in: user.ve_urls } });
+            console.log('🔍 VE URLs by user array:', veUrlsByArray.length);
+            console.log('🔍 VE URL IDs by array:', veUrlsByArray.map(v => v._id));
+        }
+        
+        res.json({
+            user: user ? {
+                _id: user._id,
+                username: user.username,
+                nickname: user.nickname,
+                ve_urls: user.ve_urls,
+                ve_urls_count: user.ve_urls?.length || 0
+            } : null,
+            ve_urls_by_creator: veUrlsByCreator.map(v => ({
+                _id: v._id,
+                ve_id: v.ve_id,
+                title: v.title,
+                creator_user_id: v.creator_info?.user_id
+            })),
+            ve_urls_by_array: user && user.ve_urls ? 
+                (await VEUrl.find({ _id: { $in: user.ve_urls } })).map(v => ({
+                    _id: v._id,
+                    ve_id: v.ve_id,
+                    title: v.title,
+                    creator_user_id: v.creator_info?.user_id
+                })) : []
+        });
+        
+    } catch (error) {
+        console.error('❌ Debug API error:', error);
+        res.status(500).json({ error: 'Debug failed' });
+    }
+});
+
 // 정리: 잘못된 ObjectId 제거 및 올바른 ObjectId 추가
 app.post('/api/cleanup/user-ve-urls', ensureMongoConnection, async (req, res) => {
     try {
