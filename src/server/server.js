@@ -523,16 +523,25 @@ app.post('/api/ve-urls/create', ensureMongoConnection, async (req, res) => {
         // 사용자의 ve_urls 배열에 추가 (userId가 있는 경우에만)
         if (processedUserInfo.userId) {
             try {
-                await User.findByIdAndUpdate(
+                console.log('🔍 Adding VE URL to user array:');
+                console.log('🔍 User ID:', processedUserInfo.userId);
+                console.log('🔍 VE URL ID:', veUrlDoc._id);
+                console.log('🔍 VE URL ID type:', typeof veUrlDoc._id);
+                
+                const updatedUser = await User.findByIdAndUpdate(
                     processedUserInfo.userId,
                     { $push: { ve_urls: veUrlDoc._id } },
                     { new: true }
                 );
+                
                 console.log('✅ VE URL added to user\'s ve_urls array:', processedUserInfo.userId);
+                console.log('✅ Updated user ve_urls:', updatedUser?.ve_urls);
             } catch (error) {
                 console.error('❌ Failed to update user\'s ve_urls array:', error);
                 // 이 오류는 VE URL 생성에는 영향을 주지 않음
             }
+        } else {
+            console.log('⚠️ No userId provided, skipping user array update');
         }
 
         // 응답 데이터 최적화 (필요한 정보만 반환)
@@ -1020,6 +1029,61 @@ app.get('/api/user/profile', authenticateToken, ensureMongoConnection, async (re
         console.error('❌ User profile error:', error);
         console.error('❌ Error stack:', error.stack);
         res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// 정리: 잘못된 ObjectId 제거 및 올바른 ObjectId 추가
+app.post('/api/cleanup/user-ve-urls', ensureMongoConnection, async (req, res) => {
+    try {
+        console.log('🧹 Starting cleanup: fixing user ve_urls array...');
+        
+        // 모든 사용자 조회
+        const users = await User.find({ ve_urls: { $exists: true, $ne: [] } });
+        console.log(`📊 Found ${users.length} users with ve_urls array`);
+        
+        let cleanedCount = 0;
+        let errorCount = 0;
+        
+        for (const user of users) {
+            try {
+                console.log(`🔍 Processing user: ${user.username} (${user._id})`);
+                console.log(`🔍 Current ve_urls:`, user.ve_urls);
+                
+                // 이 사용자가 생성한 실제 VE URL들 조회
+                const actualVeUrls = await VEUrl.find({ 'creator_info.user_id': user._id.toString() });
+                console.log(`🔍 Found ${actualVeUrls.length} actual VE URLs for this user`);
+                
+                // 실제 VE URL의 ObjectId들만 추출
+                const correctVeUrlIds = actualVeUrls.map(veUrl => veUrl._id);
+                console.log(`🔍 Correct VE URL IDs:`, correctVeUrlIds);
+                
+                // 사용자의 ve_urls 배열을 올바른 ObjectId들로 업데이트
+                await User.findByIdAndUpdate(
+                    user._id,
+                    { $set: { ve_urls: correctVeUrlIds } },
+                    { new: true }
+                );
+                
+                console.log(`✅ Cleaned up user ${user.username}`);
+                cleanedCount++;
+                
+            } catch (error) {
+                console.error(`❌ Failed to cleanup user ${user.username}:`, error);
+                errorCount++;
+            }
+        }
+        
+        console.log(`✅ Cleanup completed: ${cleanedCount} cleaned, ${errorCount} errors`);
+        res.json({
+            message: 'Cleanup completed',
+            total: users.length,
+            cleaned: cleanedCount,
+            errors: errorCount
+        });
+        
+    } catch (error) {
+        console.error('❌ Cleanup failed:', error);
+        res.status(500).json({ error: 'Cleanup failed' });
     }
 });
 
