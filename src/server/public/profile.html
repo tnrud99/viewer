@@ -592,15 +592,24 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', async function() {
-            if (await checkAuthStatus()) {
+            console.log('🚀 DOMContentLoaded - Starting profile page initialization...');
+            const authResult = await checkAuthStatus();
+            console.log('🔍 Auth result:', authResult);
+            
+            if (authResult) {
+                console.log('✅ Auth successful, loading profile data...');
                 loadUserProfile();
                 loadUserVideos();
+            } else {
+                console.log('❌ Auth failed, redirecting to login...');
             }
         });
 
         // Check authentication status and load user data from server
         async function checkAuthStatus() {
             const token = localStorage.getItem('authToken');
+            console.log('🔍 Checking auth status...');
+            console.log('Token exists:', !!token);
             
             if (!token) {
                 console.error('No auth token found');
@@ -609,6 +618,7 @@
             }
             
             try {
+                console.log('📡 Fetching user data from /api/user/profile...');
                 // Get user data from server
                 const response = await fetch('/api/user/profile', {
                     headers: {
@@ -617,24 +627,31 @@
                     }
                 });
                 
+                console.log('📡 Response status:', response.status);
+                console.log('📡 Response ok:', response.ok);
+                
                 if (response.ok) {
                     const userData = await response.json();
+                    console.log('📡 User data received:', userData);
                     currentUser = userData.user;
-                    console.log('User logged in:', currentUser.username);
+                    console.log('✅ User logged in:', currentUser.username);
+                    console.log('✅ Current user set:', currentUser);
                     return true;
                 } else if (response.status === 401) {
-                    console.error('Authentication failed - token expired');
+                    console.error('❌ Authentication failed - token expired');
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('user');
                     window.location.href = 'login.html';
                     return false;
                 } else {
-                    console.error('Failed to load user data:', response.status);
+                    console.error('❌ Failed to load user data:', response.status);
+                    const errorText = await response.text();
+                    console.error('❌ Error response:', errorText);
                     window.location.href = 'login.html';
                     return false;
                 }
             } catch (error) {
-                console.error('Error loading user data:', error);
+                console.error('❌ Error loading user data:', error);
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('user');
                 window.location.href = 'login.html';
