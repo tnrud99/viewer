@@ -727,11 +727,12 @@
         // Load user videos
         async function loadUserVideos() {
             try {
+                console.log('🎥 loadUserVideos called');
                 const token = localStorage.getItem('authToken');
                 
                 // Check if token exists
                 if (!token) {
-                    console.error('No auth token found');
+                    console.error('❌ No auth token found in loadUserVideos');
                     showToast('Please login again', 'error');
                     setTimeout(() => {
                         window.location.href = 'login.html';
@@ -739,6 +740,7 @@
                     return;
                 }
                 
+                console.log('📡 Fetching user videos from /api/react-central/videos?category=my...');
                 // For now, we'll use the existing API to get user's videos
                 // In a real implementation, you'd have a dedicated user videos API
                 const response = await fetch('/api/react-central/videos?category=my', {
@@ -748,9 +750,14 @@
                     }
                 });
 
+                console.log('📡 Videos response status:', response.status);
+                console.log('📡 Videos response ok:', response.ok);
+                
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('📡 Videos data received:', data);
                     userVideos = data.videos || [];
+                    console.log('🎥 User videos loaded:', userVideos.length, 'videos');
                     displayUserVideos(userVideos);
                     updateStats(userVideos);
                 } else if (response.status === 401) {
