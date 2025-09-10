@@ -255,7 +255,8 @@ const veUrlSchema = new mongoose.Schema({
     creator_info: {
         nickname: { type: String, required: true },
         email: { type: String },
-        is_public: { type: Boolean, default: true }
+        is_public: { type: Boolean, default: true },
+        user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
     },
     // React Central을 위한 추가 필드들
     react_central: {
@@ -1020,7 +1021,7 @@ app.get('/api/user/profile', authenticateToken, ensureMongoConnection, async (re
         }
 
         // Get user's videos
-        const userVideos = await VEUrl.find({ creator_id: req.user.userId })
+        const userVideos = await VEUrl.find({ 'creator_info.user_id': req.user.userId })
             .select('ve_id title description metadata creator_info react_central')
             .sort({ 'metadata.created_at': -1 });
 
