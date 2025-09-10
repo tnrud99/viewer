@@ -10,21 +10,18 @@
 
     <style>
         :root {
-            --primary: #c12a1f;
-            --primary-dark: #a01f17;
-            --primary-light: #e63946;
-            --accent: #00d4ff;
-            --text: #1a1a1a;
-            --text-secondary: #2a2a2a;
-            --text-muted: #666666;
-            --bg: #ffffff;
-            --bg-secondary: #f8f9fa;
-            --bg-card: rgba(255, 255, 255, 0.9);
-            --border: rgba(193, 42, 31, 0.2);
-            --shadow: 0 20px 40px rgba(193, 42, 31, 0.15);
-            --error: #dc3545;
-            --success: #28a745;
-            --warning: #ffc107;
+            --primary: #c2291f;
+            --primary-hover: #a81f18;
+            --secondary: #4a4a4a;
+            --background: #1a1a1a;
+            --surface: #2a2a2a;
+            --text: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #888888;
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #4caf50;
+            --error: #f44336;
+            --warning: #ff9800;
         }
 
         * {
@@ -34,82 +31,51 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
             color: var(--text);
+            line-height: 1.6;
         }
 
-        /* Header */
-        .header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            padding: 15px 20px;
-        }
-
-        .header-content {
+        .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-        }
-
-        .header-left {
-            display: flex;
             align-items: center;
-            gap: 20px;
-        }
-
-        .back-btn {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            transition: background 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .back-btn .material-icons {
-            font-size: 20px;
-        }
-
-        .back-btn:hover {
-            background: rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 10px;
-            text-decoration: none;
-            color: var(--text);
-        }
-
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            object-fit: contain;
-        }
-
-        .logo-text {
-            font-size: 20px;
-            font-weight: 700;
+            font-size: 24px;
+            font-weight: bold;
             color: var(--primary);
         }
 
+        .logo img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            object-position: center;
+            flex-shrink: 0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
         .beta-badge {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            background: var(--primary);
             color: white;
             font-size: 10px;
             font-weight: 600;
@@ -120,32 +86,61 @@
             letter-spacing: 0.5px;
         }
 
-        /* Main Content */
-        .main-content {
-            margin-top: 80px;
-            padding: 40px 20px;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
 
-        .page-title {
-            font-size: 32px;
-            font-weight: 700;
+        .btn-primary {
+            background: var(--primary);
             color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a5a5a;
+        }
+
+        .profile-section {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 30px;
             margin-bottom: 30px;
-            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         /* Video Preview */
         .video-preview {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 30px;
+            background: var(--background);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
         }
 
         .video-thumbnail {
@@ -175,25 +170,12 @@
             font-size: 14px;
         }
 
-        /* Management Sections */
         .management-section {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--background);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
             margin-bottom: 20px;
-        }
-
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
         .section-title .material-icons {
@@ -467,24 +449,35 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="header-left">
-                <button class="back-btn" onclick="goBack()">
-                    <span class="material-icons">arrow_back</span>
-                </button>
-                <a href="react-central.html" class="logo">
-                    <img src="logo/blackred_mini.png" alt="React Central" class="logo-icon">
-                    <div class="logo-text">React Central <span class="beta-badge">BETA</span></div>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <img src="logo/whitered_mini.png" alt="React Central">
+                React Central <span class="beta-badge">BETA</span>
+            </div>
+            <div class="nav-buttons">
+                <a href="profile.html" class="btn btn-secondary">
+                    <span class="material-icons">person</span>
+                    Profile
                 </a>
+                <a href="react-central.html" class="btn btn-secondary">
+                    <span class="material-icons">home</span>
+                    Home
+                </a>
+                <button onclick="logout()" class="btn btn-secondary">
+                    <span class="material-icons">logout</span>
+                    Sign Out
+                </button>
             </div>
         </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <h1 class="page-title">Video Management</h1>
+        <!-- Video Management Section -->
+        <div class="profile-section">
+            <h2 class="section-title">
+                <span class="material-icons">video_library</span>
+                Video Management
+            </h2>
 
         <!-- Loading State -->
         <div id="loadingState" class="loading">
@@ -506,31 +499,6 @@
                 </div>
             </div>
 
-            <!-- Basic Information -->
-            <div class="management-section">
-                <h3 class="section-title">
-                    <span class="material-icons">info</span>
-                    Basic Information
-                </h3>
-                
-                <div class="form-group">
-                    <label class="form-label" for="videoTitleInput">Title</label>
-                    <div style="display: flex; align-items: center;">
-                        <input type="text" id="videoTitleInput" class="form-input" placeholder="Enter video title">
-                        <button class="youtube-fetch-btn" onclick="fetchYouTubeTitle()">
-                            <span class="material-icons">refresh</span>
-                            Auto-fill
-                        </button>
-                    </div>
-                    <div class="input-hint">💡 Leave empty to use the original YouTube video title</div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="videoDescription">Description</label>
-                    <textarea id="videoDescription" class="form-input form-textarea" placeholder="Enter video description (optional)"></textarea>
-                    <div class="input-hint">💡 Leave empty to use the original YouTube video description</div>
-                </div>
-            </div>
 
             <!-- React Central Settings -->
             <div class="management-section">
@@ -660,8 +628,6 @@
             document.getElementById('videoLikes').textContent = `Likes: ${video.react_central?.likes || 0}`;
 
             // Form fields
-            document.getElementById('videoTitleInput').value = video.title || '';
-            document.getElementById('videoDescription').value = video.description || '';
             document.getElementById('isPublicToggle').checked = video.creator_info?.is_public || false;
             
             // Set category checkboxes
@@ -679,40 +645,6 @@
             }
         }
 
-        // Fetch YouTube title
-        async function fetchYouTubeTitle() {
-            if (!currentVideo?.reaction_url) {
-                showToast('No reaction video URL found', 'error');
-                return;
-            }
-
-            const button = document.querySelector('.youtube-fetch-btn');
-            button.disabled = true;
-            button.innerHTML = '<span class="material-icons">refresh</span> Loading...';
-
-            try {
-                const videoId = extractYouTubeVideoId(currentVideo.reaction_url);
-                if (!videoId) {
-                    throw new Error('Invalid YouTube URL');
-                }
-
-                const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch YouTube data');
-                }
-
-                const data = await response.json();
-                document.getElementById('videoTitleInput').value = data.title || '';
-                showToast('YouTube title fetched successfully!', 'success');
-
-            } catch (error) {
-                console.error('Error fetching YouTube title:', error);
-                showToast('Failed to fetch YouTube title', 'error');
-            } finally {
-                button.disabled = false;
-                button.innerHTML = '<span class="material-icons">refresh</span> Auto-fill';
-            }
-        }
 
         // Save changes
         async function saveChanges() {
@@ -725,8 +657,6 @@
             if (document.getElementById('categoryKpop').checked) categories.push('kpop');
 
             const updateData = {
-                title: document.getElementById('videoTitleInput').value.trim(),
-                description: document.getElementById('videoDescription').value.trim(),
                 is_public: document.getElementById('isPublicToggle').checked,
                 categories: categories
             };
@@ -840,6 +770,13 @@
             window.history.back();
         }
 
+        // Logout
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             if (!veId) {
@@ -850,5 +787,6 @@
             loadVideoData();
         });
     </script>
+    </div>
 </body>
 </html>
