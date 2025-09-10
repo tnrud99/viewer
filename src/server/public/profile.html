@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - React Central</title>
+    <link rel="icon" href="favicon.ico">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #c2291f;
+            --primary-hover: #a81f18;
+            --secondary: #4a4a4a;
+            --background: #1a1a1a;
+            --surface: #2a2a2a;
+            --text: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #888888;
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #4caf50;
+            --error: #f44336;
+            --warning: #ff9800;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .logo img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            object-position: center;
+            flex-shrink: 0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .beta-badge {
+            background: var(--primary);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a5a5a;
+        }
+
+        .profile-section {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .profile-info h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .profile-info p {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--background);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .section-header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            font-weight: 400;
+        }
+
+        .videos-section h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            margin-top: 8px;
+        }
+
+        .video-card {
+            background: var(--background);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .video-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            border-color: var(--primary);
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--surface) 0%, var(--background) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-thumbnail::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(193, 42, 31, 0.05) 0%, rgba(193, 42, 31, 0.02) 100%);
+        }
+
+        .video-thumbnail .material-icons {
+            font-size: 48px;
+            opacity: 0.6;
+            z-index: 1;
+        }
+
+        .video-info {
+            padding: 20px;
+        }
+
+        .video-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            padding: 8px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .video-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 8px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 32px;
+            height: 32px;
+        }
+
+        .action-btn:hover {
+            background: var(--surface);
+            color: var(--text);
+            border-color: var(--primary);
+        }
+
+        .action-btn.manage-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, #e63946 100%);
+            color: white;
+            border: none;
+            min-width: 50px;
+            height: 50px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(193, 42, 31, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn.manage-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .action-btn.manage-btn:hover::before {
+            left: 100%;
+        }
+
+        .action-btn.manage-btn:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #d62828 100%);
+            color: white;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(193, 42, 31, 0.6);
+        }
+
+        .action-btn.manage-btn:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        .action-btn .material-icons {
+            font-size: 16px;
+        }
+
+        .action-btn.manage-btn .material-icons {
+            font-size: 22px;
+            margin-right: 4px;
+        }
+
+        .action-btn.manage-btn .btn-text {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-muted);
+            background: var(--surface);
+            border-radius: 16px;
+            border: 2px dashed var(--border);
+            margin: 20px 0;
+        }
+
+        .empty-state .material-icons {
+            font-size: 72px;
+            margin-bottom: 24px;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .toast.error {
+            background: var(--error);
+        }
+
+        .toast.info {
+            background: var(--primary);
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--text);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--border);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            padding: 20px 30px;
+            border-top: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--background);
+            color: var(--text);
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .videos-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .video-card {
+                border-radius: 12px;
+            }
+
+            .video-thumbnail {
+                height: 160px;
+            }
+
+            .video-info {
+                padding: 16px;
+            }
+
+            .video-title {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+
+            .section-header {
+                margin-bottom: 20px;
+                padding-bottom: 12px;
+            }
+
+            .section-title {
+                font-size: 20px;
+                gap: 8px;
+            }
+
+            .empty-state {
+                padding: 60px 16px;
+                margin: 16px 0;
+            }
+
+            .empty-state .material-icons {
+                font-size: 56px;
+                margin-bottom: 20px;
+            }
+
+            .action-btn.manage-btn {
+                min-width: 45px;
+                height: 45px;
+            }
+
+            .action-btn.manage-btn .material-icons {
+                font-size: 20px;
+                margin-right: 2px;
+            }
+
+            .action-btn.manage-btn .btn-text {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <img src="logo/whitered_mini.png" alt="React Central">
+                React Central <span class="beta-badge">BETA</span>
+            </div>
+            <div class="nav-buttons">
+                <a href="react-central.html" class="btn btn-secondary">
+                    <span class="material-icons">home</span>
+                    Home
+                </a>
+                <a href="studio.html" class="btn btn-primary">
+                    <span class="material-icons">add</span>
+                    Create
+                </a>
+                <button onclick="logout()" class="btn btn-secondary">
+                    <span class="material-icons">logout</span>
+                    Sign Out
+                </button>
+            </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <div class="profile-header">
+                <div class="profile-avatar" id="profileAvatar">U</div>
+                <div class="profile-info">
+                    <h1 id="profileName">Loading...</h1>
+                    <p id="profileEmail">Loading...</p>
+                </div>
+                <button onclick="openEditProfile()" class="btn btn-secondary" style="margin-left: auto;">
+                    <span class="material-icons">edit</span>
+                    Edit Profile
+                </button>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="videosCount">0</div>
+                    <div class="stat-label">Videos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalViews">0</div>
+                    <div class="stat-label">Total Views</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalLikes">0</div>
+                    <div class="stat-label">Total Likes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="memberSince">-</div>
+                    <div class="stat-label">Member Since</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Videos Section -->
+        <div class="profile-section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="material-icons">video_library</span>
+                    My Videos
+                </h2>
+                <div class="section-subtitle">Manage and organize your video content</div>
+            </div>
+            <div id="videosContainer">
+                <div class="loading">
+                    <span class="material-icons">hourglass_empty</span>
+                    <p>Loading your videos...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Profile</h2>
+                <button onclick="closeEditProfile()" class="modal-close">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfileForm">
+                    <div class="form-group">
+                        <label for="editNickname">Nickname</label>
+                        <input type="text" id="editNickname" name="nickname" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeEditProfile()" class="btn btn-secondary">Cancel</button>
+                <button onclick="saveProfile()" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Profile page loading...');
+            
+            // Check authentication
+            if (!await checkAuth()) {
+                return;
+            }
+
+            // Load profile data
+            await loadProfile();
+            await loadVideos();
+        });
+
+        // Check authentication
+        async function checkAuth() {
+            const token = localStorage.getItem('authToken');
+            
+            if (!token) {
+                console.log('❌ No token found, redirecting to login');
+                window.location.href = 'login.html';
+                return false;
+            }
+
+            try {
+                // Verify token by calling profile API
+                const response = await fetch('/api/user/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    console.log('❌ Token invalid, redirecting to login');
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
+                    return false;
+                }
+
+                const data = await response.json();
+                currentUser = data.user;
+                console.log('✅ User authenticated:', currentUser.username);
+                return true;
+
+            } catch (error) {
+                console.error('❌ Auth check failed:', error);
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+
+        // Load profile data
+        async function loadProfile() {
+            if (!currentUser) {
+                showToast('User data not found', 'error');
+                return;
+            }
+
+            // Update profile header
+            const profileAvatar = document.getElementById('profileAvatar');
+            const profileName = document.getElementById('profileName');
+            const profileEmail = document.getElementById('profileEmail');
+
+            const displayName = currentUser.nickname || currentUser.username || 'User';
+            const displayEmail = currentUser.email || 'No email provided';
+
+            profileAvatar.textContent = displayName.charAt(0).toUpperCase();
+            profileName.textContent = displayName;
+            profileEmail.textContent = displayEmail;
+
+            // Update stats
+            document.getElementById('videosCount').textContent = '0';
+            document.getElementById('totalViews').textContent = '0';
+            document.getElementById('totalLikes').textContent = '0';
+            
+            if (currentUser.created_at) {
+                const memberSince = new Date(currentUser.created_at).getFullYear();
+                document.getElementById('memberSince').textContent = memberSince;
+            }
+        }
+
+        // Load user videos
+        async function loadVideos() {
+            console.log('🎥 loadVideos called');
+            const videosContainer = document.getElementById('videosContainer');
+            
+            try {
+                const token = localStorage.getItem('authToken');
+                console.log('🔍 Token exists:', !!token);
+                console.log('🔍 Token (first 20 chars):', token ? token.substring(0, 20) + '...' : 'null');
+                
+                // 디버깅: 현재 사용자 데이터 직접 확인
+                console.log('🔍 currentUser object:', currentUser);
+                console.log('🔍 currentUser._id:', currentUser?._id);
+                console.log('🔍 currentUser keys:', currentUser ? Object.keys(currentUser) : 'null');
+                console.log('🔍 currentUser full structure:', JSON.stringify(currentUser, null, 2));
+                
+                if (currentUser && currentUser._id) {
+                    console.log('🔍 Current user ID:', currentUser._id);
+                    try {
+                        const debugResponse = await fetch(`/api/debug/user-data/${currentUser._id}`);
+                        console.log('🔍 Debug API response status:', debugResponse.status);
+                        if (debugResponse.ok) {
+                            const debugData = await debugResponse.json();
+                            console.log('🔍 Debug data:', debugData);
+                        } else {
+                            const errorText = await debugResponse.text();
+                            console.error('❌ Debug API error response:', errorText);
+                        }
+                    } catch (debugError) {
+                        console.error('❌ Debug API error:', debugError);
+                    }
+                } else {
+                    console.log('⚠️ No currentUser._id available for debugging');
+                }
+                
+                console.log('📡 Fetching user videos from /api/react-central/videos?category=my...');
+                const response = await fetch('/api/react-central/videos?category=my', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('📡 Response status:', response.status);
+                console.log('📡 Response ok:', response.ok);
+                console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('❌ Response error:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                console.log('📡 Videos data received:', data);
+                const videos = data.videos || [];
+                console.log('🎥 Videos array length:', videos.length);
+                console.log('🎥 Videos:', videos);
+
+                if (videos.length === 0) {
+                    videosContainer.innerHTML = `
+                        <div class="empty-state">
+                            <span class="material-icons">video_library</span>
+                            <h3>No videos yet</h3>
+                            <p>Create your first reaction video to get started!</p>
+                            <a href="studio.html" class="btn btn-primary" style="margin-top: 20px; padding: 15px 30px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(194, 41, 31, 0.3);">
+                                <span class="material-icons" style="font-size: 20px;">add_circle</span>
+                                Create Your First Video
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Update stats
+                const totalViews = videos.reduce((sum, video) => sum + (video.metadata?.view_count || 0), 0);
+                const totalLikes = videos.reduce((sum, video) => sum + (video.react_central?.likes || 0), 0);
+
+                document.getElementById('videosCount').textContent = videos.length;
+                document.getElementById('totalViews').textContent = totalViews.toLocaleString();
+                document.getElementById('totalLikes').textContent = totalLikes.toLocaleString();
+
+                // Display videos
+                videosContainer.innerHTML = videos.map(video => `
+                    <div class="video-card">
+                        <div class="video-thumbnail" onclick="openVideo('${video.ve_id}')">
+                            <span class="material-icons">music_video</span>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title" onclick="openVideo('${video.ve_id}')">${video.title || 'Untitled Video'}</div>
+                            <div class="video-meta">
+                                <span>${video.metadata?.view_count || 0} views</span>
+                                <span>${formatDate(video.metadata?.created_at)}</span>
+                            </div>
+                            <div class="video-actions">
+                                <button class="action-btn" onclick="event.stopPropagation(); openVideo('${video.ve_id}')" title="Watch Video">
+                                    <span class="material-icons">play_arrow</span>
+                                </button>
+                                <button class="action-btn manage-btn" onclick="event.stopPropagation(); manageVideo('${video.ve_id}')" title="Manage Video">
+                                    <span class="material-icons">settings</span>
+                                    <span class="btn-text">MANAGE</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('❌ Failed to load videos:', error);
+                videosContainer.innerHTML = `
+                    <div class="empty-state">
+                        <span class="material-icons">error</span>
+                        <h3>Failed to load videos</h3>
+                        <p>Please try refreshing the page</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Open video
+        function openVideo(veId) {
+            window.open(`viewer.html?ve=${veId}`, '_blank');
+        }
+
+        // Manage video
+        function manageVideo(veId) {
+            window.open(`video-management.html?ve=${veId}`, '_blank');
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return 'Unknown';
+            const date = new Date(dateString);
+            return date.toLocaleDateString();
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            
+            // Clear user-specific data
+            localStorage.removeItem('bookmarks');
+            
+            // Clear all liked/bookmarked video states
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('liked_') || key.startsWith('bookmarked_'))) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            window.location.href = 'login.html';
+        }
+
+        // Show toast
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            
+            toastContainer.appendChild(toast);
+            
+            // Show toast
+            setTimeout(() => toast.classList.add('show'), 100);
+            
+            // Hide toast
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toastContainer.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        // Open edit profile modal
+        function openEditProfile() {
+            if (!currentUser) {
+                showToast('User data not available', 'error');
+                return;
+            }
+
+            // Fill form with current data
+            document.getElementById('editNickname').value = currentUser.nickname || currentUser.username || '';
+
+            // Show modal
+            document.getElementById('editProfileModal').style.display = 'flex';
+        }
+
+        // Close edit profile modal
+        function closeEditProfile() {
+            document.getElementById('editProfileModal').style.display = 'none';
+        }
+
+        // Save profile changes
+        async function saveProfile() {
+            const nickname = document.getElementById('editNickname').value.trim();
+
+            if (!nickname) {
+                showToast('Nickname is required', 'error');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch('/api/user/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nickname: nickname
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to update profile');
+                }
+
+                const data = await response.json();
+                
+                // Update current user data
+                currentUser.nickname = data.user.nickname;
+
+                // Update UI
+                const displayName = currentUser.nickname || currentUser.username || 'User';
+                const displayEmail = currentUser.email || 'No email provided';
+
+                document.getElementById('profileName').textContent = displayName;
+                document.getElementById('profileEmail').textContent = displayEmail;
+                document.getElementById('profileAvatar').textContent = displayName.charAt(0).toUpperCase();
+
+                // Close modal
+                closeEditProfile();
+
+                // Show success message
+                showToast(`Profile updated successfully! Updated ${data.updated_videos_count} videos.`, 'success');
+
+                // Reload videos to reflect changes
+                await loadVideos();
+
+            } catch (error) {
+                console.error('❌ Profile update failed:', error);
+                showToast(error.message || 'Failed to update profile', 'error');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('editProfileModal');
+            if (event.target === modal) {
+                closeEditProfile();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -62,7 +62,7 @@
   },
   "git": {
     "deploymentEnabled": {
-      "main": true,
+      "main": false,
       "development": true,
       "production": true,
       "homepage": true

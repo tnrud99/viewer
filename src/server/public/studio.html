@@ -461,9 +461,210 @@
         .create-own-btn:active {
             transform: translateY(0);
         }
+
+        /* Header Styles */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 2rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            width: 150px;
+            height: 40px;
+            background-image: url('logo/whitered_mini.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-menu a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+            padding: 0.5rem 0;
+        }
+
+        .nav-menu a:hover {
+            color: #c2291f;
+        }
+
+        /* Login Button Styles */
+        .login-btn {
+            background: #c2291f;
+            color: white;
+            padding: 0.6rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: 2px solid #c2291f;
+        }
+
+        .login-btn:hover {
+            background: transparent;
+            color: #c2291f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(194, 41, 31, 0.3);
+        }
+
+        /* User Menu Styles */
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #c2291f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .user-menu a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .user-menu a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #c2291f;
+        }
+
+        .user-menu a.logout-btn {
+            background: #c2291f;
+            color: white;
+        }
+
+        .user-menu a.logout-btn:hover {
+            background: #a81f18;
+        }
+
+        /* Adjust body padding for fixed header */
+        body {
+            padding-top: 90px;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 1rem;
+            }
+            
+            .nav-container {
+                height: 60px;
+            }
+            
+            .logo {
+                width: 120px;
+                height: 32px;
+            }
+            
+            .nav-menu {
+                display: none;
+            }
+            
+            .login-btn {
+                padding: 0.5rem 1.2rem;
+                font-size: 0.8rem;
+            }
+            
+            .user-menu {
+                gap: 0.5rem;
+            }
+            
+            .user-menu a {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+            }
+            
+            .user-avatar {
+                width: 28px;
+                height: 28px;
+                font-size: 0.7rem;
+            }
+            
+            body {
+                padding-top: 80px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo"></div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="react-central.html">Videos</a></li>
+                <li><a href="profile.html">Profile</a></li>
+            </ul>
+            <!-- Login/User Menu -->
+            <div id="authMenu">
+                <!-- Login button (shown when not logged in) -->
+                <a href="login.html" class="login-btn" id="loginBtn">Login</a>
+                
+                <!-- User menu (shown when logged in) -->
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">U</div>
+                        <span id="userName">User</span>
+                    </div>
+                    <a href="react-central.html">Videos</a>
+                    <a href="profile.html">Profile</a>
+                    <a href="#" onclick="logout()" class="logout-btn">Logout</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
     <div class="main-container">
         <div class="container">
             <div class="title-container">
@@ -589,10 +790,69 @@
             content.classList.toggle('collapsed');
         }
 
+        // Check authentication status and update UI
+        function checkAuthStatus() {
+            const token = localStorage.getItem('authToken');
+            const user = localStorage.getItem('user');
+            const loginBtn = document.getElementById('loginBtn');
+            const userMenu = document.getElementById('userMenu');
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+
+            if (token && user) {
+                try {
+                    const userData = JSON.parse(user);
+                    // Show user menu
+                    loginBtn.style.display = 'none';
+                    userMenu.style.display = 'flex';
+                    
+                    // Update user info
+                    userName.textContent = userData.nickname || userData.email || 'User';
+                    userAvatar.textContent = (userData.nickname || userData.email || 'U').charAt(0).toUpperCase();
+                } catch (error) {
+                    console.error('Error parsing user data:', error);
+                    // Show login button if user data is corrupted
+                    loginBtn.style.display = 'block';
+                    userMenu.style.display = 'none';
+                }
+            } else {
+                // Show login button
+                loginBtn.style.display = 'block';
+                userMenu.style.display = 'none';
+            }
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            
+            // Clear user-specific data
+            localStorage.removeItem('bookmarks');
+            
+            // Clear all liked/bookmarked video states
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('liked_') || key.startsWith('bookmarked_'))) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            // Update UI
+            checkAuthStatus();
+        }
 
         // 페이지 로드 시 가이드 박스를 열린 상태로 시작
         window.addEventListener('load', function() {
             // 기본적으로 열린 상태로 시작
+            checkAuthStatus();
+        });
+
+        // DOM이 로드되면 인증 상태 체크
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
         });
     </script>
 </body>
