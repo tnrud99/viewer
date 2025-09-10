@@ -1110,6 +1110,38 @@ app.put('/api/user/profile', authenticateToken, ensureMongoConnection, async (re
     }
 });
 
+// 북마크 API 테스트
+app.get('/api/user/bookmark/test', authenticateToken, ensureMongoConnection, async (req, res) => {
+    try {
+        console.log('🧪 Bookmark test API called');
+        const userId = req.user.userId;
+        console.log('🧪 User ID:', userId);
+        console.log('🧪 MongoDB state:', mongoose.connection.readyState);
+        
+        const user = await User.findById(userId).select('username email bookmarks');
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        res.json({
+            success: true,
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email,
+                bookmarks: user.bookmarks || []
+            },
+            mongoState: mongoose.connection.readyState
+        });
+    } catch (error) {
+        console.error('❌ Bookmark test error:', error);
+        res.status(500).json({ 
+            error: 'Test failed',
+            details: error.message 
+        });
+    }
+});
+
 // 북마크 API
 // 북마크 추가/제거
 app.post('/api/user/bookmark', authenticateToken, ensureMongoConnection, async (req, res) => {
@@ -1126,6 +1158,8 @@ app.post('/api/user/bookmark', authenticateToken, ensureMongoConnection, async (
         }
         
         console.log('🔖 Finding user:', userId);
+        console.log('🔖 MongoDB connection state:', mongoose.connection.readyState);
+        
         const user = await User.findById(userId);
         if (!user) {
             console.log('❌ User not found:', userId);
@@ -1134,9 +1168,10 @@ app.post('/api/user/bookmark', authenticateToken, ensureMongoConnection, async (
         
         console.log('🔖 User found, current bookmarks:', user.bookmarks);
         
-        // 북마크 배열이 없으면 초기화
-        if (!user.bookmarks) {
+        // 북마크 배열이 없으면 초기화 (기존 사용자 호환성)
+        if (!user.bookmarks || !Array.isArray(user.bookmarks)) {
             user.bookmarks = [];
+            console.log('🔖 Initialized bookmarks array for user');
         }
         
         // 북마크 배열에서 해당 비디오 ID 찾기
@@ -1146,8 +1181,14 @@ app.post('/api/user/bookmark', authenticateToken, ensureMongoConnection, async (
             // 북마크 추가
             console.log('🔖 Adding bookmark for:', ve_id);
             user.bookmarks.push(ve_id);
-            await user.save();
-            console.log('✅ Bookmark added, new bookmarks:', user.bookmarks);
+            
+            try {
+                await user.save();
+                console.log('✅ Bookmark added, new bookmarks:', user.bookmarks);
+            } catch (saveError) {
+                console.error('❌ Failed to save user:', saveError);
+                throw new Error('Failed to save bookmark: ' + saveError.message);
+            }
             
             // VEUrl의 북마크 카운트 증가 (선택적)
             try {
@@ -1169,8 +1210,14 @@ app.post('/api/user/bookmark', authenticateToken, ensureMongoConnection, async (
             // 북마크 제거
             console.log('🔖 Removing bookmark for:', ve_id);
             user.bookmarks.splice(bookmarkIndex, 1);
-            await user.save();
-            console.log('✅ Bookmark removed, new bookmarks:', user.bookmarks);
+            
+            try {
+                await user.save();
+                console.log('✅ Bookmark removed, new bookmarks:', user.bookmarks);
+            } catch (saveError) {
+                console.error('❌ Failed to save user:', saveError);
+                throw new Error('Failed to remove bookmark: ' + saveError.message);
+            }
             
             // VEUrl의 북마크 카운트 감소 (선택적)
             try {
@@ -1222,6 +1269,30 @@ app.get('/api/user/bookmarks', authenticateToken, ensureMongoConnection, async (
     } catch (error) {
         console.error('❌ Get bookmarks API error:', error);
         res.status(500).json({ error: 'Failed to get bookmarks' });
+    }
+});
+
+// 북마크 필드 마이그레이션 (임시)
+app.post('/api/migrate/bookmarks', ensureMongoConnection, async (req, res) => {
+    try {
+        console.log('🔄 Starting bookmarks migration...');
+        
+        const result = await User.updateMany(
+            { bookmarks: { $exists: false } },
+            { $set: { bookmarks: [] } }
+        );
+        
+        console.log('✅ Migration completed:', result);
+        
+        res.json({
+            success: true,
+            message: 'Bookmarks field added to all users',
+            modifiedCount: result.modifiedCount,
+            matchedCount: result.matchedCount
+        });
+    } catch (error) {
+        console.error('❌ Migration failed:', error);
+        res.status(500).json({ error: 'Migration failed', details: error.message });
     }
 });
 
