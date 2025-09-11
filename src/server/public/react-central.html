@@ -1135,8 +1135,8 @@
         }
 
         function openVideo(videoId) {
-            // VE URL로 이동
-            window.open(`/viewer.html?ve=${videoId}`, '_blank');
+            // 같은 탭에서 viewer로 이동
+            window.location.href = `/viewer.html?ve=${videoId}`;
         }
 
         async function toggleLike(videoId, button) {
