@@ -11,34 +11,14 @@
     <meta name="x5-fullscreen" content="true">
     <title>Multi-Window-Viewer - Synchronized Reaction Video Player</title>
     <link rel="icon" href="favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     
     <!-- 독립적인 스타일 (ui-system.css 참조하지 않음) -->
     <style>
         :root {
-            /* 색상 시스템 - react-central과 통일 */
-            --primary: #c12a1f;
-            --primary-dark: #a01f17;
-            --primary-light: #e63946;
-            --accent: #00d4ff;
-            --text: #1a1a1a;
-            --text-secondary: #2a2a2a;
-            --text-muted: #666666;
-            --bg: #ffffff;
-            --bg-secondary: #f8f9fa;
-            --bg-card: rgba(255, 255, 255, 0.9);
-            --border: rgba(193, 42, 31, 0.2);
-            --shadow: 0 20px 40px rgba(193, 42, 31, 0.15);
-            --dark-bg: #0f0f0f;
-            --dark-card: #1a1a1a;
-            --dark-text: #ffffff;
-            --dark-text-secondary: #aaaaaa;
-            
-            /* 기존 변수들도 유지 (호환성) */
-            --color-action: #c12a1f;
-            --color-action-hover: #a01f17;
+            /* 색상 시스템 */
+            --color-action: #c2291f;
+            --color-action-hover: #a81f18;
             --color-action-light: rgba(194, 41, 31, 0.1);
             --color-secondary: #4a4a4a;
             --color-secondary-hover: #5a5a5a;
@@ -46,14 +26,14 @@
             --color-warning: #ff9800;
             --color-error: #f44336;
             --color-info: #2196f3;
-            --color-bg-main: #ffffff;
-            --color-bg-card: rgba(255, 255, 255, 0.9);
-            --color-bg-input: rgba(255, 255, 255, 0.8);
-            --color-text-main: #1a1a1a;
-            --color-text-sub: #2a2a2a;
-            --color-text-muted: #666666;
-            --color-border: rgba(193, 42, 31, 0.2);
-            --color-border-focus: rgba(193, 42, 31, 0.3);
+            --color-bg-main: #1a1a1a;
+            --color-bg-card: rgba(42, 42, 42, 0.8);
+            --color-bg-input: rgba(58, 58, 58, 0.6);
+            --color-text-main: #ffffff;
+            --color-text-sub: #cccccc;
+            --color-text-muted: #888888;
+            --color-border: rgba(255, 255, 255, 0.1);
+            --color-border-focus: rgba(194, 41, 31, 0.3);
             
             /* 간격 */
             --space-xs: 0.5rem;
@@ -89,14 +69,12 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
-            background: var(--bg);
-            color: var(--text);
+            background: linear-gradient(135deg, var(--color-bg-main) 0%, #2a2a2a 100%);
+            color: var(--color-text-main);
             min-height: 100vh;
-            line-height: 1.6;
-            overflow-x: hidden;
             /* Prevent screen rotation on mobile */
             -webkit-text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;
@@ -110,167 +88,62 @@
             margin: 0 auto;
             padding: var(--space-lg);
             min-height: 100vh;
-            margin-top: 80px; /* 고정 헤더를 위한 상단 마진 */
         }
 
-        /* Header with Logo & Navigation - react-central 스타일 */
+        /* Header with Logo & Navigation */
         .header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            padding: 0 20px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            padding: var(--space-lg) 0 var(--space-sm) 0;
         }
 
         .header-content {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
+            gap: var(--space-xxl);
+            position: relative;
             width: 100%;
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
         .header-center {
-            flex: 1;
-            max-width: 600px;
-            margin: 0 40px;
             display: flex;
             align-items: center;
-            justify-content: center;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            gap: var(--space-sm);
+            padding-top: var(--space-md);
         }
 
         .header-logo {
-            width: 32px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
             background-image: url('./logo/whitered_mini.png');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-            border-radius: 8px;
         }
 
         .header h1 {
-            color: var(--text);
-            font-size: 20px;
-            font-weight: 700;
+            color: var(--color-text-main);
+            font-size: var(--text-3xl);
+            font-weight: 600;
             margin: 0;
+            letter-spacing: 0.02em;
             display: flex;
             align-items: center;
-            gap: 10px;
-            text-decoration: none;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            color: var(--text);
-        }
-
-        .logo-text {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--primary);
+            gap: var(--space-sm);
         }
 
         .beta-tag {
-            background: var(--primary);
+            background: var(--color-action);
             color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.4em;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-left: 8px;
-        }
-
-        .create-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .create-btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
-        }
-
-        .material-icons {
-            font-size: 18px;
-            vertical-align: middle;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .header {
-                padding: 0 15px;
-            }
-
-            .header-center {
-                margin: 0 20px;
-            }
-
-            .container {
-                padding: 15px;
-                margin-top: 70px;
-            }
-
-            .logo-text {
-                font-size: 16px;
-            }
-
-            .create-btn {
-                padding: 6px 12px;
-                font-size: 14px;
-            }
-
-            .create-btn span:last-child {
-                display: none;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header-right .create-btn {
-                display: none;
-            }
-
-            .logo-text {
-                display: none;
-            }
-
-            .container {
-                padding: 10px;
-                margin-top: 60px;
-            }
+            margin-left: 4px;
+            margin-top: 5px;
         }
 
         .header p {
@@ -1455,12 +1328,10 @@
             border-radius: 4px;
             outline: none;
             -webkit-appearance: none;
-            appearance: none;
         }
 
         .slider-container input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            appearance: none;
             width: 20px;
             height: 20px;
             background: var(--color-action);
@@ -1570,31 +1441,19 @@
                  display: none !important;
              }
             
-            /* Header Mobile Optimization - react-central 스타일과 통일 */
+            /* Header Mobile Optimization */
             .header {
-                position: fixed;
-                top: 0;
-                width: 100%;
-                z-index: 1000;
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(20px);
-                border-bottom: 1px solid var(--border);
-                padding: 0 15px;
-                height: 60px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
+                margin-bottom: var(--space-md);
+                padding: var(--space-md) 0 var(--space-sm) 0;
             }
             
             .header-content {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                width: 100%;
+                flex-direction: column;
+                gap: var(--space-sm);
             }
             
             .header h1 {
-                font-size: 16px;
+                font-size: var(--text-xl);
                 flex-wrap: wrap;
                 gap: var(--space-xs);
             }
@@ -1751,6 +1610,10 @@
              
              /* Show controls when expanded on mobile */
              .compact-controls {
+                 /* Remove !important to allow JavaScript control */
+             }
+            
+                         .compact-controls {
                  display: grid;
                  grid-template-columns: 1fr 1fr;
                  gap: var(--space-sm);
@@ -1759,6 +1622,8 @@
                  background: rgba(255, 255, 255, 0.05);
                  border-radius: var(--radius-md);
                  border: 1px solid rgba(255, 255, 255, 0.1);
+                 box-sizing: border-box;
+                 overflow: hidden;
              }
              
              /* Mobile: Hide controls by default */
@@ -1823,7 +1688,6 @@
              
              .slider-container input[type="range"]::-webkit-slider-thumb {
                  -webkit-appearance: none;
-            appearance: none;
                  width: 16px;
                  height: 16px;
                  background: var(--color-action);
@@ -1946,21 +1810,6 @@
          @media (max-width: 480px) {
              .container {
                  padding: var(--space-xs);
-                 margin-top: 60px;
-             }
-             
-             /* Header for very small screens */
-             .header {
-                 height: 50px;
-                 padding: 0 10px;
-             }
-             
-             .logo-text {
-                 display: none;
-             }
-             
-             .header-right .create-btn {
-                 display: none;
              }
              
              /* Compact overlay settings for very small screens */
@@ -2171,7 +2020,6 @@
             /* Swipe-friendly sliders */
             .slider-container input[type="range"] {
                 -webkit-appearance: none;
-            appearance: none;
                 height: 6px;
                 background: rgba(255, 255, 255, 0.2);
                 border-radius: 3px;
@@ -2180,7 +2028,6 @@
             
             .slider-container input[type="range"]::-webkit-slider-thumb {
                 -webkit-appearance: none;
-            appearance: none;
                 width: 20px;
                 height: 20px;
                 background: var(--color-action);
@@ -2320,52 +2167,44 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <div class="header-left">
-                    <a href="/react-central.html" class="logo">
-                        <div class="header-logo"></div>
-                        <div class="logo-text">Multi-Window-Viewer <span class="beta-tag">BETA</span></div>
-                    </a>
-                </div>
-
                 <div class="header-center">
-                    <button class="info-icon" id="infoIcon" title="Learn more about this solution">i</button>
-                    <div class="apple-tooltip" id="appleTooltip">
-                        <div class="apple-tooltip-header">
-                            <h3 class="apple-tooltip-title">VirtuEDIT Technology</h3>
-                            <div class="apple-tooltip-subtitle">US Patent Registered • First ever IP Solution for Video Platforms</div>
-                        </div>
-                        
-                        <div class="apple-tooltip-section">
-                            <p class="apple-tooltip-section-content" style="line-height: 1.2;">
-                                Millisecond precision synchronization.<br>
-                                Real YouTube videos played simultaneously.
-                            </p>
-                        </div>
+                    <h1>
+                        <div class="header-logo"></div>
+                        Multi-Window-Viewer
+                        <span class="beta-tag">Beta</span>
+                        <button class="info-icon" id="infoIcon" title="Learn more about this solution">i</button>
+                        <a href="/studio.html" class="create-own-btn" title="Create your own reaction video">Create My Own</a>
+                        <div class="apple-tooltip" id="appleTooltip">
+                            <div class="apple-tooltip-header">
+                                <h3 class="apple-tooltip-title">VirtuEDIT Technology</h3>
+                                <div class="apple-tooltip-subtitle">US Patent Registered • First ever IP Solution for Video Platforms</div>
+                            </div>
+                            
+                            <div class="apple-tooltip-section">
+                                <p class="apple-tooltip-section-content" style="line-height: 1.2;">
+                                    Millisecond precision synchronization.<br>
+                                    Real YouTube videos played simultaneously.
+                                </p>
+                            </div>
 
-                        <div class="apple-tooltip-highlight">
-                            <div class="apple-tooltip-highlight-title">Everyone Wins</div>
-                            <div class="apple-tooltip-highlight-content" style="color: #fff; font-size: 14px;">
-                                <strong style="font-weight: 600;">Reactors:</strong> Monetize without copyright fears<br>
-                                <strong style="font-weight: 600;">Artists:</strong> Get views & revenue from every reaction<br>
-                                <strong style="font-weight: 600;">Platforms:</strong> Revenue from previously non-monetizable content<br>
-                                <strong style="font-weight: 600;">Viewers:</strong> Perfect synchronized reaction experiences
+                            <div class="apple-tooltip-highlight">
+                                <div class="apple-tooltip-highlight-title">Everyone Wins</div>
+                                <div class="apple-tooltip-highlight-content" style="color: #fff; font-size: 14px;">
+                                    <strong style="font-weight: 600;">Reactors:</strong> Monetize without copyright fears<br>
+                                    <strong style="font-weight: 600;">Artists:</strong> Get views & revenue from every reaction<br>
+                                    <strong style="font-weight: 600;">Platforms:</strong> Revenue from previously non-monetizable content<br>
+                                    <strong style="font-weight: 600;">Viewers:</strong> Perfect synchronized reaction experiences
+                                </div>
+                            </div>
+
+                            <div class="apple-tooltip-section">
+                                <p class="apple-tooltip-section-content">
+                                    Official YouTube players only. All copyright protections intact.
+                                </p>
                             </div>
                         </div>
+                    </h1>
 
-                        <div class="apple-tooltip-section">
-                            <p class="apple-tooltip-section-content">
-                                Official YouTube players only. All copyright protections intact.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="header-right">
-                    <a href="/studio.html" class="create-btn">
-                        <span class="material-icons">add</span>
-                        <span>Create</span>
-                    </a>
-                </div>
             </div>
         </header>
 
