@@ -794,6 +794,23 @@
             transition: all 0.3s ease;
             aspect-ratio: 16 / 9;
         }
+        
+        /* 모바일에서 오버레이 영상 성능 최적화 */
+        @media (max-width: 768px) {
+            #youtube-container {
+                /* GPU 가속 활성화 */
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
+                /* 하드웨어 가속 */
+                will-change: transform;
+            }
+            
+            #youtube-container iframe {
+                /* 모바일에서 iframe 최적화 */
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
+            }
+        }
 
         #youtube-container iframe {
             width: 100% !important;
@@ -2410,6 +2427,53 @@
             
             // 회전 방지 코드 완전 제거 - 모바일에서 자연스러운 화면 표시
         }
+        
+        // 모바일 성능 최적화 함수
+        function optimizeForMobile() {
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                console.log('Mobile optimization applied');
+                
+                // 화면 크기에 따른 적응형 해상도 조절
+                const screenWidth = window.innerWidth;
+                let overlayQuality, mainQuality;
+                
+                if (screenWidth <= 480) {
+                    // 매우 작은 화면 (아이폰 SE 등)
+                    overlayQuality = 'medium'; // 360p
+                    mainQuality = 'large';     // 480p
+                } else if (screenWidth <= 768) {
+                    // 일반 모바일 화면
+                    overlayQuality = 'large';  // 480p
+                    mainQuality = 'hd720';     // 720p
+                }
+                
+                // 오버레이 영상 해상도 강제 조절
+                if (youtubePlayer && youtubePlayer.setPlaybackQuality) {
+                    try {
+                        youtubePlayer.setPlaybackQuality(overlayQuality);
+                        console.log(`Overlay video quality set to ${overlayQuality}`);
+                    } catch (error) {
+                        console.log('Could not set overlay quality:', error);
+                    }
+                }
+                
+                // 메인 영상 해상도 조절
+                if (reactionYoutubePlayer && reactionYoutubePlayer.setPlaybackQuality) {
+                    try {
+                        reactionYoutubePlayer.setPlaybackQuality(mainQuality);
+                        console.log(`Main video quality set to ${mainQuality}`);
+                    } catch (error) {
+                        console.log('Could not set main video quality:', error);
+                    }
+                }
+            }
+        }
+        
+        // 화면 크기 변경 감지
+        window.addEventListener('resize', function() {
+            setTimeout(optimizeForMobile, 500); // 0.5초 후 실행
+        });
         // Overlay settings panel controls
         const overlayToggleBtn = document.getElementById('overlayToggleBtn');
         const overlayControlsToggleBtn = document.getElementById('overlayControlsToggleBtn');
@@ -2798,16 +2862,28 @@
                 reactionYoutubeReady = false;
                 
                 // Create new reaction YouTube player with improved height
+                // 모바일 감지 및 해상도 최적화
+                const isMobile = window.innerWidth <= 768;
+                const playerVars = isMobile ? {
+                    'playsinline': 1,
+                    'controls': 1,
+                    'autoplay': 0,
+                    'rel': 0,
+                    'vq': 'large',  // 메인 영상은 높은 해상도 (480p) - 좋은 화질
+                    'iv_load_policy': 3,  // 주석 비활성화
+                    'cc_load_policy': 0   // 자막 비활성화
+                } : {
+                    'playsinline': 1,
+                    'controls': 1,
+                    'autoplay': 0,
+                    'rel': 0
+                };
+                
                 reactionYoutubePlayer = new YT.Player('reaction-youtube-container', {
                     height: '540', // 1.5배 높이 증가 (기본 360px의 1.5배)
                     width: '100%',
                     videoId: reactionVideoId,
-                    playerVars: {
-                        'playsinline': 1,
-                        'controls': 1,
-                        'autoplay': 0,
-                        'rel': 0
-                    },
+                    playerVars: playerVars,
                     events: {
                         'onReady': onReactionPlayerReady,
                         'onStateChange': onReactionPlayerStateChange
@@ -3251,6 +3327,9 @@
         document.getElementById('status').textContent = 'Status: Reaction Video Loaded';
         reactionYoutubeReady = true;
         addDebugMessage("Reaction YouTube player ready");
+        
+        // 모바일 최적화 적용
+        setTimeout(optimizeForMobile, 1000); // 1초 후 실행
         
         // If playback was started before player was ready, start sync now
         if (youtubeYoutubeMode && isPlaying) {
@@ -3868,16 +3947,28 @@
                     reactionYoutubeReady = false;
                     
                     // Create new reaction YouTube player
+                    // 모바일 감지 및 해상도 최적화
+                    const isMobile = window.innerWidth <= 768;
+                    const playerVars = isMobile ? {
+                        'playsinline': 1,
+                        'controls': 1,
+                        'autoplay': 0,
+                        'rel': 0,
+                        'vq': 'large',  // 메인 영상은 높은 해상도 (480p) - 좋은 화질
+                        'iv_load_policy': 3,  // 주석 비활성화
+                        'cc_load_policy': 0   // 자막 비활성화
+                    } : {
+                        'playsinline': 1,
+                        'controls': 1,
+                        'autoplay': 0,
+                        'rel': 0
+                    };
+                    
                     reactionYoutubePlayer = new YT.Player('reaction-youtube-container', {
                         height: '540',
                         width: '100%',
                         videoId: reactionVideoId,
-                        playerVars: {
-                            'playsinline': 1,
-                            'controls': 1,
-                            'autoplay': 0,
-                            'rel': 0
-                        },
+                        playerVars: playerVars,
                         events: {
                             'onReady': onReactionPlayerReady,
                             'onStateChange': onReactionPlayerStateChange

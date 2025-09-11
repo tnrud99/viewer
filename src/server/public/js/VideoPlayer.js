@@ -40,19 +40,35 @@ class VideoPlayer {
             return false;
         }
 
+        // 모바일 감지
+        const isMobile = window.innerWidth <= 768;
+        
+        // 모바일용 적당한 해상도 설정 (오버레이 영상용)
+        const playerVars = isMobile ? {
+            'autoplay': 0,
+            'controls': 1,
+            'rel': 0,
+            'showinfo': 0,
+            'modestbranding': 1,
+            'start': startTime,
+            'vq': 'medium',  // 중간 해상도 (360p) - 적당한 화질
+            'iv_load_policy': 3,  // 주석 비활성화
+            'cc_load_policy': 0   // 자막 비활성화
+        } : {
+            'autoplay': 0,
+            'controls': 1,
+            'rel': 0,
+            'showinfo': 0,
+            'modestbranding': 1,
+            'start': startTime
+        };
+
         try {
             this.youtubePlayer = new YT.Player('youtube-player', {
                 height: '100%',
                 width: '100%',
                 videoId: videoId,
-                playerVars: {
-                    'autoplay': 0,
-                    'controls': 1,
-                    'rel': 0,
-                    'showinfo': 0,
-                    'modestbranding': 1,
-                    'start': startTime
-                },
+                playerVars: playerVars,
                 events: {
                     'onReady': (event) => this.onPlayerReady(event),
                     'onStateChange': (event) => this.onPlayerStateChange(event)
