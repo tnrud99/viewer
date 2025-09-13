@@ -16,7 +16,8 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json());누가.proㄴ 안ㄷ고 새
+
 
 // 정적 파일 서빙 설정
 app.use(express.static(path.join(__dirname, 'public')));
@@ -195,11 +196,18 @@ connectToMongoDB().catch(console.error);
 // MongoDB 연결 상태 확인 미들웨어
 const ensureMongoConnection = async (req, res, next) => {
     try {
-        console.log('Checking MongoDB connection...');
-        console.log('Connection state:', mongoose.connection.readyState);
+        console.log('🔍 Checking MongoDB connection...');
+        console.log('🔍 Connection state:', mongoose.connection.readyState);
+        console.log('🔍 Request URL:', req.url);
+        console.log('🔍 Request method:', req.method);
         
         if (mongoose.connection.readyState !== 1) {
-            console.log('MongoDB not connected, attempting to reconnect...');
+            console.log('🔍 MongoDB not connected, attempting to reconnect...');
+            console.log('🔍 Environment variables:', {
+                NODE_ENV: process.env.NODE_ENV,
+                MONGODB_URI_EXISTS: !!process.env.MONGODB_URI,
+                MONGODB_URI_LENGTH: process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0
+            });
             await connectToMongoDB();
         }
         
@@ -209,16 +217,20 @@ const ensureMongoConnection = async (req, res, next) => {
             next();
         } else {
             console.error('❌ MongoDB connection failed after reconnect attempt');
+            console.error('❌ Final connection state:', mongoose.connection.readyState);
             res.status(500).json({ 
                 error: 'Database connection failed',
-                details: 'Unable to establish database connection'
+                details: 'Unable to establish database connection',
+                connectionState: mongoose.connection.readyState
             });
         }
     } catch (error) {
-        console.error('MongoDB connection failed:', error);
+        console.error('❌ ensureMongoConnection error:', error);
+        console.error('❌ ensureMongoConnection stack:', error.stack);
         res.status(500).json({ 
-            error: 'Database connection failed',
-            details: error.message
+            error: 'Database connection error',
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 };
@@ -822,6 +834,10 @@ app.delete('/api/videos/:veId', ensureMongoConnection, async (req, res) => {
 // 공개된 반응 영상 목록 조회
 app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => {
     try {
+        console.log('🎬 React Central videos API called');
+        console.log('🎬 Query parameters:', req.query);
+        console.log('🎬 MongoDB connection state:', mongoose.connection.readyState);
+        
         const { 
             category = 'all', 
             search = '', 
@@ -948,7 +964,27 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
         });
     } catch (error) {
         console.error('React Central videos fetch error:', error);
-        res.status(500).json({ error: 'Server error' });
+        console.error('Error stack:', error.stack);
+        console.error('Error details:', {
+            message: error.message,
+            name: error.name,
+            code: error.code,
+            errno: error.errno,
+            syscall: error.syscall,
+            hostname: error.hostname,
+            port: error.port
+        });
+        console.error('MongoDB connection state:', mongoose.connection.readyState);
+        console.error('Environment variables:', {
+            NODE_ENV: process.env.NODE_ENV,
+            MONGODB_URI_EXISTS: !!process.env.MONGODB_URI,
+            MONGODB_URI_LENGTH: process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0
+        });
+        res.status(500).json({ 
+            error: 'Server error',
+            details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
+            mongoState: mongoose.connection.readyState
+        });
     }
 });
 
@@ -1899,6 +1935,59 @@ app.get('/api/health', (req, res) => {
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development'
     });
+});
+
+// React Central API 디버깅 엔드포인트
+app.get('/api/react-central/debug', async (req, res) => {
+    try {
+        console.log('🐛 React Central debug API called');
+        console.log('🐛 MongoDB connection state:', mongoose.connection.readyState);
+        console.log('🐛 Environment variables:', {
+            NODE_ENV: process.env.NODE_ENV,
+            MONGODB_URI_EXISTS: !!process.env.MONGODB_URI,
+            MONGODB_URI_LENGTH: process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0
+        });
+        
+        // 간단한 데이터베이스 테스트
+        let dbTest = 'not_attempted';
+        let videoCount = 0;
+        
+        if (mongoose.connection.readyState === 1) {
+            try {
+                videoCount = await VEUrl.countDocuments({ 'creator_info.is_public': true });
+                dbTest = 'success';
+            } catch (error) {
+                dbTest = 'failed';
+                console.error('🐛 Database test failed:', error);
+            }
+        }
+        
+        res.json({
+            status: 'React Central Debug',
+            mongoConnectionState: mongoose.connection.readyState,
+            mongoConnectionStates: {
+                0: 'disconnected',
+                1: 'connected',
+                2: 'connecting',
+                3: 'disconnecting'
+            },
+            environment: {
+                NODE_ENV: process.env.NODE_ENV,
+                MONGODB_URI_EXISTS: !!process.env.MONGODB_URI,
+                MONGODB_URI_LENGTH: process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0
+            },
+            databaseTest: dbTest,
+            publicVideoCount: videoCount,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('🐛 Debug API error:', error);
+        res.status(500).json({
+            error: 'Debug API failed',
+            message: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
 });
 
 // MongoDB 연결 테스트
