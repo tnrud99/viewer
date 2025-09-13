@@ -878,21 +878,43 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
             }
         } else {
             // 다른 카테고리는 공개 영상만 표시
-            query['creator_info.is_public'] = true;
+            // 기존 데이터 호환성을 위해 $or 조건 사용
+            query.$and = [
+                {
+                    $or: [
+                        { 'creator_info.is_public': true },
+                        { 'creator_info.is_public': { $exists: false } }, // 기존 데이터 (필드가 없는 경우)
+                        { 'creator_info.is_public': null } // null인 경우
+                    ]
+                }
+            ];
             
             if (category !== 'all' && category !== 'latest') {
                 // 다중 카테고리 지원: 배열에 해당 카테고리가 포함된 영상 검색
-                query['react_central.categories'] = { $in: [category] };
+                query.$and.push({
+                    $or: [
+                        { 'react_central.categories': { $in: [category] } },
+                        { 'react_central.categories': { $exists: false } } // 기존 데이터 (필드가 없는 경우)
+                    ]
+                });
             }
         }
         
         // 검색 필터링
         if (search) {
-            query.$or = [
-                { title: { $regex: search, $options: 'i' } },
-                { description: { $regex: search, $options: 'i' } },
-                { 'react_central.tags': { $in: [new RegExp(search, 'i')] } }
-            ];
+            const searchCondition = {
+                $or: [
+                    { title: { $regex: search, $options: 'i' } },
+                    { description: { $regex: search, $options: 'i' } },
+                    { 'react_central.tags': { $in: [new RegExp(search, 'i')] } }
+                ]
+            };
+            
+            if (query.$and) {
+                query.$and.push(searchCondition);
+            } else {
+                query.$and = [searchCondition];
+            }
         }
 
         // 정렬 옵션
@@ -915,6 +937,10 @@ app.get('/api/react-central/videos', ensureMongoConnection, async (req, res) => 
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
         // 데이터 조회
+        console.log('🔍 Final query:', JSON.stringify(query, null, 2));
+        console.log('🔍 Sort option:', sortOption);
+        console.log('🔍 Skip:', skip, 'Limit:', parseInt(limit));
+        
         const videos = await VEUrl.find(query)
             .select('ve_id title description reaction_url original_url metadata creator_info react_central')
             .sort(sortOption)
