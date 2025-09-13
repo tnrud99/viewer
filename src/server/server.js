@@ -52,19 +52,15 @@ const connectToMongoDB = async () => {
         await mongoose.connect(mongoUri, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 5000,  // 서버리스 환경에서는 더 짧은 타임아웃
-            socketTimeoutMS: 10000,
-            connectTimeoutMS: 10000,
-            maxPoolSize: 10,  // 서버리스 환경에서는 더 큰 풀 크기
+            serverSelectionTimeoutMS: 30000,
+            socketTimeoutMS: 45000,
+            connectTimeoutMS: 30000,
+            maxPoolSize: 1,
             minPoolSize: 0,
             maxIdleTimeMS: 30000,
             bufferCommands: false,
             retryWrites: true,
-            w: 'majority',
-            // 서버리스 환경을 위한 추가 옵션
-            bufferMaxEntries: 0,
-            useCreateIndex: true,
-            useFindAndModify: false
+            w: 'majority'
         });
         
         console.log('✅ Successfully connected to MongoDB');
@@ -207,9 +203,17 @@ const ensureMongoConnection = async (req, res, next) => {
             await connectToMongoDB();
         }
         
-        console.log('✅ MongoDB connection verified');
-        next();
-        
+        // 연결 상태 재확인
+        if (mongoose.connection.readyState === 1) {
+            console.log('✅ MongoDB connection verified');
+            next();
+        } else {
+            console.error('❌ MongoDB connection failed after reconnect attempt');
+            res.status(500).json({ 
+                error: 'Database connection failed',
+                details: 'Unable to establish database connection'
+            });
+        }
     } catch (error) {
         console.error('MongoDB connection failed:', error);
         res.status(500).json({ 
