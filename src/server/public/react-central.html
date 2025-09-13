@@ -94,9 +94,11 @@
         }
 
         .logo-text {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--primary);
+            font-size: 24px;
+            font-weight: 400;
+            color: white;
+            letter-spacing: -0.5px;
+            font-family: 'Roboto', 'Arial', sans-serif;
         }
 
         .beta-badge {
@@ -123,7 +125,9 @@
         .header-center {
             flex: 1;
             max-width: 600px;
-            margin: 0 40px;
+            margin: 0 20px;
+            display: flex;
+            justify-content: center;
         }
 
         .search-container {
@@ -170,6 +174,26 @@
             background: var(--primary-dark);
         }
 
+        /* Mobile search button (standalone) */
+        .mobile-search-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s ease;
+        }
+
+        .mobile-search-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-search-btn .material-icons {
+            font-size: 24px;
+        }
+
         .header-right {
             display: flex;
             align-items: center;
@@ -177,22 +201,27 @@
         }
 
         .create-btn {
-            background: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
             color: white;
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
+            border-radius: 18px;
+            font-weight: 500;
+            font-size: 10px;
             cursor: pointer;
             transition: all 0.2s ease;
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
+            min-width: fit-content;
+            backdrop-filter: blur(10px);
         }
 
         .create-btn:hover {
-            background: var(--primary-dark);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
             transform: translateY(-1px);
         }
 
@@ -305,7 +334,7 @@
         /* Video Grid */
         .video-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             margin-top: 20px;
         }
@@ -344,77 +373,114 @@
             opacity: 1;
         }
 
-        .video-thumbnail-split {
+        .video-thumbnail {
             position: relative;
             width: 100%;
-            height: 0;
-            padding-bottom: 112.5%; /* 16:9 * 2 = 32:18 비율 (각각 16:9) */
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            aspect-ratio: 16/9;
             border-radius: 16px 16px 0 0;
-        }
-
-        .thumbnail-half {
-            position: absolute;
-            width: 100%;
-            height: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            transition: all 0.3s ease;
             overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .thumbnail-half::before {
+        .reaction-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .original-thumbnail {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            width: 35%;
+            height: 25%;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transform: scale(0.8) translateY(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 3;
+        }
+
+        .original-label {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 4;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .reaction-label {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 2;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* 호버 효과 */
+        .video-card:hover .reaction-thumbnail {
+            transform: scale(1.05);
+        }
+
+        .video-card:hover .original-thumbnail {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        .video-card:hover .original-label {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .video-card:hover .video-duration {
+            bottom: 8px;
+            right: 8px;
+            transform: scale(0.9);
+        }
+
+        /* 호버 시 썸네일 전체에 미묘한 오버레이 */
+        .video-card:hover .video-thumbnail::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 100%);
-            opacity: 0.7;
+            background: linear-gradient(135deg, rgba(194, 42, 31, 0.1) 0%, rgba(255, 107, 107, 0.05) 100%);
+            opacity: 1;
+            z-index: 1;
             transition: opacity 0.3s ease;
         }
 
-        .video-card:hover .thumbnail-half::before {
-            opacity: 0.4;
-        }
-
-        .thumbnail-half:first-child {
-            top: 0;
-        }
-
-        .thumbnail-half:last-child {
-            bottom: 0;
-        }
-
-        .reaction-thumbnail {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-        }
-
-        .original-thumbnail {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .thumbnail-label {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 100%);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 2;
+        .video-thumbnail::before {
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .video-duration {
@@ -430,6 +496,7 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 2;
+            transition: all 0.3s ease;
         }
 
         .video-info {
@@ -559,6 +626,30 @@
             color: var(--primary);
             background: rgba(193, 42, 31, 0.15);
             border-color: rgba(193, 42, 31, 0.3);
+        }
+
+        .action-btn.subscribe-btn {
+            color: var(--primary);
+            background: rgba(193, 42, 31, 0.1);
+            border-color: rgba(193, 42, 31, 0.2);
+        }
+
+        .action-btn.subscribe-btn:hover {
+            color: white;
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .action-btn.subscribed {
+            color: white;
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .action-btn.subscribed:hover {
+            color: var(--primary);
+            background: rgba(193, 42, 31, 0.1);
+            border-color: rgba(193, 42, 31, 0.2);
         }
 
         .action-btn.bookmarked:hover {
@@ -692,7 +783,11 @@
             }
 
             .header-center {
-                margin: 0 20px;
+                display: none;
+            }
+
+            .mobile-search-btn {
+                display: block;
             }
 
             .category-tabs {
@@ -704,7 +799,7 @@
             }
 
             .video-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(1, 1fr);
                 gap: 15px;
             }
         }
@@ -719,7 +814,7 @@
             }
 
             .video-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(1, 1fr);
                 gap: 8px;
             }
 
@@ -727,7 +822,7 @@
                 border-radius: 12px;
             }
 
-            .video-thumbnail-split {
+            .video-thumbnail {
                 border-radius: 12px 12px 0 0;
             }
 
@@ -774,11 +869,20 @@
                 font-size: 16px;
             }
 
-            .thumbnail-label {
+            .reaction-label,
+            .original-label {
                 font-size: 9px;
                 padding: 4px 8px;
+            }
+            
+            .reaction-label {
                 top: 8px;
                 left: 8px;
+            }
+            
+            .original-label {
+                top: 6px;
+                left: 6px;
             }
 
             .video-duration {
@@ -836,7 +940,7 @@
             </button>
             <a href="/studio.html" class="logo">
                 <img src="logo/whitered_mini.png" alt="React Central" class="logo-icon">
-                <div class="logo-text">React Central <span class="beta-badge">BETA</span></div>
+                <div class="logo-text">ReactCentral <span class="beta-badge">BETA</span></div>
             </a>
         </div>
 
@@ -850,6 +954,9 @@
         </div>
 
         <div class="header-right">
+            <button class="mobile-search-btn" id="mobileSearchBtn" onclick="toggleMobileSearch()">
+                <span class="material-icons">search</span>
+            </button>
             <a href="/studio.html" class="create-btn">
                 <span class="material-icons">add</span>
                 <span>Create</span>
@@ -870,6 +977,7 @@
     <div class="category-tabs">
         <button class="category-tab active" data-category="latest">Latest</button>
         <button class="category-tab" data-category="popular">Popular</button>
+        <button class="category-tab" data-category="subscriptions">Subscriptions</button>
         <button class="category-tab" data-category="mv">Music Videos</button>
         <button class="category-tab" data-category="kpop">K-POP</button>
         <button class="category-tab" data-category="my">My Videos</button>
@@ -920,6 +1028,12 @@
                 if (category === 'latest' || category === 'popular') {
                     currentCategory = 'latest'; // Show all videos with sort
                     currentSort = category; // Set sort order
+                } else if (category === 'subscriptions') {
+                    // Handle subscriptions tab
+                    currentCategory = 'subscriptions';
+                    currentSort = 'latest';
+                    loadSubscribedVideos();
+                    return; // Don't call loadVideos() for subscriptions
                 } else {
                     // Handle category-based tabs (mv, kpop, my)
                     currentCategory = category;
@@ -942,6 +1056,13 @@
             currentSearch = document.getElementById('searchInput').value.trim();
             currentPage = 1; // Reset to first page
             loadVideos();
+        }
+
+        function toggleMobileSearch() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.focus();
+            }
         }
 
         // API 호출로 비디오 로드
@@ -1021,6 +1142,9 @@
                 videoGrid.appendChild(videoCard);
             });
 
+            // 구독 상태 복원
+            restoreSubscriptionStates();
+
             document.getElementById('videoGrid').style.display = 'grid';
             document.getElementById('emptyState').style.display = 'none';
         }
@@ -1050,14 +1174,12 @@
             const creatorInitial = video.creator_info?.nickname?.charAt(0) || '?';
 
             card.innerHTML = `
-                <div class="video-thumbnail-split">
-                    <div class="thumbnail-half reaction-thumbnail" style="background-image: url('${reactionThumbnailUrl}'); background-size: cover; background-position: center;">
-                        <div class="thumbnail-label">REACTION</div>
-                    </div>
-                    <div class="thumbnail-half original-thumbnail" style="background-image: url('${originalThumbnailUrl}'); background-size: cover; background-position: center;">
-                        <div class="thumbnail-label">ORIGINAL</div>
-                        <div class="video-duration">${categoryIcon}</div>
-                    </div>
+                <div class="video-thumbnail">
+                    <img src="${reactionThumbnailUrl}" class="reaction-thumbnail" alt="Reaction Video">
+                    <img src="${originalThumbnailUrl}" class="original-thumbnail" alt="Original Video">
+                    <div class="reaction-label">REACTION</div>
+                    <div class="original-label">ORIGINAL</div>
+                    <div class="video-duration">${categoryIcon}</div>
                 </div>
                 <div class="video-info">
                     <h3 class="video-title">${video.title || 'No Title'}</h3>
@@ -1449,6 +1571,132 @@
             window.location.href = `video-management.html?ve=${veId}`;
         }
 
+        // 구독 기능
+        async function toggleSubscription(creatorId, button) {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('Please log in to subscribe to channels');
+                return;
+            }
+
+            if (!creatorId) {
+                alert('Creator information not available');
+                return;
+            }
+
+            const isSubscribed = button.classList.contains('subscribed');
+            const action = isSubscribed ? 'unsubscribe' : 'subscribe';
+            
+            try {
+                const response = await fetch('/api/user/subscription', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        creator_id: creatorId,
+                        action: action
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update subscription');
+                }
+
+                const data = await response.json();
+                
+                if (data.action === 'subscribed') {
+                    button.classList.add('subscribed');
+                    button.classList.remove('subscribe-btn');
+                    button.querySelector('span:last-child').textContent = 'Subscribed';
+                    button.querySelector('.material-icons').textContent = 'notifications_active';
+                    
+                    // 로컬스토리지에 구독 정보 저장
+                    const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
+                    if (!subscriptions.includes(creatorId)) {
+                        subscriptions.push(creatorId);
+                        localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
+                    }
+                    
+                    console.log('✅ Subscribed to creator:', creatorId);
+                } else if (data.action === 'unsubscribed') {
+                    button.classList.remove('subscribed');
+                    button.classList.add('subscribe-btn');
+                    button.querySelector('span:last-child').textContent = 'Subscribe';
+                    button.querySelector('.material-icons').textContent = 'notifications';
+                    
+                    // 로컬스토리지에서 구독 정보 제거
+                    const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
+                    const updatedSubscriptions = subscriptions.filter(id => id !== creatorId);
+                    localStorage.setItem('subscriptions', JSON.stringify(updatedSubscriptions));
+                    
+                    console.log('❌ Unsubscribed from creator:', creatorId);
+                }
+                
+            } catch (error) {
+                console.error('Subscription error:', error);
+                alert('Failed to update subscription. Please try again.');
+            }
+        }
+
+        // 구독한 채널의 비디오만 로드
+        async function loadSubscribedVideos() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                showEmptyState('Please log in to view your subscriptions');
+                return;
+            }
+
+            showLoading();
+            
+            try {
+                const response = await fetch('/api/user/subscriptions/videos', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load subscribed videos');
+                }
+
+                const data = await response.json();
+                
+                if (data.videos && data.videos.length > 0) {
+                    displayVideos(data.videos);
+                    hideLoading();
+                } else {
+                    showEmptyState('No videos from your subscribed channels yet');
+                }
+                
+            } catch (error) {
+                console.error('Error loading subscribed videos:', error);
+                showEmptyState('Failed to load subscribed videos');
+            }
+        }
+
+        // 구독 상태 복원
+        function restoreSubscriptionStates() {
+            const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
+            
+            document.querySelectorAll('.subscribe-btn, .subscribed').forEach(button => {
+                const onclick = button.getAttribute('onclick');
+                if (onclick) {
+                    const match = onclick.match(/toggleSubscription\('([^']+)'/);
+                    if (match) {
+                        const creatorId = match[1];
+                        if (subscriptions.includes(creatorId)) {
+                            button.classList.add('subscribed');
+                            button.classList.remove('subscribe-btn');
+                            button.querySelector('span:last-child').textContent = 'Subscribed';
+                            button.querySelector('.material-icons').textContent = 'notifications_active';
+                        }
+                    }
+                }
+            });
+        }
+
         // Authentication functions
         function toggleProfileMenu() {
             const menu = document.getElementById('profileMenu');
@@ -1617,6 +1865,10 @@
                 if (categoryParam === 'latest' || categoryParam === 'popular') {
                     currentCategory = 'latest'; // Show all videos with sort
                     currentSort = categoryParam; // Set sort order
+                } else if (categoryParam === 'subscriptions') {
+                    // Handle subscriptions tab
+                    currentCategory = 'subscriptions';
+                    currentSort = 'latest';
                 } else {
                     // Handle category-based tabs (mv, kpop, my)
                     currentCategory = categoryParam;
@@ -1633,7 +1885,13 @@
             }
             
             checkAuthStatus();
-            loadVideos();
+            
+            // subscriptions 카테고리인 경우 구독 비디오 로드
+            if (currentCategory === 'subscriptions') {
+                loadSubscribedVideos();
+            } else {
+                loadVideos();
+            }
         });
     </script>
 </body>

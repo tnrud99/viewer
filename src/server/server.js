@@ -36,6 +36,7 @@ const connectToMongoDB = async () => {
         console.log('Attempting to connect to MongoDB...');
         console.log('MongoDB URI exists:', !!process.env.MONGODB_URI);
         console.log('MongoDB URI length:', process.env.MONGODB_URI ? process.env.MONGODB_URI.length : 0);
+        console.log('Environment:', process.env.NODE_ENV);
         
         // 이미 연결되어 있다면 재사용
         if (mongoose.connection.readyState === 1) {
@@ -51,15 +52,19 @@ const connectToMongoDB = async () => {
         await mongoose.connect(mongoUri, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 30000,
-            socketTimeoutMS: 45000,
-            connectTimeoutMS: 30000,
-            maxPoolSize: 1,
+            serverSelectionTimeoutMS: 5000,  // 서버리스 환경에서는 더 짧은 타임아웃
+            socketTimeoutMS: 10000,
+            connectTimeoutMS: 10000,
+            maxPoolSize: 10,  // 서버리스 환경에서는 더 큰 풀 크기
             minPoolSize: 0,
             maxIdleTimeMS: 30000,
             bufferCommands: false,
             retryWrites: true,
-            w: 'majority'
+            w: 'majority',
+            // 서버리스 환경을 위한 추가 옵션
+            bufferMaxEntries: 0,
+            useCreateIndex: true,
+            useFindAndModify: false
         });
         
         console.log('✅ Successfully connected to MongoDB');
@@ -202,17 +207,9 @@ const ensureMongoConnection = async (req, res, next) => {
             await connectToMongoDB();
         }
         
-        // 연결 상태 재확인
-        if (mongoose.connection.readyState === 1) {
-            console.log('✅ MongoDB connection verified');
-            next();
-        } else {
-            console.error('❌ MongoDB connection failed after reconnect attempt');
-            res.status(500).json({ 
-                error: 'Database connection failed',
-                details: 'Unable to establish database connection'
-            });
-        }
+        console.log('✅ MongoDB connection verified');
+        next();
+        
     } catch (error) {
         console.error('MongoDB connection failed:', error);
         res.status(500).json({ 
@@ -230,7 +227,8 @@ const userSchema = new mongoose.Schema({
     nickname: { type: String, required: true }, // 닉네임 필드 추가
     created_at: { type: Date, default: Date.now },
     ve_urls: [{ type: mongoose.Schema.Types.ObjectId, ref: 'VEUrl' }],
-    bookmarks: [{ type: String }] // 북마크한 비디오 ID들
+    bookmarks: [{ type: String }], // 북마크한 비디오 ID들
+    subscriptions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] // 구독한 사용자 ID들
 });
 
 const veUrlSchema = new mongoose.Schema({
@@ -346,7 +344,7 @@ app.put('/api/auth/update-nickname', authenticateToken, async (req, res) => {
 });
 
 // 인증 라우트
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/register', ensureMongoConnection, async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
@@ -390,13 +388,18 @@ app.post('/api/auth/register', async (req, res) => {
     }
 });
 
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', ensureMongoConnection, async (req, res) => {
     try {
+        console.log('🔐 Login attempt:', { email: req.body.email, rememberMe: req.body.rememberMe });
+        console.log('🔐 MongoDB connection state:', mongoose.connection.readyState);
+        
         const { email, password, rememberMe } = req.body;
 
         // 사용자 찾기
         const user = await User.findOne({ email });
+        console.log('🔐 User found:', user ? 'Yes' : 'No');
         if (!user) {
+            console.log('🔐 No user found with email:', email);
             return res.status(400).json({ error: 'Invalid credentials' });
         }
 
@@ -425,7 +428,8 @@ app.post('/api/auth/login', async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ error: 'Server error' });
+        console.error('❌ Login API Error:', error);
+        res.status(500).json({ error: 'Server error', details: error.message });
     }
 });
 
@@ -1269,6 +1273,209 @@ app.get('/api/user/bookmarks', authenticateToken, ensureMongoConnection, async (
     } catch (error) {
         console.error('❌ Get bookmarks API error:', error);
         res.status(500).json({ error: 'Failed to get bookmarks' });
+    }
+});
+
+// 구독 API
+app.post('/api/user/subscription', authenticateToken, ensureMongoConnection, async (req, res) => {
+    try {
+        console.log('📺 Subscription API called');
+        const { creator_id, action } = req.body;
+        const userId = req.user.userId;
+        
+        console.log('📺 Request data:', { creator_id, action, userId });
+        
+        if (!creator_id || !action) {
+            console.log('❌ Missing required fields');
+            return res.status(400).json({ error: 'Creator ID and action are required' });
+        }
+        
+        if (action !== 'subscribe' && action !== 'unsubscribe') {
+            console.log('❌ Invalid action');
+            return res.status(400).json({ error: 'Action must be "subscribe" or "unsubscribe"' });
+        }
+        
+        if (userId === creator_id) {
+            console.log('❌ Cannot subscribe to yourself');
+            return res.status(400).json({ error: 'Cannot subscribe to yourself' });
+        }
+        
+        console.log('📺 Finding user:', userId);
+        const user = await User.findById(userId);
+        if (!user) {
+            console.log('❌ User not found:', userId);
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        // 구독 대상 사용자 확인
+        const creator = await User.findById(creator_id);
+        if (!creator) {
+            console.log('❌ Creator not found:', creator_id);
+            return res.status(404).json({ error: 'Creator not found' });
+        }
+        
+        console.log('📺 User found, current subscriptions:', user.subscriptions);
+        
+        // 구독 배열이 없으면 초기화
+        if (!user.subscriptions || !Array.isArray(user.subscriptions)) {
+            user.subscriptions = [];
+            console.log('📺 Initialized subscriptions array for user');
+        }
+        
+        // 구독 배열에서 해당 크리에이터 ID 찾기
+        const subscriptionIndex = user.subscriptions.findIndex(id => id.toString() === creator_id);
+        
+        if (action === 'subscribe') {
+            if (subscriptionIndex === -1) {
+                // 구독 추가
+                console.log('📺 Adding subscription for:', creator_id);
+                user.subscriptions.push(creator_id);
+                
+                try {
+                    await user.save();
+                    console.log('✅ Subscription added, new subscriptions:', user.subscriptions);
+                } catch (saveError) {
+                    console.error('❌ Failed to save user:', saveError);
+                    throw new Error('Failed to save subscription: ' + saveError.message);
+                }
+                
+                res.json({ 
+                    success: true, 
+                    action: 'subscribed',
+                    message: 'Successfully subscribed to creator' 
+                });
+            } else {
+                res.json({ 
+                    success: true, 
+                    action: 'already_subscribed',
+                    message: 'Already subscribed to this creator' 
+                });
+            }
+        } else if (action === 'unsubscribe') {
+            if (subscriptionIndex !== -1) {
+                // 구독 제거
+                console.log('📺 Removing subscription for:', creator_id);
+                user.subscriptions.splice(subscriptionIndex, 1);
+                
+                try {
+                    await user.save();
+                    console.log('✅ Subscription removed, new subscriptions:', user.subscriptions);
+                } catch (saveError) {
+                    console.error('❌ Failed to save user:', saveError);
+                    throw new Error('Failed to remove subscription: ' + saveError.message);
+                }
+                
+                res.json({ 
+                    success: true, 
+                    action: 'unsubscribed',
+                    message: 'Successfully unsubscribed from creator' 
+                });
+            } else {
+                res.json({ 
+                    success: true, 
+                    action: 'not_subscribed',
+                    message: 'Not subscribed to this creator' 
+                });
+            }
+        }
+        
+    } catch (error) {
+        console.error('❌ Subscription API error:', error);
+        console.error('❌ Error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        res.status(500).json({ 
+            error: 'Failed to update subscription',
+            details: error.message 
+        });
+    }
+});
+
+// 구독한 채널의 비디오 조회 API
+app.get('/api/user/subscriptions/videos', authenticateToken, ensureMongoConnection, async (req, res) => {
+    try {
+        console.log('📺 Subscribed videos API called');
+        const userId = req.user.userId;
+        const { page = 1, limit = 12 } = req.query;
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        
+        console.log('📺 User ID:', userId);
+        
+        const user = await User.findById(userId).select('subscriptions');
+        if (!user) {
+            console.log('❌ User not found:', userId);
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        console.log('📺 User subscriptions:', user.subscriptions);
+        
+        if (!user.subscriptions || user.subscriptions.length === 0) {
+            console.log('📺 No subscriptions found');
+            return res.json({
+                videos: [],
+                pagination: {
+                    current_page: parseInt(page),
+                    total_pages: 0,
+                    total_count: 0,
+                    has_next: false
+                }
+            });
+        }
+        
+        // 구독한 사용자들의 비디오 조회
+        const videos = await VEUrl.find({
+            'creator_info.user_id': { $in: user.subscriptions },
+            'creator_info.is_public': true
+        })
+        .select('ve_id title description reaction_url original_url metadata creator_info react_central')
+        .sort({ 'metadata.created_at': -1 })
+        .skip(skip)
+        .limit(parseInt(limit));
+        
+        console.log('📺 Found subscribed videos:', videos.length);
+        
+        // 전체 개수 조회
+        const totalCount = await VEUrl.countDocuments({
+            'creator_info.user_id': { $in: user.subscriptions },
+            'creator_info.is_public': true
+        });
+        
+        res.json({
+            videos: videos,
+            pagination: {
+                current_page: parseInt(page),
+                total_pages: Math.ceil(totalCount / parseInt(limit)),
+                total_count: totalCount,
+                has_next: skip + videos.length < totalCount
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Subscribed videos API error:', error);
+        res.status(500).json({ error: 'Failed to get subscribed videos' });
+    }
+});
+
+// 사용자의 구독 목록 조회
+app.get('/api/user/subscriptions', authenticateToken, ensureMongoConnection, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        
+        const user = await User.findById(userId).populate('subscriptions', 'username nickname email');
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        res.json({ 
+            success: true, 
+            subscriptions: user.subscriptions || [] 
+        });
+        
+    } catch (error) {
+        console.error('❌ Get subscriptions API error:', error);
+        res.status(500).json({ error: 'Failed to get subscriptions' });
     }
 });
 
