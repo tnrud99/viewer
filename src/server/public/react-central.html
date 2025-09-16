@@ -397,54 +397,36 @@
         }
 
         .video-card {
-            background: var(--bg-card);
-            border-radius: 16px;
+            background: transparent;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
             cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.05);
             position: relative;
         }
 
         .video-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-            border-color: rgba(193, 42, 31, 0.2);
+            transform: none;
+            box-shadow: none;
         }
 
-        .video-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(193, 42, 31, 0.05) 0%, rgba(255, 107, 107, 0.05) 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 1;
-        }
-
-        .video-card:hover::before {
-            opacity: 1;
-        }
 
         .video-thumbnail {
             position: relative;
             width: 100%;
             aspect-ratio: 16/9;
-            border-radius: 16px 16px 0 0;
+            border-radius: 12px;
             overflow: hidden;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
+            background: #000;
         }
 
         .reaction-thumbnail {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
         }
 
         .original-thumbnail {
@@ -558,34 +540,51 @@
         }
 
         .video-info {
-            padding: 20px;
+            padding: 12px 0;
             position: relative;
             z-index: 2;
         }
 
         .video-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #ffffff;
-            margin-bottom: 12px;
-            line-height: 1.4;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 4px;
+            line-height: 1.3;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            transition: color 0.3s ease;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            transition: color 0.2s ease;
         }
 
         .video-card:hover .video-title {
-            color: var(--primary);
+            color: var(--text);
         }
 
         .video-meta {
             display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 0;
+        }
+
+        .creator-info {
+            display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
+            gap: 8px;
+        }
+
+        .creator-name {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .video-stats {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 400;
         }
 
         .creator-info {
@@ -595,24 +594,17 @@
         }
 
         .creator-avatar {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary) 0%, #ff6b6b 100%);
+            background: var(--text-secondary);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 12px;
-            font-weight: 700;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .video-card:hover .creator-avatar {
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(193, 42, 31, 0.3);
+            font-size: 11px;
+            font-weight: 500;
+            flex-shrink: 0;
         }
 
         .creator-name {
@@ -631,90 +623,7 @@
             color: var(--text-muted);
         }
 
-        .video-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 12px;
-        }
 
-        .action-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 8px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            color: var(--text-muted);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-        }
-
-        .action-btn:hover {
-            background: rgba(193, 42, 31, 0.1);
-            color: var(--primary);
-            border-color: rgba(193, 42, 31, 0.2);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(193, 42, 31, 0.2);
-        }
-
-        .action-btn.liked {
-            color: var(--primary);
-            background: rgba(193, 42, 31, 0.15);
-            border-color: rgba(193, 42, 31, 0.3);
-        }
-
-        .action-btn.bookmarked {
-            color: #ffd700;
-            background: rgba(255, 215, 0, 0.15);
-            border-color: rgba(255, 215, 0, 0.3);
-        }
-
-        .action-btn.manage-btn {
-            color: var(--text-muted);
-            background: rgba(108, 117, 125, 0.1);
-            border-color: rgba(108, 117, 125, 0.2);
-        }
-
-        .action-btn.manage-btn:hover {
-            color: var(--primary);
-            background: rgba(193, 42, 31, 0.15);
-            border-color: rgba(193, 42, 31, 0.3);
-        }
-
-        .action-btn.subscribe-btn {
-            color: var(--primary);
-            background: rgba(193, 42, 31, 0.1);
-            border-color: rgba(193, 42, 31, 0.2);
-        }
-
-        .action-btn.subscribe-btn:hover {
-            color: white;
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-
-        .action-btn.subscribed {
-            color: white;
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-
-        .action-btn.subscribed:hover {
-            color: var(--primary);
-            background: rgba(193, 42, 31, 0.1);
-            border-color: rgba(193, 42, 31, 0.2);
-        }
-
-        .action-btn.bookmarked:hover {
-            color: #ffed4e;
-            background: rgba(255, 215, 0, 0.2);
-            border-color: rgba(255, 215, 0, 0.4);
-        }
 
         /* Material Icons */
         .material-icons {
@@ -751,9 +660,6 @@
             font-size: 18px;
         }
 
-        .action-btn .material-icons {
-            font-size: 18px;
-        }
 
         .menu-btn .material-icons {
             font-size: 24px;
@@ -936,20 +842,6 @@
                 font-size: 11px;
             }
 
-            .video-actions {
-                margin-top: 8px;
-                gap: 8px;
-            }
-
-            .action-btn {
-                padding: 6px 8px;
-                font-size: 11px;
-                border-radius: 16px;
-            }
-
-            .action-btn .material-icons {
-                font-size: 16px;
-            }
 
             .reaction-label,
             .original-label {
@@ -1261,17 +1153,6 @@
             videos.forEach(video => {
                 const videoCard = createVideoCard(video);
                 
-                // Check if video is bookmarked and update button state
-                const bookmarkBtn = videoCard.querySelector('.action-btn:nth-child(2)');
-                if (bookmarks.includes(video.ve_id)) {
-                    bookmarkBtn.classList.add('bookmarked');
-                }
-                
-                // Check if video is liked and update button state
-                const likeBtn = videoCard.querySelector('.action-btn:nth-child(1)');
-                if (localStorage.getItem(`liked_${video.ve_id}`)) {
-                    likeBtn.classList.add('liked');
-                }
                 
                 videoGrid.appendChild(videoCard);
             });
@@ -1325,23 +1206,6 @@
                         </div>
                     </div>
                     <div class="video-stats">${viewCount} • ${timeAgo}</div>
-                    <div class="video-actions">
-                        <button class="action-btn" onclick="event.stopPropagation(); toggleLike('${video.ve_id}', this)">
-                            <span class="material-icons">thumb_up</span>
-                            <span>${formatCount(likes)}</span>
-                        </button>
-                        <button class="action-btn" onclick="event.stopPropagation(); toggleBookmark('${video.ve_id}', this)">
-                            <span class="material-icons">bookmark</span>
-                        </button>
-                        <button class="action-btn" onclick="event.stopPropagation(); shareVideo('${video.ve_id}')">
-                            <span class="material-icons">share</span>
-                        </button>
-                        ${currentCategory === 'my' ? `
-                        <button class="action-btn manage-btn" onclick="event.stopPropagation(); manageVideo('${video.ve_id}')">
-                            <span class="material-icons">settings</span>
-                        </button>
-                        ` : ''}
-                    </div>
                 </div>
             `;
 
@@ -1614,20 +1478,6 @@
             displayVideos(filteredVideos);
         }
 
-        // 로컬스토리지에서 좋아요/북마크 상태 복원
-        function restoreUserInteractions() {
-            document.querySelectorAll('.action-btn').forEach(button => {
-                const videoId = button.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
-                if (videoId) {
-                    if (localStorage.getItem(`liked_${videoId}`)) {
-                        button.classList.add('liked');
-                    }
-                    if (localStorage.getItem(`bookmarked_${videoId}`)) {
-                        button.classList.add('bookmarked');
-                    }
-                }
-            });
-        }
 
         // Video interaction functions
         function toggleLike(veId, button) {

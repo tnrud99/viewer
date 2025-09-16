@@ -288,61 +288,6 @@
             border-radius: 0 0 12px 12px;
         }
 
-        /* Sidebar */
-        .sidebar {
-            position: fixed;
-            top: 60px;
-            left: 0;
-            width: 240px;
-            height: calc(100vh - 60px);
-            background: var(--background);
-            border-right: 1px solid var(--border);
-            padding: 20px 0;
-            z-index: 100;
-            overflow-y: auto;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .sidebar-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 24px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .sidebar-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .sidebar-item.active {
-            background: rgba(194, 41, 31, 0.1);
-            color: var(--primary);
-            border-right: 3px solid var(--primary);
-        }
-
-        .sidebar-item .material-icons {
-            margin-right: 24px;
-            font-size: 24px;
-            color: var(--text-muted);
-        }
-
-        .sidebar-item:hover .material-icons,
-        .sidebar-item.active .material-icons {
-            color: var(--primary);
-        }
-
-        .sidebar-item span {
-            font-weight: 500;
-            font-size: 14px;
-        }
 
         /* Main content with sidebar */
         .container {
@@ -753,15 +698,6 @@
                 display: none; /* 모바일에서 "Create" 텍스트 숨김 */
             }
 
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-            }
-
-            .sidebar.open {
-                transform: translateX(0);
-            }
-
             .container {
                 margin-left: 0;
                 padding: 80px 15px 40px;
@@ -886,6 +822,43 @@
 
         /* 매우 작은 모바일 화면 (480px 이하) */
         @media (max-width: 480px) {
+            .header {
+                padding: 0 10px;
+            }
+
+            .header-left {
+                gap: 8px;
+            }
+
+            .logo-text {
+                display: none; /* 로고 텍스트 숨김 */
+            }
+
+            .header-right {
+                gap: 6px;
+            }
+
+            .create-btn {
+                display: none; /* Create 버튼 완전히 숨김 */
+            }
+
+            .profile-btn {
+                width: 32px;
+                height: 32px;
+            }
+
+            .profile-btn .material-icons {
+                font-size: 20px;
+            }
+
+            .mobile-search-btn {
+                padding: 6px;
+            }
+
+            .mobile-search-btn .material-icons {
+                font-size: 20px;
+            }
+
             .container {
                 padding: 80px 8px 15px;
             }
@@ -992,45 +965,6 @@
             }
         }
 
-        /* 헤더 모바일 최적화 (480px 이하) */
-        @media (max-width: 480px) {
-            .header {
-                padding: 0 10px;
-            }
-
-            .header-left {
-                gap: 8px;
-            }
-
-            .logo-text {
-                display: none; /* 로고 텍스트 숨김 */
-            }
-
-            .header-right {
-                gap: 6px;
-            }
-
-            .create-btn {
-                display: none; /* Create 버튼 완전히 숨김 */
-            }
-
-            .profile-btn {
-                width: 32px;
-                height: 32px;
-            }
-
-            .profile-btn .material-icons {
-                font-size: 20px;
-            }
-
-            .mobile-search-btn {
-                padding: 6px;
-            }
-
-            .mobile-search-btn .material-icons {
-                font-size: 20px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -1459,11 +1393,6 @@
             window.location.href = 'login.html';
         }
 
-        // Sidebar toggle
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('open');
-        }
 
         // Search functions
         function performSearch() {
