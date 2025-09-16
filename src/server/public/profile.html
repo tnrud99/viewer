@@ -42,35 +42,132 @@
             padding: 20px;
         }
 
+        /* Header */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding: 20px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s ease;
+            color: var(--text);
+        }
+
+        .menu-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 10px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        .logo-text {
             font-size: 24px;
-            font-weight: bold;
+            font-weight: 400;
+            color: white;
+            letter-spacing: -0.5px;
+            font-family: 'Roboto', 'Arial', sans-serif;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 240px;
+            height: calc(100vh - 60px);
+            background: var(--background);
+            border-right: 1px solid var(--border);
+            padding: 20px 0;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-item.active {
+            background: rgba(194, 41, 31, 0.1);
+            color: var(--primary);
+            border-right: 3px solid var(--primary);
+        }
+
+        .sidebar-item .material-icons {
+            margin-right: 24px;
+            font-size: 24px;
+            color: var(--text-muted);
+        }
+
+        .sidebar-item:hover .material-icons,
+        .sidebar-item.active .material-icons {
             color: var(--primary);
         }
 
-        .logo img {
-            width: 32px;
-            height: 32px;
-            object-fit: contain;
-            object-position: center;
-            flex-shrink: 0;
+        .sidebar-item span {
+            font-weight: 500;
+            font-size: 14px;
         }
 
-        .nav-buttons {
-            display: flex;
-            gap: 15px;
+        /* Main content with sidebar */
+        .container {
+            margin-left: 240px;
+            padding: 80px 24px 40px;
         }
 
         .beta-badge {
@@ -213,59 +310,176 @@
             gap: 10px;
         }
 
-        .videos-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
-            margin-top: 8px;
-        }
-
-        .video-card {
-            background: var(--background);
-            border-radius: 16px;
-            overflow: hidden;
+        /* My Videos Table Design */
+        .videos-table-container {
+            background: var(--surface);
+            border-radius: 12px;
             border: 1px solid var(--border);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            margin-top: 16px;
         }
 
-        .video-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-            border-color: var(--primary);
-        }
-
-        .video-thumbnail {
+        .videos-table {
             width: 100%;
-            height: 200px;
-            background: linear-gradient(135deg, var(--surface) 0%, var(--background) 100%);
+            border-collapse: collapse;
+        }
+
+        .videos-table th {
+            background: var(--background);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .videos-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .videos-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        .videos-table tbody tr:hover {
+            background: rgba(194, 41, 31, 0.02);
+        }
+
+        .videos-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .video-title-cell {
+            max-width: 300px;
+        }
+
+        .video-title-link {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            line-height: 1.4;
+            display: block;
+            margin-bottom: 4px;
+            transition: color 0.2s ease;
+        }
+
+        .video-title-link:hover {
+            color: var(--primary);
+        }
+
+        .video-subtitle {
+            color: var(--text-muted);
+            font-size: 13px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 4px;
+        }
+
+        .video-subtitle .material-icons {
+            font-size: 14px;
+        }
+
+        .video-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 80px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .stat-item .material-icons {
+            font-size: 16px;
             color: var(--text-muted);
-            position: relative;
-            overflow: hidden;
         }
 
-        .video-thumbnail::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, rgba(193, 42, 31, 0.05) 0%, rgba(193, 42, 31, 0.02) 100%);
+        .stat-number {
+            font-weight: 600;
+            color: var(--text);
         }
 
-        .video-thumbnail .material-icons {
+        .video-date {
+            color: var(--text-muted);
+            font-size: 13px;
+            min-width: 100px;
+        }
+
+        .video-actions-cell {
+            text-align: right;
+            min-width: 140px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .action-btn-compact {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-btn-compact .material-icons {
+            font-size: 16px;
+        }
+
+        .btn-watch {
+            background: rgba(194, 41, 31, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(194, 41, 31, 0.2);
+        }
+
+        .btn-watch:hover {
+            background: rgba(194, 41, 31, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .btn-manage {
+            background: var(--primary);
+            color: white;
+            border: 1px solid var(--primary);
+            box-shadow: 0 2px 4px rgba(194, 41, 31, 0.2);
+        }
+
+        .btn-manage:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(194, 41, 31, 0.3);
+        }
+
+        .empty-videos {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-videos .material-icons {
             font-size: 48px;
-            opacity: 0.6;
-            z-index: 1;
-        }
-
-        .video-info {
-            padding: 20px;
+            margin-bottom: 16px;
+            opacity: 0.5;
         }
 
         .video-title {
@@ -547,26 +761,45 @@
                 grid-template-columns: 1fr;
             }
 
-            .videos-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
+            /* Mobile table adjustments */
+            .videos-table th,
+            .videos-table td {
+                padding: 12px 8px;
+                font-size: 12px;
             }
 
-            .video-card {
-                border-radius: 12px;
+            .video-title-cell {
+                max-width: 200px;
             }
 
-            .video-thumbnail {
-                height: 160px;
+            .video-title-link {
+                font-size: 14px;
             }
 
-            .video-info {
-                padding: 16px;
+            .video-subtitle {
+                font-size: 11px;
             }
 
-            .video-title {
-                font-size: 16px;
-                margin-bottom: 10px;
+            .stat-item {
+                font-size: 11px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .action-btn-compact {
+                padding: 6px 8px;
+                font-size: 10px;
+            }
+
+            .action-btn-compact .material-icons {
+                font-size: 14px;
+            }
+
+            .video-date {
+                font-size: 11px;
             }
 
             .section-header {
@@ -606,28 +839,65 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo">
-                <img src="logo/whitered_mini.png" alt="React Central">
-                React Central <span class="beta-badge">BETA</span>
-            </div>
-            <div class="nav-buttons">
-                <a href="react-central.html" class="btn btn-secondary">
-                    <span class="material-icons">home</span>
-                    Home
-                </a>
-                <a href="studio.html" class="btn btn-primary">
-                    <span class="material-icons">add</span>
-                    Create
-                </a>
-                <button onclick="logout()" class="btn btn-secondary">
-                    <span class="material-icons">logout</span>
-                    Sign Out
-                </button>
-            </div>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleSidebar()">
+                <span class="material-icons">menu</span>
+            </button>
+            <a href="react-central.html" class="logo">
+                <img src="logo/whitered_mini.png" alt="VirtuEDIT" class="logo-icon">
+                <span class="logo-text">VirtuEDIT</span>
+                <span class="beta-badge">BETA</span>
+            </a>
         </div>
+        <div class="header-right">
+            <a href="react-central.html" class="btn btn-secondary">
+                <span class="material-icons">home</span>
+                Home
+            </a>
+            <a href="studio.html" class="btn btn-primary">
+                <span class="material-icons">add</span>
+                Create
+            </a>
+            <button onclick="logout()" class="btn btn-secondary">
+                <span class="material-icons">logout</span>
+                Sign Out
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <ul class="sidebar-menu">
+            <li>
+                <a href="react-central.html" class="sidebar-item">
+                    <span class="material-icons">home</span>
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="sidebar-item" data-section="bookmarks">
+                    <span class="material-icons">bookmark</span>
+                    <span>Bookmarks</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="sidebar-item" data-section="subscriptions">
+                    <span class="material-icons">subscriptions</span>
+                    <span>Subscriptions</span>
+                </a>
+            </li>
+            <li>
+                <a href="profile.html" class="sidebar-item active">
+                    <span class="material-icons">account_circle</span>
+                    <span>Profile</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container">
 
         <!-- Profile Section -->
         <div class="profile-section">
@@ -880,30 +1150,73 @@
                 document.getElementById('totalViews').textContent = totalViews.toLocaleString();
                 document.getElementById('totalLikes').textContent = totalLikes.toLocaleString();
 
-                // Display videos
-                videosContainer.innerHTML = videos.map(video => `
-                    <div class="video-card">
-                        <div class="video-thumbnail" onclick="openVideo('${video.ve_id}')">
-                            <span class="material-icons">music_video</span>
+                // Display videos in table format
+                if (videos.length === 0) {
+                    videosContainer.innerHTML = `
+                        <div class="empty-videos">
+                            <div class="material-icons">video_library</div>
+                            <h3>No videos yet</h3>
+                            <p>Start creating reaction videos to see them here</p>
                         </div>
-                        <div class="video-info">
-                            <div class="video-title" onclick="openVideo('${video.ve_id}')">${video.title || 'Untitled Video'}</div>
-                            <div class="video-meta">
-                                <span>${video.metadata?.view_count || 0} views</span>
-                                <span>${formatDate(video.metadata?.created_at)}</span>
-                            </div>
-                            <div class="video-actions">
-                                <button class="action-btn" onclick="event.stopPropagation(); openVideo('${video.ve_id}')" title="Watch Video">
-                                    <span class="material-icons">play_arrow</span>
-                                </button>
-                                <button class="action-btn manage-btn" onclick="event.stopPropagation(); manageVideo('${video.ve_id}')" title="Manage Video">
-                                    <span class="material-icons">settings</span>
-                                    <span class="btn-text">MANAGE</span>
-                                </button>
-                            </div>
+                    `;
+                } else {
+                    videosContainer.innerHTML = `
+                        <div class="videos-table-container">
+                            <table class="videos-table">
+                                <thead>
+                                    <tr>
+                                        <th>Video</th>
+                                        <th>Stats</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${videos.map(video => `
+                                        <tr>
+                                            <td class="video-title-cell">
+                                                <a href="#" onclick="openVideo('${video.ve_id}')" class="video-title-link">
+                                                    ${video.title || 'Untitled Video'}
+                                                </a>
+                                                <div class="video-subtitle">
+                                                    <span class="material-icons">music_video</span>
+                                                    <span>VE-${video.ve_id.slice(-8)}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="video-stats">
+                                                    <div class="stat-item">
+                                                        <span class="material-icons">visibility</span>
+                                                        <span class="stat-number">${(video.metadata?.view_count || 0).toLocaleString()}</span>
+                                                    </div>
+                                                    <div class="stat-item">
+                                                        <span class="material-icons">favorite</span>
+                                                        <span class="stat-number">${(video.metadata?.like_count || 0).toLocaleString()}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="video-date">
+                                                ${formatDate(video.metadata?.created_at)}
+                                            </td>
+                                            <td class="video-actions-cell">
+                                                <div class="action-buttons">
+                                                    <button class="action-btn-compact btn-watch" onclick="openVideo('${video.ve_id}')" title="Watch Video">
+                                                        <span class="material-icons">play_arrow</span>
+                                                        <span>Watch</span>
+                                                    </button>
+                                                    <button class="action-btn-compact btn-manage" onclick="manageVideo('${video.ve_id}')" title="Manage Video">
+                                                        <span class="material-icons">settings</span>
+                                                        <span>Manage</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }
 
             } catch (error) {
                 console.error('❌ Failed to load videos:', error);
@@ -1055,6 +1368,12 @@
                 closeEditProfile();
             }
         });
+
+        // Sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
     </script>
 </body>
 </html>

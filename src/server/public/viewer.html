@@ -152,7 +152,7 @@
         .search-bar {
             width: 100%;
             height: 40px;
-            padding: 0 50px 0 20px;
+            padding: 0 44px 0 20px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
             font-size: 16px;
@@ -173,7 +173,7 @@
 
         .search-btn {
             position: absolute;
-            right: 8px;
+            right: 4px;
             top: 50%;
             transform: translateY(-50%);
             background: var(--primary);
@@ -211,28 +211,6 @@
 
         .mobile-search-btn .material-icons {
             font-size: 24px;
-        }
-
-        .search-btn {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: var(--primary);
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s ease;
-        }
-
-        .search-btn:hover {
-            background: var(--primary-dark);
         }
 
         .header-right {
@@ -404,6 +382,22 @@
         .material-icons {
             font-size: 18px;
             vertical-align: middle;
+        }
+
+        /* Medium screens - prevent overlap between search and create button */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .header-center {
+                max-width: 400px;
+                margin: 0 10px;
+            }
+            
+            .header-right {
+                gap: 10px;
+            }
+            
+            .create-btn span:last-child {
+                display: none; /* Hide "Create" text, keep icon only */
+            }
         }
 
         /* Responsive Design */
@@ -3194,7 +3188,7 @@
     let nextPlayTime = null; // Next play time in reaction video timeline
     let syncMode = 'precise'; // 'precise' or 'relaxed' synchronization mode
     let missedEventCheckEnabled = true; // Enable checking for missed events
-    let eventDetectionWindow = 0.5; // Increased event detection window (seconds)
+    let eventDetectionWindow = 0.8; // Increased event detection window (seconds) - Better for slower computers
     let lastReactionTime = 0; // Last processed reaction time (for file mode)
 
     // YouTube-YouTube synchronization variables
@@ -3205,8 +3199,8 @@
     let youtubeYoutubeSyncInterval = null; // Interval for YouTube-YouTube synchronization
     let reactionYoutubeStateChangeTime = 0; // Time of last state change in reaction YouTube player
     let youtubeYoutubeSyncEnabled = true; // Enable YouTube-YouTube synchronization
-    let youtubeYoutubeSyncFrequency = 200; // Frequency of YouTube-YouTube synchronization in ms (Legacy value)
-    let youtubeYoutubeSyncThreshold = 0.3; // Threshold for YouTube-YouTube synchronization in seconds
+    let youtubeYoutubeSyncFrequency = 300; // Frequency of YouTube-YouTube synchronization in ms (Increased for better performance)
+    let youtubeYoutubeSyncThreshold = 0.5; // Threshold for YouTube-YouTube synchronization in seconds (Increased tolerance)
     let reactionYoutubeState = -1; // Current state of reaction YouTube player
 
     // YouTube API callback
@@ -3247,12 +3241,12 @@
                 
                 if (screenWidth <= 480) {
                     // 매우 작은 화면 (아이폰 SE 등)
-                    overlayQuality = 'medium'; // 360p
-                    mainQuality = 'large';     // 480p
+                    overlayQuality = 'small';  // 240p
+                    mainQuality = 'medium';    // 360p
                 } else if (screenWidth <= 768) {
                     // 일반 모바일 화면
-                    overlayQuality = 'large';  // 480p
-                    mainQuality = 'hd720';     // 720p
+                    overlayQuality = 'medium'; // 360p
+                    mainQuality = 'large';     // 480p
                 }
                 
                 // 오버레이 영상 해상도 강제 조절
@@ -3698,7 +3692,8 @@
                     'playsinline': 1,
                     'controls': 1,
                     'autoplay': 0,
-                    'rel': 0
+                    'rel': 0,
+                    'vq': 'medium' // 데스크탑 메인 영상은 중간 해상도 (360p) - 적절한 화질
                 };
                 
                 reactionYoutubePlayer = new YT.Player('reaction-youtube-container', {
@@ -4026,7 +4021,7 @@
         for (const event of playEvents) {
             if (event.reaction_time > lastProcessedPlayTime && 
                 event.reaction_time < currentTime && 
-                Math.abs(event.reaction_time - currentTime) < 2.0) {
+                Math.abs(event.reaction_time - currentTime) < 3.0) { // Increased range for slower computers
                 
                 console.log("Catching up missed play event at:", event.reaction_time);
                 addDebugMessage(`Catching up missed play event at ${event.reaction_time.toFixed(2)}s`);
@@ -4067,7 +4062,7 @@
         for (const event of pauseEvents) {
             if (event.reaction_time > lastProcessedPauseTime && 
                 event.reaction_time < currentTime && 
-                Math.abs(event.reaction_time - currentTime) < 2.0) {
+                Math.abs(event.reaction_time - currentTime) < 3.0) { // Increased range for slower computers
                 
                 console.log("Catching up missed pause event at:", event.reaction_time);
                 addDebugMessage(`Catching up missed pause event at ${event.reaction_time.toFixed(2)}s`);
@@ -4115,7 +4110,8 @@
                 'controls': 0, // Disable controls for better overlay experience
                 'autoplay': 0, // Critical: No autoplay
                 'start': Math.floor(startTime), // Set start time
-                'rel': 0
+                'rel': 0,
+                'vq': 'medium' // 오버레이 영상은 중간 해상도 (360p) - 적절한 화질
             },
             events: {
                 'onReady': function(event) {
@@ -4390,7 +4386,7 @@
                 if (isPlaying && !youtubeYoutubeMode) {
                     handleSynchronization(reactionPlayer.currentTime);
                 }
-            }, 200); // File mode sync frequency
+            }, 300); // File mode sync frequency (Increased for better performance)
         } else {
             if (reactionYoutubeReady) {
                 reactionYoutubePlayer.playVideo();
@@ -4792,7 +4788,8 @@
                         'playsinline': 1,
                         'controls': 1,
                         'autoplay': 0,
-                        'rel': 0
+                        'rel': 0,
+                        'vq': 'medium' // 데스크탑 메인 영상은 중간 해상도 (360p) - 적절한 화질
                     };
                     
                     reactionYoutubePlayer = new YT.Player('reaction-youtube-container', {
@@ -4976,8 +4973,13 @@
         document.getElementById('uploadDate').textContent = `• ${formattedDate}`;
         
         // Update channel info
+        console.log("🔍 Creator info debug:", videoData.creator_info);
+        console.log("🔍 Full video data:", videoData);
+        
         const creatorName = videoData.creator_info?.nickname || 'Anonymous';
         const creatorInitial = creatorName.charAt(0).toUpperCase();
+        
+        console.log("👤 Creator name resolved to:", creatorName);
         
         document.getElementById('channelAvatar').textContent = creatorInitial;
         document.getElementById('channelName').textContent = creatorName;

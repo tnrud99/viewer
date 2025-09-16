@@ -4448,35 +4448,15 @@
 
     <script>
         // Check authentication status and update UI
+        // Index 페이지에서는 로그인 상태와 관계없이 헤더를 고정하여 레이아웃 변화 방지
         function checkAuthStatus() {
-            const token = localStorage.getItem('authToken');
-            const user = localStorage.getItem('user');
+            // Index 페이지에서는 항상 로그인 버튼만 표시
             const loginBtn = document.getElementById('loginBtn');
             const userMenu = document.getElementById('userMenu');
-            const userAvatar = document.getElementById('userAvatar');
-            const userName = document.getElementById('userName');
-
-            if (token && user) {
-                try {
-                    const userData = JSON.parse(user);
-                    // Show user menu
-                    loginBtn.style.display = 'none';
-                    userMenu.style.display = 'flex';
-                    
-                    // Update user info
-                    userName.textContent = userData.nickname || userData.email || 'User';
-                    userAvatar.textContent = (userData.nickname || userData.email || 'U').charAt(0).toUpperCase();
-                } catch (error) {
-                    console.error('Error parsing user data:', error);
-                    // Show login button if user data is corrupted
-                    loginBtn.style.display = 'block';
-                    userMenu.style.display = 'none';
-                }
-            } else {
-                // Show login button
-                loginBtn.style.display = 'block';
-                userMenu.style.display = 'none';
-            }
+            
+            // 항상 로그인 버튼 표시, 유저 메뉴 숨김
+            if (loginBtn) loginBtn.style.display = 'block';
+            if (userMenu) userMenu.style.display = 'none';
         }
 
         // Logout function

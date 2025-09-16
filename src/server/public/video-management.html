@@ -43,35 +43,132 @@
             padding: 20px;
         }
 
+        /* Header */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding: 20px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s ease;
+            color: var(--text);
+        }
+
+        .menu-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 10px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        .logo-text {
             font-size: 24px;
-            font-weight: bold;
+            font-weight: 400;
+            color: white;
+            letter-spacing: -0.5px;
+            font-family: 'Roboto', 'Arial', sans-serif;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 240px;
+            height: calc(100vh - 60px);
+            background: var(--background);
+            border-right: 1px solid var(--border);
+            padding: 20px 0;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-item.active {
+            background: rgba(194, 41, 31, 0.1);
+            color: var(--primary);
+            border-right: 3px solid var(--primary);
+        }
+
+        .sidebar-item .material-icons {
+            margin-right: 24px;
+            font-size: 24px;
+            color: var(--text-muted);
+        }
+
+        .sidebar-item:hover .material-icons,
+        .sidebar-item.active .material-icons {
             color: var(--primary);
         }
 
-        .logo img {
-            width: 32px;
-            height: 32px;
-            object-fit: contain;
-            object-position: center;
-            flex-shrink: 0;
+        .sidebar-item span {
+            font-weight: 500;
+            font-size: 14px;
         }
 
-        .nav-buttons {
-            display: flex;
-            gap: 15px;
+        /* Main content with sidebar */
+        .container {
+            margin-left: 240px;
+            padding: 80px 24px 40px;
         }
 
         .beta-badge {
@@ -457,28 +554,65 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo">
-                <img src="logo/whitered_mini.png" alt="React Central">
-                React Central <span class="beta-badge">BETA</span>
-            </div>
-            <div class="nav-buttons">
-                <a href="react-central.html" class="btn btn-secondary">
-                    <span class="material-icons">home</span>
-                    Home
-                </a>
-                <a href="profile.html" class="btn btn-secondary">
-                    <span class="material-icons">person</span>
-                    Profile
-                </a>
-                <button onclick="logout()" class="btn btn-secondary">
-                    <span class="material-icons">logout</span>
-                    Sign Out
-                </button>
-            </div>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleSidebar()">
+                <span class="material-icons">menu</span>
+            </button>
+            <a href="react-central.html" class="logo">
+                <img src="logo/whitered_mini.png" alt="VirtuEDIT" class="logo-icon">
+                <span class="logo-text">VirtuEDIT</span>
+                <span class="beta-badge">BETA</span>
+            </a>
         </div>
+        <div class="header-right">
+            <a href="react-central.html" class="btn btn-secondary">
+                <span class="material-icons">home</span>
+                Home
+            </a>
+            <a href="profile.html" class="btn btn-secondary">
+                <span class="material-icons">person</span>
+                Profile
+            </a>
+            <button onclick="logout()" class="btn btn-secondary">
+                <span class="material-icons">logout</span>
+                Sign Out
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <ul class="sidebar-menu">
+            <li>
+                <a href="react-central.html" class="sidebar-item">
+                    <span class="material-icons">home</span>
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="sidebar-item" data-section="bookmarks">
+                    <span class="material-icons">bookmark</span>
+                    <span>Bookmarks</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="sidebar-item" data-section="subscriptions">
+                    <span class="material-icons">subscriptions</span>
+                    <span>Subscriptions</span>
+                </a>
+            </li>
+            <li>
+                <a href="profile.html" class="sidebar-item">
+                    <span class="material-icons">account_circle</span>
+                    <span>Profile</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container">
 
         <!-- Video Management Section -->
         <div class="profile-section">
@@ -799,6 +933,12 @@
             keysToRemove.forEach(key => localStorage.removeItem(key));
             
             window.location.href = 'login.html';
+        }
+
+        // Sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
         }
 
         // Initialize

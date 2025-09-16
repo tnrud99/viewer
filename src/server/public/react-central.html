@@ -331,11 +331,73 @@
             margin-right: auto;
         }
 
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 240px;
+            height: calc(100vh - 60px);
+            background: var(--bg);
+            border-right: 1px solid var(--border);
+            padding: 20px 0;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: var(--text);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .sidebar-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .sidebar-item.active {
+            background: var(--bg-secondary);
+            color: var(--primary);
+            border-right: 3px solid var(--primary);
+        }
+
+        .sidebar-item .material-icons {
+            margin-right: 24px;
+            font-size: 24px;
+            color: var(--text-muted);
+        }
+
+        .sidebar-item:hover .material-icons,
+        .sidebar-item.active .material-icons {
+            color: var(--primary);
+        }
+
+        .sidebar-item span {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        /* Main content with sidebar */
+        .main-content {
+            margin-left: 240px;
+            padding: 80px 24px 40px;
+        }
+
         /* Video Grid */
         .video-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
             margin-top: 20px;
         }
 
@@ -408,8 +470,8 @@
 
         .original-label {
             position: absolute;
-            top: 8px;
-            left: 8px;
+            bottom: 8px;
+            right: 8px;
             background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 100%);
             color: white;
             padding: 4px 8px;
@@ -419,7 +481,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             opacity: 0;
-            transform: translateY(-5px);
+            transform: translateY(10px);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 4;
             backdrop-filter: blur(10px);
@@ -445,7 +507,8 @@
 
         /* 호버 효과 */
         .video-card:hover .reaction-thumbnail {
-            transform: scale(1.05);
+            /* 크기 변화 제거하여 16:9 비율 유지 */
+            filter: brightness(1.1);
         }
 
         .video-card:hover .original-thumbnail {
@@ -460,7 +523,7 @@
 
         .video-card:hover .video-duration {
             bottom: 8px;
-            right: 8px;
+            left: 8px;
             transform: scale(0.9);
         }
 
@@ -486,7 +549,7 @@
         .video-duration {
             position: absolute;
             bottom: 12px;
-            right: 12px;
+            left: 12px;
             background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 100%);
             color: white;
             padding: 6px 10px;
@@ -777,6 +840,13 @@
         }
 
         /* Responsive Design */
+        @media (max-width: 1200px) {
+            .video-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+        }
+
         @media (max-width: 768px) {
             .header {
                 padding: 0 15px;
@@ -790,12 +860,22 @@
                 display: block;
             }
 
-            .category-tabs {
-                padding: 0 15px;
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
             }
 
             .main-content {
-                padding: 15px;
+                margin-left: 0;
+                padding: 80px 15px 40px;
+            }
+
+            .category-tabs {
+                padding: 0 15px;
             }
 
             .video-grid {
@@ -813,9 +893,13 @@
                 display: none;
             }
 
+            .main-content {
+                padding: 80px 10px 40px;
+            }
+
             .video-grid {
                 grid-template-columns: repeat(1, 1fr);
-                gap: 8px;
+                gap: 12px;
             }
 
             .video-card {
@@ -881,15 +965,15 @@
             }
             
             .original-label {
-                top: 6px;
-                left: 6px;
+                bottom: 6px;
+                right: 6px;
             }
 
             .video-duration {
                 font-size: 9px;
                 padding: 4px 8px;
                 bottom: 8px;
-                right: 8px;
+                left: 8px;
             }
         }
 
@@ -903,6 +987,28 @@
             .header {
                 background: rgba(15, 15, 15, 0.95);
                 border-bottom-color: rgba(255, 255, 255, 0.1);
+            }
+
+            .sidebar {
+                background: var(--dark-bg);
+                border-right-color: rgba(255, 255, 255, 0.1);
+            }
+
+            .sidebar-item {
+                color: var(--dark-text-secondary);
+            }
+
+            .sidebar-item:hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .sidebar-item.active {
+                background: rgba(193, 42, 31, 0.1);
+                color: var(--primary);
+            }
+
+            .sidebar-item .material-icons {
+                color: var(--dark-text-secondary);
             }
 
             .category-tabs {
@@ -982,6 +1088,36 @@
         <button class="category-tab" data-category="kpop">K-POP</button>
         <button class="category-tab" data-category="my">My Videos</button>
     </div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <ul class="sidebar-menu">
+            <li>
+                <a href="#" class="sidebar-item active" data-section="home">
+                    <span class="material-icons">home</span>
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="sidebar-item" data-section="bookmarks">
+                    <span class="material-icons">bookmark</span>
+                    <span>Bookmarks</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="sidebar-item" data-section="subscriptions">
+                    <span class="material-icons">subscriptions</span>
+                    <span>Subscriptions</span>
+                </a>
+            </li>
+            <li>
+                <a href="profile.html" class="sidebar-item">
+                    <span class="material-icons">account_circle</span>
+                    <span>Profile</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -1419,8 +1555,57 @@
         }
 
         function toggleSidebar() {
-            // TODO: Implement sidebar toggle
-            console.log('Toggle sidebar');
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // 사이드바 메뉴 클릭 이벤트
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarItems = document.querySelectorAll('.sidebar-item[data-section]');
+            
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 모든 사이드바 아이템에서 active 클래스 제거
+                    sidebarItems.forEach(i => i.classList.remove('active'));
+                    
+                    // 클릭된 아이템에 active 클래스 추가
+                    this.classList.add('active');
+                    
+                    const section = this.dataset.section;
+                    
+                    // 섹션별 필터링 로직
+                    switch(section) {
+                        case 'home':
+                            currentCategory = 'all';
+                            document.querySelector('.category-tab[data-category="all"]').click();
+                            break;
+                        case 'bookmarks':
+                            filterBookmarkedVideos();
+                            break;
+                        case 'subscriptions':
+                            filterSubscribedVideos();
+                            break;
+                    }
+                });
+            });
+        });
+
+        // 북마크된 비디오만 필터링
+        function filterBookmarkedVideos() {
+            const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+            const filteredVideos = allVideos.filter(video => bookmarks.includes(video.ve_id));
+            displayVideos(filteredVideos);
+        }
+
+        // 구독한 채널의 비디오만 필터링
+        function filterSubscribedVideos() {
+            const subscriptions = JSON.parse(localStorage.getItem('subscriptions') || '[]');
+            const filteredVideos = allVideos.filter(video => 
+                subscriptions.includes(video.creator_id || video.creator_name)
+            );
+            displayVideos(filteredVideos);
         }
 
         // 로컬스토리지에서 좋아요/북마크 상태 복원

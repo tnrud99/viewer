@@ -618,7 +618,8 @@ app.get('/api/ve-urls/:id', ensureMongoConnection, async (req, res) => {
                 generated_url: veUrl.generated_url, // 생성된 URL 포함
                 timestamp_data: veUrl.timestamp_data,
                 settings: veUrl.settings,
-                metadata: veUrl.metadata
+                metadata: veUrl.metadata,
+                creator_info: veUrl.creator_info // creator_info 추가
             }
         });
     } catch (error) {
@@ -1942,6 +1943,79 @@ app.get('/api/test-mongodb', async (req, res) => {
             error: 'MongoDB Test Failed',
             message: error.message,
             timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// Migration endpoint to fix creator_info for existing videos
+app.post('/api/migrate/creator-info', ensureMongoConnection, async (req, res) => {
+    try {
+        console.log('🔄 Starting creator_info migration...');
+        
+        // Find videos without proper creator_info
+        const videosToFix = await VEUrl.find({
+            $or: [
+                { 'creator_info': { $exists: false } },
+                { 'creator_info.nickname': { $exists: false } },
+                { 'creator_info.nickname': '' },
+                { 'creator_info.nickname': null }
+            ]
+        });
+
+        console.log(`📊 Found ${videosToFix.length} videos to fix`);
+        
+        let fixedCount = 0;
+        
+        for (const video of videosToFix) {
+            try {
+                // Try to get user info if user_id exists
+                let nickname = 'Anonymous';
+                let email = '';
+                
+                if (video.creator_info?.user_id) {
+                    const user = await User.findById(video.creator_info.user_id);
+                    if (user) {
+                        nickname = user.nickname || user.username || 'Anonymous';
+                        email = user.email || '';
+                    }
+                } else if (video.creator_id) {
+                    // Fallback to creator_id if exists
+                    const user = await User.findById(video.creator_id);
+                    if (user) {
+                        nickname = user.nickname || user.username || 'Anonymous';
+                        email = user.email || '';
+                    }
+                }
+                
+                // Update the video with proper creator_info
+                await VEUrl.findByIdAndUpdate(video._id, {
+                    'creator_info.nickname': nickname,
+                    'creator_info.email': email,
+                    'creator_info.is_public': video.creator_info?.is_public ?? true,
+                    'creator_info.user_id': video.creator_info?.user_id || video.creator_id || null
+                });
+                
+                fixedCount++;
+                console.log(`✅ Fixed video ${video.ve_id}: ${nickname}`);
+                
+            } catch (error) {
+                console.error(`❌ Error fixing video ${video.ve_id}:`, error);
+            }
+        }
+        
+        console.log(`🎉 Migration completed: ${fixedCount}/${videosToFix.length} videos fixed`);
+        
+        res.json({
+            message: 'Creator info migration completed',
+            totalVideos: videosToFix.length,
+            fixedVideos: fixedCount
+        });
+        
+    } catch (error) {
+        console.error('❌ Migration error:', error);
+        res.status(500).json({ 
+            error: 'Migration failed',
+            message: error.message 
         });
     }
 });
