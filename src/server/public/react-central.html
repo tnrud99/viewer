@@ -72,10 +72,11 @@
             padding: 8px;
             border-radius: 50%;
             transition: background 0.2s ease;
+            color: white;
         }
 
         .menu-btn:hover {
-            background: rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .logo {
@@ -287,7 +288,7 @@
         .category-tabs {
             position: fixed;
             top: 60px;
-            left: 0;
+            left: 240px;
             right: 0;
             background: var(--bg);
             border-bottom: 1px solid var(--border);
@@ -324,11 +325,10 @@
 
         /* Main Content */
         .main-content {
+            margin-left: 240px;
             margin-top: 110px;
-            padding: 20px;
+            padding: 20px 24px;
             max-width: 1400px;
-            margin-left: auto;
-            margin-right: auto;
         }
 
         /* Sidebar */
@@ -387,18 +387,13 @@
             font-size: 14px;
         }
 
-        /* Main content with sidebar */
-        .main-content {
-            margin-left: 240px;
-            padding: 80px 24px 40px;
-        }
 
         /* Video Grid */
         .video-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 16px;
-            margin-top: 20px;
+            margin-top: 0;
         }
 
         .video-card {
@@ -871,10 +866,12 @@
 
             .main-content {
                 margin-left: 0;
-                padding: 80px 15px 40px;
+                padding: 20px 15px;
+                margin-top: 110px;
             }
 
             .category-tabs {
+                left: 0;
                 padding: 0 15px;
             }
 
@@ -894,7 +891,8 @@
             }
 
             .main-content {
-                padding: 80px 10px 40px;
+                padding: 20px 10px;
+                margin-top: 110px;
             }
 
             .video-grid {

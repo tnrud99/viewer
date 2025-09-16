@@ -534,6 +534,20 @@
 
         /* Responsive */
         @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .container {
+                margin-left: 0;
+                padding: 80px 15px 40px;
+            }
+
             .main-content {
                 padding: 20px 15px;
             }
@@ -561,8 +575,8 @@
                 <span class="material-icons">menu</span>
             </button>
             <a href="react-central.html" class="logo">
-                <img src="logo/whitered_mini.png" alt="VirtuEDIT" class="logo-icon">
-                <span class="logo-text">VirtuEDIT</span>
+                <img src="logo/whitered_mini.png" alt="React Central" class="logo-icon">
+                <span class="logo-text">React Central</span>
                 <span class="beta-badge">BETA</span>
             </a>
         </div>
