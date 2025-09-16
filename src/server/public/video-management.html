@@ -49,9 +49,9 @@
             top: 0;
             width: 100%;
             z-index: 1000;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(15, 15, 15, 0.95);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding: 0 20px;
             height: 60px;
             display: flex;
@@ -141,12 +141,16 @@
             width: 100%;
             height: 40px;
             padding: 0 50px 0 20px;
-            border: 1px solid var(--border);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
             font-size: 16px;
-            background: var(--surface);
-            color: var(--text);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
             transition: all 0.2s ease;
+        }
+
+        .search-bar::placeholder {
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .search-bar:focus {
@@ -741,6 +745,14 @@
                 display: block;
             }
 
+            .header-right {
+                gap: 10px;
+            }
+
+            .create-btn span:last-child {
+                display: none; /* 모바일에서 "Create" 텍스트 숨김 */
+            }
+
             .sidebar {
                 transform: translateX(-100%);
                 transition: transform 0.3s ease;
@@ -977,6 +989,46 @@
             .video-meta span {
                 display: block;
                 margin-bottom: 2px;
+            }
+        }
+
+        /* 헤더 모바일 최적화 (480px 이하) */
+        @media (max-width: 480px) {
+            .header {
+                padding: 0 10px;
+            }
+
+            .header-left {
+                gap: 8px;
+            }
+
+            .logo-text {
+                display: none; /* 로고 텍스트 숨김 */
+            }
+
+            .header-right {
+                gap: 6px;
+            }
+
+            .create-btn {
+                display: none; /* Create 버튼 완전히 숨김 */
+            }
+
+            .profile-btn {
+                width: 32px;
+                height: 32px;
+            }
+
+            .profile-btn .material-icons {
+                font-size: 20px;
+            }
+
+            .mobile-search-btn {
+                padding: 6px;
+            }
+
+            .mobile-search-btn .material-icons {
+                font-size: 20px;
             }
         }
     </style>
