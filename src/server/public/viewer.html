@@ -152,7 +152,7 @@
         .search-bar {
             width: 100%;
             height: 40px;
-            padding: 0 40px 0 20px;
+            padding: 0 48px 0 20px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
             font-size: 16px;
@@ -173,7 +173,7 @@
 
         .search-btn {
             position: absolute;
-            right: 4px;
+            right: 8px;
             top: 50%;
             transform: translateY(-50%);
             background: var(--primary);
@@ -4953,6 +4953,9 @@
         currentVideoData = videoData;
         currentCreatorId = videoData.creator_info?.user_id;
         
+        console.log("🆔 Current Creator ID set to:", currentCreatorId);
+        console.log("🆔 Creator ID type:", typeof currentCreatorId);
+        
         // Show video info section (already visible by default)
         // document.getElementById('videoInfoSection').style.display = 'block';
         
@@ -5034,25 +5037,47 @@
 
     // Check subscription status
     async function checkSubscriptionStatus() {
+        console.log('🔍 checkSubscriptionStatus called');
+        
         const token = localStorage.getItem('authToken');
-        if (!token || !currentCreatorId) return;
+        console.log('🔍 Token exists:', !!token);
+        console.log('🔍 Current Creator ID:', currentCreatorId);
+        
+        if (!token || !currentCreatorId) {
+            console.log('❌ Missing token or creator ID');
+            return;
+        }
 
         try {
+            console.log('🌐 Fetching subscriptions...');
             const response = await fetch('/api/user/subscriptions', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
 
+            console.log('📡 Subscriptions response status:', response.status);
+            
             if (response.ok) {
                 const data = await response.json();
-                const subscriptions = data.subscriptions || [];
-                const isSubscribed = subscriptions.some(sub => sub._id === currentCreatorId);
+                console.log('📺 Subscriptions data:', data);
                 
+                const subscriptions = data.subscriptions || [];
+                console.log('📺 Subscriptions array:', subscriptions);
+                
+                const isSubscribed = subscriptions.some(sub => {
+                    console.log('🔍 Comparing:', sub._id, 'with', currentCreatorId);
+                    return sub._id === currentCreatorId;
+                });
+                
+                console.log('📺 Is subscribed:', isSubscribed);
                 updateSubscriptionButton(isSubscribed);
+            } else {
+                const errorText = await response.text();
+                console.log('❌ Subscriptions API error:', errorText);
             }
         } catch (error) {
-            console.error('Error checking subscription status:', error);
+            console.error('❌ Error checking subscription status:', error);
         }
     }
 

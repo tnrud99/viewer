@@ -977,7 +977,7 @@ app.get('/api/react-central/videos/:id', ensureMongoConnection, async (req, res)
 });
 
 // 좋아요/북마크 기능 (간단한 구현)
-app.post('/api/react-central/videos/:id/like', ensureMongoConnection, async (req, res) => {
+app.post('/api/react-central/videos/:id/like', authenticateToken, ensureMongoConnection, async (req, res) => {
     try {
         const { action } = req.body; // 'like' or 'unlike'
         
