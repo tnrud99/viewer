@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "build": "echo 'Build completed'",
-    "dev": "nodemon server.js",
+앗ㅓ? 괘    "dev": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:editor": "node ../../scripts/build-editor.js",
     "build:viewer": "node ../../scripts/build-viewer.js",
