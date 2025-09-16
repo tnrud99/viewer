@@ -48,7 +48,7 @@
             top: 0;
             width: 100%;
             z-index: 1000;
-            background: rgba(26, 26, 26, 0.95);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
             padding: 0 20px;
@@ -72,7 +72,7 @@
             padding: 8px;
             border-radius: 50%;
             transition: background 0.2s ease;
-            color: var(--text);
+            color: white;
         }
 
         .menu-btn:hover {
@@ -100,6 +100,27 @@
             color: white;
             letter-spacing: -0.5px;
             font-family: 'Roboto', 'Arial', sans-serif;
+        }
+
+        .beta-badge {
+            background: var(--primary);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .region-badge {
+            background: var(--bg-secondary);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
         }
 
         .header-center {
@@ -178,6 +199,88 @@
             display: flex;
             align-items: center;
             gap: 15px;
+        }
+
+        .create-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 18px;
+            font-weight: 500;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            min-width: fit-content;
+            backdrop-filter: blur(10px);
+        }
+
+        .create-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .profile-btn {
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: background 0.2s ease;
+            position: relative;
+            color: var(--text);
+        }
+
+        .profile-btn .material-icons {
+            color: var(--primary);
+            font-size: 24px;
+        }
+
+        .profile-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border);
+            min-width: 180px;
+            z-index: 1000;
+        }
+
+        .profile-menu-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .profile-menu-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .profile-menu-item:first-child {
+            border-radius: 12px 12px 0 0;
+        }
+
+        .profile-menu-item:last-child {
+            border-radius: 0 0 12px 12px;
         }
 
         /* Sidebar */
@@ -1093,8 +1196,7 @@
             </button>
             <a href="react-central.html" class="logo">
                 <img src="logo/whitered_mini.png" alt="React Central" class="logo-icon">
-                <span class="logo-text">React Central</span>
-                <span class="beta-badge">BETA</span>
+                <div class="logo-text">React Central <span class="beta-badge">BETA</span></div>
             </a>
         </div>
 
@@ -1111,18 +1213,19 @@
             <button class="mobile-search-btn" onclick="toggleMobileSearch()">
                 <span class="material-icons">search</span>
             </button>
-            <a href="react-central.html" class="btn btn-secondary">
-                <span class="material-icons">home</span>
-                Home
-            </a>
-            <a href="studio.html" class="btn btn-primary">
+            <a href="/studio.html" class="create-btn">
                 <span class="material-icons">add</span>
-                Create
+                <span>Create</span>
             </a>
-            <button onclick="logout()" class="btn btn-secondary">
-                <span class="material-icons">logout</span>
-                Sign Out
+            <button class="profile-btn" id="profileBtn" onclick="toggleProfileMenu()">
+                <span class="material-icons">account_circle</span>
             </button>
+            <div class="profile-menu" id="profileMenu" style="display: none;">
+                <div class="profile-menu-item" onclick="goToProfile()">My Profile</div>
+                <div class="profile-menu-item" onclick="goToMyVideos()">My Videos</div>
+                <div class="profile-menu-item" onclick="goToMyBookmarks()">My Bookmarks</div>
+                <div class="profile-menu-item" onclick="logout()">Sign Out</div>
+            </div>
         </div>
     </header>
 
@@ -1647,6 +1750,24 @@
             if (searchInput) {
                 searchInput.focus();
             }
+        }
+
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profileMenu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function goToProfile() {
+            // Already on profile page
+            toggleProfileMenu();
+        }
+
+        function goToMyVideos() {
+            window.location.href = '/react-central.html?category=my';
+        }
+
+        function goToMyBookmarks() {
+            window.location.href = '/react-central.html?section=bookmarks';
         }
     </script>
 </body>

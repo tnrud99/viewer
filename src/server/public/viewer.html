@@ -3756,7 +3756,6 @@
             addDebugMessage("Ready to play. Click Play to start.");
             updateDebugDisplay();
             
-            showMessage('All media loaded. Click Play to start.', 'success');
             });
         }
 
@@ -3939,7 +3938,6 @@
                         youtubePlayer.pauseVideo();
                         
                         document.getElementById('status').textContent = 'Status: YouTube Paused (by timestamp)';
-                        showMessage(`YouTube video paused at ${pauseEvent.relative_youtube_time.toFixed(2)}s`, 'success');
                     }
                     
                     // Update next event times
@@ -3972,7 +3970,6 @@
                         currentSyncPoint = playEvent;
                         
                         document.getElementById('status').textContent = 'Status: Playing (synchronized)';
-                        showMessage(`YouTube video resumed at ${playEvent.relative_youtube_time.toFixed(2)}s`, 'success');
                     }
                     
                     // Update next event times
@@ -4045,7 +4042,6 @@
                     
                     // Update status
                     document.getElementById('status').textContent = 'Status: Playing (synchronized after catch-up)';
-                    showMessage(`YouTube video resumed at ${event.relative_youtube_time.toFixed(2)}s (catch-up)`, 'success');
                 }
                 
                 // Update last processed play time
@@ -4071,7 +4067,6 @@
                     
                     // Update status
                     document.getElementById('status').textContent = 'Status: YouTube Paused (by timestamp catch-up)';
-                    showMessage(`YouTube video paused at ${event.relative_youtube_time.toFixed(2)}s (catch-up)`, 'success');
                 }
                 
                 // Update last processed pause time
@@ -4364,7 +4359,6 @@
                 updateNextEventTimes(currentReactionTime);
                 document.getElementById('status').textContent = 'Status: Playing (synchronized)';
             } else {
-                showMessage('Could not find a sync point. Please restart.', 'error');
                 addDebugMessage("ERROR: Could not find a sync point. Please restart.");
                 updateDebugDisplay();
                 isPlaying = false;
@@ -4875,7 +4869,6 @@
             // Update status
             console.log('Status updated');
             enableControls(true);
-            showMessage('VE URL data loaded successfully. Auto-starting playback...', 'success');
             updateDebugDisplay();
             
             // Auto-start playback after a short delay to ensure everything is ready
@@ -5369,7 +5362,6 @@
 
         const html = videos.map(video => {
             const thumbnailUrl = getThumbnailUrl(video.reaction_url);
-            const duration = formatDuration(video.metadata?.duration || 0);
             const viewCount = formatViewCount(video.metadata?.view_count || 0);
             const uploadDate = formatUploadDate(video.metadata?.created_at);
             const channelName = video.creator_info?.nickname || 'Anonymous';
@@ -5379,7 +5371,6 @@
                 <div class="video-item" onclick="loadVideo('${video.ve_id}')">
                     <div class="video-thumbnail">
                         <img src="${thumbnailUrl}" alt="${video.title}" onerror="this.style.display='none'">
-                        <div class="video-duration">${duration}</div>
                     </div>
                     <div class="video-info">
                         <div class="video-item-title">${video.title || 'Untitled'}</div>
@@ -5404,12 +5395,6 @@
         return videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : '';
     }
 
-    function formatDuration(seconds) {
-        if (!seconds) return '0:00';
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    }
 
     function formatUploadDate(dateString) {
         if (!dateString) return 'Unknown';
