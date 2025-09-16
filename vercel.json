@@ -49,7 +49,10 @@
     },
     {
       "src": "/(.*)",
-      "dest": "src/server/server.js"
+      "dest": "src/server/server.js",
+      "headers": {
+        "Cache-Control": "public, max-age=3600, must-revalidate"
+      }
     }
   ],
   "env": {
@@ -67,34 +70,5 @@
       "production": true,
       "homepage": true
     }
-  },
-  "headers": [
-    {
-      "source": "/homepage image/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/(.*\\.(js|css|png|jpg|jpeg|gif|ico|svg|webp))",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/(.*\\.(html|json))",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600, must-revalidate"
-        }
-      ]
-    }
-  ]
+  }
 } 
