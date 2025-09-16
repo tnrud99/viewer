@@ -152,7 +152,7 @@
         .search-bar {
             width: 100%;
             height: 40px;
-            padding: 0 44px 0 20px;
+            padding: 0 40px 0 20px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
             font-size: 16px;
@@ -3280,10 +3280,9 @@
             }, 500); // 0.5초 후 실행
         });
 
-        // Sidebar toggle function
+        // Navigate to React Central
         function toggleSidebar() {
-            // TODO: Implement sidebar toggle
-            console.log('Toggle sidebar');
+            window.location.href = '/react-central.html';
         }
 
         // Go back to React Central
@@ -5118,20 +5117,28 @@
 
     // Toggle subscription
     async function toggleSubscription() {
+        console.log('📺 toggleSubscription called');
+        
         const token = localStorage.getItem('authToken');
         if (!token) {
+            console.log('❌ No auth token');
             alert('Please log in to subscribe to channels');
             return;
         }
 
         if (!currentCreatorId) {
+            console.log('❌ No creator ID:', currentCreatorId);
             alert('Creator information not available');
             return;
         }
 
+        console.log('👤 Creator ID:', currentCreatorId);
+        
         const subscribeBtn = document.getElementById('subscribeBtn');
         const isSubscribed = subscribeBtn.classList.contains('subscribed');
         const action = isSubscribed ? 'unsubscribe' : 'subscribe';
+        
+        console.log('🎯 Action:', action, 'isSubscribed:', isSubscribed);
         
         try {
             const response = await fetch('/api/user/subscription', {
@@ -5146,11 +5153,16 @@
                 })
             });
 
+            console.log('📡 Response status:', response.status);
+            
             if (!response.ok) {
-                throw new Error('Failed to update subscription');
+                const errorText = await response.text();
+                console.log('❌ Response error:', errorText);
+                throw new Error(`Failed to update subscription: ${response.status}`);
             }
 
             const data = await response.json();
+            console.log('✅ API response:', data);
             
             if (data.action === 'subscribed' || data.action === 'unsubscribed') {
                 updateSubscriptionButton(data.action === 'subscribed');
@@ -5165,23 +5177,34 @@
 
     // Toggle like using react-central logic
     async function toggleLike() {
+        console.log('👍 toggleLike called');
+        
         const token = localStorage.getItem('authToken');
         if (!token) {
+            console.log('❌ No auth token');
             alert('Please log in to like videos');
             return;
         }
 
         if (!currentVideoData || !currentVideoData.ve_id) {
+            console.log('❌ No video data:', currentVideoData);
             alert('Video information not available');
             return;
         }
 
+        console.log('📹 Video ID:', currentVideoData.ve_id);
+        
         const likeBtn = document.getElementById('likeBtn');
         const isLiked = likeBtn.classList.contains('liked');
         const action = isLiked ? 'unlike' : 'like';
         
+        console.log('🎯 Action:', action, 'isLiked:', isLiked);
+        
         try {
-            const response = await fetch(`/api/react-central/videos/${currentVideoData.ve_id}/like`, {
+            const url = `/api/react-central/videos/${currentVideoData.ve_id}/like`;
+            console.log('🌐 API URL:', url);
+            
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -5190,9 +5213,16 @@
                 body: JSON.stringify({ action })
             });
 
+            console.log('📡 Response status:', response.status);
+            
             if (!response.ok) {
-                throw new Error('Failed to update like');
+                const errorText = await response.text();
+                console.log('❌ Response error:', errorText);
+                throw new Error(`Failed to update like: ${response.status}`);
             }
+
+            const result = await response.json();
+            console.log('✅ API response:', result);
 
             // Update UI
             const likeCountSpan = document.getElementById('likeCount');
@@ -5219,19 +5249,27 @@
 
     // Toggle bookmark using react-central logic
     async function toggleBookmark() {
+        console.log('🔖 toggleBookmark called');
+        
         const token = localStorage.getItem('authToken');
         if (!token) {
+            console.log('❌ No auth token');
             alert('Please log in to bookmark videos');
             return;
         }
 
         if (!currentVideoData || !currentVideoData.ve_id) {
+            console.log('❌ No video data:', currentVideoData);
             alert('Video information not available');
             return;
         }
 
+        console.log('📹 Video ID:', currentVideoData.ve_id);
+        
         const bookmarkBtn = document.getElementById('bookmarkBtn');
         const isBookmarked = bookmarkBtn.classList.contains('bookmarked');
+        
+        console.log('🎯 Current bookmark state:', isBookmarked);
         
         try {
             const response = await fetch('/api/user/bookmark', {
@@ -5243,11 +5281,16 @@
                 body: JSON.stringify({ ve_id: currentVideoData.ve_id })
             });
 
+            console.log('📡 Response status:', response.status);
+            
             if (!response.ok) {
-                throw new Error('Failed to update bookmark');
+                const errorText = await response.text();
+                console.log('❌ Response error:', errorText);
+                throw new Error(`Failed to update bookmark: ${response.status}`);
             }
 
             const data = await response.json();
+            console.log('✅ API response:', data);
             
             if (data.action === 'added') {
                 bookmarkBtn.classList.add('bookmarked');
@@ -5420,8 +5463,7 @@
 
     // Header functions from react-central
     function toggleSidebar() {
-        // TODO: Implement sidebar toggle
-        console.log('Toggle sidebar');
+        window.location.href = '/react-central.html';
     }
 
     function performSearch() {

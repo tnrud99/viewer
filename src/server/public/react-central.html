@@ -1576,14 +1576,22 @@
                     // 섹션별 필터링 로직
                     switch(section) {
                         case 'home':
-                            currentCategory = 'all';
-                            document.querySelector('.category-tab[data-category="all"]').click();
+                            currentCategory = 'latest';
+                            document.querySelector('.category-tab[data-category="latest"]').click();
                             break;
                         case 'bookmarks':
-                            filterBookmarkedVideos();
+                            goToMyBookmarks();
                             break;
                         case 'subscriptions':
-                            filterSubscribedVideos();
+                            // Subscriptions 탭으로 이동
+                            currentCategory = 'subscriptions';
+                            document.querySelectorAll('.category-tab').forEach(tab => {
+                                tab.classList.remove('active');
+                                if (tab.dataset.category === 'subscriptions') {
+                                    tab.classList.add('active');
+                                }
+                            });
+                            loadVideos();
                             break;
                     }
                 });
@@ -2039,9 +2047,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('React Central initialized');
             
-            // Check URL parameters for category
+            // Check URL parameters for category and section
             const urlParams = new URLSearchParams(window.location.search);
             const categoryParam = urlParams.get('category');
+            const sectionParam = urlParams.get('section');
             
             if (categoryParam) {
                 // Handle sort-based tabs (Latest, Popular)
@@ -2068,6 +2077,25 @@
             }
             
             checkAuthStatus();
+            
+            // Handle section parameter for direct navigation
+            if (sectionParam === 'bookmarks') {
+                setTimeout(() => {
+                    const bookmarksItem = document.querySelector('.sidebar-item[data-section="bookmarks"]');
+                    if (bookmarksItem) {
+                        bookmarksItem.click();
+                    }
+                }, 500); // Wait for auth check
+                return;
+            } else if (sectionParam === 'subscriptions') {
+                setTimeout(() => {
+                    const subscriptionsItem = document.querySelector('.sidebar-item[data-section="subscriptions"]');
+                    if (subscriptionsItem) {
+                        subscriptionsItem.click();
+                    }
+                }, 500); // Wait for auth check
+                return;
+            }
             
             // subscriptions 카테고리인 경우 구독 비디오 로드
             if (currentCategory === 'subscriptions') {
