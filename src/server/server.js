@@ -1300,10 +1300,6 @@ app.post('/api/user/subscription', authenticateToken, ensureMongoConnection, asy
             return res.status(400).json({ error: 'Action must be "subscribe" or "unsubscribe"' });
         }
         
-        if (userId === creator_id) {
-            console.log('❌ Cannot subscribe to yourself');
-            return res.status(400).json({ error: 'Cannot subscribe to yourself' });
-        }
         
         console.log('📺 Finding user:', userId);
         const user = await User.findById(userId);

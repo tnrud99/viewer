@@ -318,6 +318,26 @@
         }
 
         .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 16px;
+            background: var(--bg);
+            color: var(--text);
+            transition: all 0.2s ease;
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(193, 42, 31, 0.1);
+        }
+
+        .form-textarea {
             min-height: 100px;
             resize: vertical;
         }
@@ -658,6 +678,26 @@
             </div>
 
 
+            <!-- Video Information -->
+            <div class="management-section">
+                <h3 class="section-title">
+                    <span class="material-icons">edit</span>
+                    Video Information
+                </h3>
+                
+                <div class="form-group">
+                    <label class="form-label">Video Title</label>
+                    <input type="text" id="editVideoTitle" class="form-input" placeholder="Enter video title">
+                    <div class="input-hint">💡 Choose a descriptive title for your video</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="editVideoDescription" class="form-textarea" rows="4" placeholder="Describe your reaction video..."></textarea>
+                    <div class="input-hint">💡 Add details about your reaction, thoughts, or context</div>
+                </div>
+            </div>
+
             <!-- React Central Settings -->
             <div class="management-section">
                 <h3 class="section-title">
@@ -785,7 +825,11 @@
             document.getElementById('videoViews').textContent = `Views: ${formatViewCount(video.metadata?.view_count || 0)}`;
             document.getElementById('videoLikes').textContent = `Likes: ${video.react_central?.likes || 0}`;
 
-            // Form fields
+            // Form fields - Video Information
+            document.getElementById('editVideoTitle').value = video.title || '';
+            document.getElementById('editVideoDescription').value = video.description || '';
+            
+            // Form fields - React Central Settings
             document.getElementById('isPublicToggle').checked = video.creator_info?.is_public || false;
             
             // Set category checkboxes
@@ -809,12 +853,19 @@
             if (!checkAuth()) return;
 
             const token = localStorage.getItem('authToken');
+            
+            // Get form data
+            const title = document.getElementById('editVideoTitle').value.trim();
+            const description = document.getElementById('editVideoDescription').value.trim();
+            
             // Get selected categories
             const categories = [];
             if (document.getElementById('categoryMv').checked) categories.push('mv');
             if (document.getElementById('categoryKpop').checked) categories.push('kpop');
 
             const updateData = {
+                title: title,
+                description: description,
                 is_public: document.getElementById('isPublicToggle').checked,
                 categories: categories
             };

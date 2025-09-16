@@ -757,60 +757,132 @@
                 padding: 80px 15px 40px;
             }
 
-            .header {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
+            .profile-section {
+                padding: 20px;
+                margin-bottom: 20px;
             }
 
             .profile-header {
                 flex-direction: column;
                 text-align: center;
+                gap: 15px;
+                margin-bottom: 20px;
             }
 
-            .stats-grid {
-                grid-template-columns: 1fr;
+            .profile-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
             }
 
-            /* Mobile table adjustments */
-            .videos-table th,
-            .videos-table td {
-                padding: 12px 8px;
-                font-size: 12px;
+            .profile-info h1 {
+                font-size: 20px;
+                margin-bottom: 4px;
             }
 
-            .video-title-cell {
-                max-width: 200px;
-            }
-
-            .video-title-link {
+            .profile-info p {
                 font-size: 14px;
             }
 
-            .video-subtitle {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+
+            .stat-card {
+                padding: 16px 12px;
+                border-radius: 8px;
+            }
+
+            .stat-number {
+                font-size: 18px;
+                margin-bottom: 4px;
+            }
+
+            .stat-label {
+                font-size: 12px;
+            }
+
+            /* Mobile table adjustments - 더 간결하게 */
+            .videos-table {
                 font-size: 11px;
             }
 
+            .videos-table th {
+                padding: 8px 4px;
+                font-size: 10px;
+            }
+
+            .videos-table td {
+                padding: 10px 4px;
+            }
+
+            .video-title-cell {
+                max-width: 140px;
+            }
+
+            .video-title-link {
+                font-size: 12px;
+                line-height: 1.3;
+                margin-bottom: 2px;
+            }
+
+            .video-subtitle {
+                font-size: 9px;
+            }
+
+            .video-stats {
+                gap: 2px;
+            }
+
             .stat-item {
-                font-size: 11px;
+                font-size: 9px;
+                gap: 3px;
+            }
+
+            .stat-item .material-icons {
+                font-size: 12px;
             }
 
             .action-buttons {
                 flex-direction: column;
-                gap: 4px;
+                gap: 3px;
             }
 
             .action-btn-compact {
-                padding: 6px 8px;
-                font-size: 10px;
+                padding: 4px 6px;
+                font-size: 9px;
+                gap: 3px;
             }
 
             .action-btn-compact .material-icons {
-                font-size: 14px;
+                font-size: 12px;
+            }
+
+            .action-btn-compact span:not(.material-icons) {
+                display: none; /* 모바일에서 버튼 텍스트 숨김 */
             }
 
             .video-date {
-                font-size: 11px;
+                font-size: 9px;
+            }
+
+            /* 모바일에서 테이블 헤더 간소화 */
+            .videos-table th:nth-child(2) {
+                display: none; /* Stats 컬럼 숨김 */
+            }
+
+            .videos-table td:nth-child(2) {
+                display: none; /* Stats 컬럼 숨김 */
+            }
+
+            .videos-table th:nth-child(3) {
+                display: none; /* Created 컬럼 숨김 */
+            }
+
+            .videos-table td:nth-child(3) {
+                display: none; /* Created 컬럼 숨김 */
             }
 
             .section-header {
@@ -844,6 +916,85 @@
             }
 
             .action-btn.manage-btn .btn-text {
+                font-size: 10px;
+            }
+        }
+
+        /* 매우 작은 모바일 화면 (480px 이하) */
+        @media (max-width: 480px) {
+            .container {
+                padding: 80px 8px 20px;
+            }
+
+            .profile-section {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .profile-header {
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+
+            .profile-avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .profile-info h1 {
+                font-size: 18px;
+            }
+
+            .profile-info p {
+                font-size: 13px;
+            }
+
+            .stats-grid {
+                gap: 8px;
+                margin-bottom: 16px;
+            }
+
+            .stat-card {
+                padding: 12px 8px;
+            }
+
+            .stat-number {
+                font-size: 16px;
+            }
+
+            .stat-label {
+                font-size: 11px;
+            }
+
+            /* 모바일 테이블 더 간결하게 */
+            .videos-table th,
+            .videos-table td {
+                padding: 8px 2px;
+            }
+
+            .video-title-cell {
+                max-width: 100px;
+            }
+
+            .video-title-link {
+                font-size: 11px;
+            }
+
+            .action-btn-compact {
+                padding: 3px 4px;
+                font-size: 8px;
+            }
+
+            .action-btn-compact .material-icons {
+                font-size: 10px;
+            }
+
+            .section-title {
+                font-size: 16px;
+            }
+
+            .section-subtitle {
                 font-size: 10px;
             }
         }

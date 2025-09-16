@@ -152,7 +152,7 @@
         .search-bar {
             width: 100%;
             height: 40px;
-            padding: 0 48px 0 20px;
+            padding: 0 50px 0 20px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
             font-size: 16px;
@@ -404,7 +404,6 @@
         @media (max-width: 768px) {
             .header {
                 padding: 0 15px;
-                box-sizing: border-box;
             }
 
             .header-center {
@@ -2926,10 +2925,7 @@
                     <span class="material-icons">account_circle</span>
                 </button>
                 <div class="profile-menu" id="profileMenu" style="display: none;">
-                    <div class="profile-menu-item" onclick="goToProfile()">My Profile</div>
-                    <div class="profile-menu-item" onclick="goToMyVideos()">My Videos</div>
-                    <div class="profile-menu-item" onclick="goToMyBookmarks()">My Bookmarks</div>
-                    <div class="profile-menu-item" onclick="logout()">Sign Out</div>
+                    <!-- 동적으로 로그인 상태에 따라 업데이트됨 -->
                 </div>
             </div>
         </header>
@@ -5006,6 +5002,7 @@
         const likeCount = videoData.react_central?.likes || 0;
         document.getElementById('likeCount').textContent = formatCount(likeCount);
         
+        
         // Check subscription status
         checkSubscriptionStatus();
         
@@ -5034,6 +5031,7 @@
         }
         return count.toString();
     }
+
 
     // Check subscription status
     async function checkSubscriptionStatus() {
@@ -5484,7 +5482,90 @@
     // Initialize sidebar tabs when DOM is loaded
     document.addEventListener('DOMContentLoaded', () => {
         initSidebarTabs();
+        checkAuthStatus(); // 인증 상태 확인하여 프로필 메뉴 업데이트
     });
+
+    // Check authentication status and update profile menu
+    function checkAuthStatus() {
+        const token = localStorage.getItem('authToken');
+        const user = localStorage.getItem('user');
+        const profileMenu = document.getElementById('profileMenu');
+        
+        if (token && user) {
+            try {
+                const userData = JSON.parse(user);
+                // 로그인된 상태 - 프로필 메뉴 표시
+                profileMenu.innerHTML = `
+                    <div class="profile-menu-item" onclick="goToProfile()">My Profile</div>
+                    <div class="profile-menu-item" onclick="goToMyVideos()">My Videos</div>
+                    <div class="profile-menu-item" onclick="goToMyBookmarks()">My Bookmarks</div>
+                    <div class="profile-menu-item" onclick="logout()">Sign Out</div>
+                `;
+                console.log('✅ User logged in:', userData.nickname || userData.username);
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+                // 로그인 안된 상태로 처리
+                showLoginMenu();
+            }
+        } else {
+            // 로그인 안된 상태
+            showLoginMenu();
+        }
+    }
+    
+    function showLoginMenu() {
+        const profileMenu = document.getElementById('profileMenu');
+        profileMenu.innerHTML = `
+            <div class="profile-menu-item" onclick="goToLogin()">Sign In</div>
+            <div class="profile-menu-item" onclick="goToSignup()">Sign Up</div>
+        `;
+        console.log('ℹ️ User not logged in');
+    }
+    
+    function goToLogin() {
+        window.location.href = '/login.html';
+    }
+    
+    function goToSignup() {
+        window.location.href = '/signup.html';
+    }
+    
+    function toggleProfileMenu() {
+        const menu = document.getElementById('profileMenu');
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    function goToProfile() {
+        window.location.href = '/profile.html';
+    }
+    
+    function goToMyVideos() {
+        window.location.href = '/react-central.html?category=my';
+    }
+    
+    function goToMyBookmarks() {
+        window.location.href = '/react-central.html?section=bookmarks';
+    }
+    
+    function logout() {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        
+        // Clear user-specific data
+        localStorage.removeItem('bookmarks');
+        
+        // Clear all liked/bookmarked video states
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.startsWith('liked_') || key.startsWith('bookmarked_') || key.startsWith('subscribed_'))) {
+                keysToRemove.push(key);
+            }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        window.location.href = '/index.html';
+    }
 
     // Header functions from react-central
     function toggleSidebar() {

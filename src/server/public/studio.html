@@ -8,8 +8,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <style>
-        * {
-            margin: 0;
+        * {ㅔ 필요
             padding: 0;
             box-sizing: border-box;
         }
@@ -592,6 +591,147 @@
             padding-top: 90px;
         }
 
+        /* Mobile Warning Modal */
+        .mobile-warning-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .mobile-warning-modal {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mobile-warning-icon {
+            font-size: 4em;
+            color: #c2291f;
+            margin-bottom: 20px;
+        }
+
+        .mobile-warning-title {
+            color: #ffffff;
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .mobile-warning-message {
+            color: #cccccc;
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .mobile-warning-features {
+            background: rgba(42, 42, 42, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-warning-features h4 {
+            color: #c2291f;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .mobile-warning-features ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .mobile-warning-features li {
+            color: #cccccc;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mobile-warning-features li::before {
+            content: "✓";
+            color: #c2291f;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .mobile-warning-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .mobile-warning-btn {
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            border: 2px solid;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mobile-warning-btn.primary {
+            background: #c2291f;
+            color: white;
+            border-color: #c2291f;
+        }
+
+        .mobile-warning-btn.primary:hover {
+            background: #a81f18;
+            border-color: #a81f18;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(194, 41, 31, 0.3);
+        }
+
+        .mobile-warning-btn.secondary {
+            background: transparent;
+            color: #cccccc;
+            border-color: #cccccc;
+        }
+
+        .mobile-warning-btn.secondary:hover {
+            background: #cccccc;
+            color: #1a1a1a;
+            transform: translateY(-2px);
+        }
+
         /* Mobile responsive */
         @media (max-width: 768px) {
             .header {
@@ -633,6 +773,30 @@
             
             body {
                 padding-top: 80px;
+            }
+
+            .mobile-warning-modal {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+
+            .mobile-warning-title {
+                font-size: 1.5em;
+            }
+
+            .mobile-warning-message {
+                font-size: 1em;
+            }
+
+            .mobile-warning-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .mobile-warning-btn {
+                width: 100%;
+                max-width: 250px;
+                justify-content: center;
             }
         }
     </style>
@@ -780,6 +944,37 @@
         </div>
     </div>
 
+    <!-- Mobile Warning Modal -->
+    <div id="mobileWarningOverlay" class="mobile-warning-overlay" style="display: none;">
+        <div class="mobile-warning-modal">
+            <div class="mobile-warning-icon">
+                <span class="material-icons">computer</span>
+            </div>
+            <h2 class="mobile-warning-title">PC Environment Required</h2>
+            <p class="mobile-warning-message">
+                Studio is a synchronization settings program for creating synchronized video experiences. This feature is currently only available on desktop and laptop computers.
+            </p>
+            
+            <div class="mobile-warning-features">
+                <h4>Mobile support coming soon</h4>
+                <p style="color: #cccccc; margin: 0; font-size: 0.95em;">
+                    We're working on mobile optimization. Please use a PC for the best experience.
+                </p>
+            </div>
+
+            <div class="mobile-warning-buttons">
+                <button class="mobile-warning-btn primary" onclick="continueOnMobile()">
+                    <span class="material-icons">smartphone</span>
+                    Continue on Mobile
+                </button>
+                <button class="mobile-warning-btn secondary" onclick="goToHomepage()">
+                    <span class="material-icons">home</span>
+                    Go to Homepage
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         function toggleGuide() {
             const panel = document.getElementById('guidePanel');
@@ -851,9 +1046,82 @@
             checkAuthStatus();
         });
 
-        // DOM이 로드되면 인증 상태 체크
+        // Mobile detection and warning functions
+        function isMobileDevice() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            
+            // Check for mobile devices
+            const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
+            const isMobile = mobileRegex.test(userAgent);
+            
+            // Check screen size (additional check)
+            const isSmallScreen = window.innerWidth <= 768;
+            
+            // Check for touch capability
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            
+            return isMobile || (isSmallScreen && isTouchDevice);
+        }
+
+        function showMobileWarning() {
+            console.log('⚠️ showMobileWarning called');
+            const overlay = document.getElementById('mobileWarningOverlay');
+            console.log('🔍 Overlay element found:', !!overlay);
+            
+            if (overlay) {
+                console.log('✅ Displaying mobile warning modal');
+                overlay.style.display = 'flex';
+                // Prevent body scroll when modal is open
+                document.body.style.overflow = 'hidden';
+            } else {
+                console.error('❌ Mobile warning overlay element not found');
+            }
+        }
+
+        function hideMobileWarning() {
+            const overlay = document.getElementById('mobileWarningOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+                // Restore body scroll
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function continueOnMobile() {
+            hideMobileWarning();
+            // Store user preference to not show warning again in this session
+            sessionStorage.setItem('mobileWarningDismissed', 'true');
+        }
+
+        function goToHomepage() {
+            window.location.href = 'index.html';
+        }
+
+        function checkMobileAndShowWarning() {
+            console.log('🔍 Checking mobile device...');
+            
+            // Check if user has already dismissed the warning in this session
+            const warningDismissed = sessionStorage.getItem('mobileWarningDismissed');
+            const isMobile = isMobileDevice();
+            
+            console.log('📱 Is mobile device:', isMobile);
+            console.log('🚫 Warning dismissed:', warningDismissed);
+            console.log('📏 Window width:', window.innerWidth);
+            console.log('👆 Touch device:', 'ontouchstart' in window);
+            
+            if (isMobile && !warningDismissed) {
+                console.log('⚠️ Showing mobile warning...');
+                // Small delay to ensure page is fully loaded
+                setTimeout(showMobileWarning, 500);
+            } else {
+                console.log('ℹ️ Mobile warning not shown');
+            }
+        }
+
+        // DOM이 로드되면 인증 상태 체크 및 모바일 경고 확인
         document.addEventListener('DOMContentLoaded', function() {
             checkAuthStatus();
+            checkMobileAndShowWarning();
         });
     </script>
 </body>
