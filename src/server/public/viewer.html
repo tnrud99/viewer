@@ -4949,8 +4949,6 @@
         currentVideoData = videoData;
         currentCreatorId = videoData.creator_info?.user_id;
         
-        console.log("🆔 Current Creator ID set to:", currentCreatorId);
-        console.log("🆔 Creator ID type:", typeof currentCreatorId);
         
         // Show video info section (already visible by default)
         // document.getElementById('videoInfoSection').style.display = 'block';
@@ -4971,17 +4969,14 @@
         document.getElementById('uploadDate').textContent = `• ${formattedDate}`;
         
         // Update channel info
-        console.log("🔍 Creator info debug:", videoData.creator_info);
-        console.log("🔍 Full video data:", videoData);
-        
         const creatorName = videoData.creator_info?.nickname || 'Anonymous';
         const creatorInitial = creatorName.charAt(0).toUpperCase();
         
-        console.log("👤 Creator name resolved to:", creatorName);
-        
         document.getElementById('channelAvatar').textContent = creatorInitial;
         document.getElementById('channelName').textContent = creatorName;
-        document.getElementById('subscriberCount').textContent = '0 subscribers'; // TODO: Get actual subscriber count
+        
+        // Load actual subscriber count
+        loadSubscriberCount();
         
         // Update description with better formatting
         const description = videoData.description || 'No description available.';
@@ -5032,50 +5027,87 @@
         return count.toString();
     }
 
+    // Refresh like count from server
+    async function refreshLikeCount() {
+        try {
+            if (!currentVideoData || !currentVideoData.ve_id) return;
+            
+            const response = await fetch(`/api/react-central/videos/${currentVideoData.ve_id}`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                const likeCount = data.video?.react_central?.likes || 0;
+                document.getElementById('likeCount').textContent = formatCount(likeCount);
+            }
+        } catch (error) {
+            console.error('Error refreshing like count:', error);
+        }
+    }
+
+    // Load subscriber count from server
+    async function loadSubscriberCount() {
+        try {
+            if (!currentCreatorId) {
+                document.getElementById('subscriberCount').textContent = '0 subscribers';
+                return;
+            }
+            
+            const response = await fetch(`/api/user/${currentCreatorId}/subscribers-count`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                const count = data.subscriberCount || 0;
+                const formattedCount = formatSubscriberCount(count);
+                document.getElementById('subscriberCount').textContent = formattedCount;
+            } else {
+                document.getElementById('subscriberCount').textContent = '0 subscribers';
+            }
+        } catch (error) {
+            console.error('Error loading subscriber count:', error);
+            document.getElementById('subscriberCount').textContent = '0 subscribers';
+        }
+    }
+
+    // Format subscriber count
+    function formatSubscriberCount(count) {
+        if (count === 0) {
+            return '0 subscribers';
+        } else if (count === 1) {
+            return '1 subscriber';
+        } else if (count >= 1000000) {
+            return `${(count / 1000000).toFixed(1)}M subscribers`;
+        } else if (count >= 1000) {
+            return `${(count / 1000).toFixed(1)}K subscribers`;
+        } else {
+            return `${count} subscribers`;
+        }
+    }
+
+    // Refresh subscriber count (called after subscribe/unsubscribe)
+    async function refreshSubscriberCount() {
+        await loadSubscriberCount();
+    }
 
     // Check subscription status
     async function checkSubscriptionStatus() {
-        console.log('🔍 checkSubscriptionStatus called');
-        
         const token = localStorage.getItem('authToken');
-        console.log('🔍 Token exists:', !!token);
-        console.log('🔍 Current Creator ID:', currentCreatorId);
-        
-        if (!token || !currentCreatorId) {
-            console.log('❌ Missing token or creator ID');
-            return;
-        }
+        if (!token || !currentCreatorId) return;
 
         try {
-            console.log('🌐 Fetching subscriptions...');
             const response = await fetch('/api/user/subscriptions', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-
-            console.log('📡 Subscriptions response status:', response.status);
             
             if (response.ok) {
                 const data = await response.json();
-                console.log('📺 Subscriptions data:', data);
-                
                 const subscriptions = data.subscriptions || [];
-                console.log('📺 Subscriptions array:', subscriptions);
-                
-                const isSubscribed = subscriptions.some(sub => {
-                    console.log('🔍 Comparing:', sub._id, 'with', currentCreatorId);
-                    return sub._id === currentCreatorId;
-                });
-                
-                console.log('📺 Is subscribed:', isSubscribed);
+                const isSubscribed = subscriptions.some(sub => sub._id === currentCreatorId);
                 updateSubscriptionButton(isSubscribed);
-            } else {
-                const errorText = await response.text();
-                console.log('❌ Subscriptions API error:', errorText);
             }
         } catch (error) {
-            console.error('❌ Error checking subscription status:', error);
+            console.error('Error checking subscription status:', error);
         }
     }
 
@@ -5140,28 +5172,20 @@
 
     // Toggle subscription
     async function toggleSubscription() {
-        console.log('📺 toggleSubscription called');
-        
         const token = localStorage.getItem('authToken');
         if (!token) {
-            console.log('❌ No auth token');
             alert('Please log in to subscribe to channels');
             return;
         }
 
         if (!currentCreatorId) {
-            console.log('❌ No creator ID:', currentCreatorId);
             alert('Creator information not available');
             return;
         }
 
-        console.log('👤 Creator ID:', currentCreatorId);
-        
         const subscribeBtn = document.getElementById('subscribeBtn');
         const isSubscribed = subscribeBtn.classList.contains('subscribed');
         const action = isSubscribed ? 'unsubscribe' : 'subscribe';
-        
-        console.log('🎯 Action:', action, 'isSubscribed:', isSubscribed);
         
         try {
             const response = await fetch('/api/user/subscription', {
@@ -5175,21 +5199,17 @@
                     action: action
                 })
             });
-
-            console.log('📡 Response status:', response.status);
             
             if (!response.ok) {
-                const errorText = await response.text();
-                console.log('❌ Response error:', errorText);
                 throw new Error(`Failed to update subscription: ${response.status}`);
             }
 
             const data = await response.json();
-            console.log('✅ API response:', data);
             
             if (data.action === 'subscribed' || data.action === 'unsubscribed') {
                 updateSubscriptionButton(data.action === 'subscribed');
-                console.log(`✅ ${action} successful`);
+                // Refresh subscriber count after subscription change
+                await refreshSubscriberCount();
             }
             
         } catch (error) {
@@ -5200,34 +5220,23 @@
 
     // Toggle like using react-central logic
     async function toggleLike() {
-        console.log('👍 toggleLike called');
-        
         const token = localStorage.getItem('authToken');
         if (!token) {
-            console.log('❌ No auth token');
             alert('Please log in to like videos');
             return;
         }
 
         if (!currentVideoData || !currentVideoData.ve_id) {
-            console.log('❌ No video data:', currentVideoData);
             alert('Video information not available');
             return;
         }
 
-        console.log('📹 Video ID:', currentVideoData.ve_id);
-        
         const likeBtn = document.getElementById('likeBtn');
         const isLiked = likeBtn.classList.contains('liked');
         const action = isLiked ? 'unlike' : 'like';
         
-        console.log('🎯 Action:', action, 'isLiked:', isLiked);
-        
         try {
-            const url = `/api/react-central/videos/${currentVideoData.ve_id}/like`;
-            console.log('🌐 API URL:', url);
-            
-            const response = await fetch(url, {
+            const response = await fetch(`/api/react-central/videos/${currentVideoData.ve_id}/like`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -5235,34 +5244,22 @@
                 },
                 body: JSON.stringify({ action })
             });
-
-            console.log('📡 Response status:', response.status);
             
             if (!response.ok) {
-                const errorText = await response.text();
-                console.log('❌ Response error:', errorText);
                 throw new Error(`Failed to update like: ${response.status}`);
             }
 
-            const result = await response.json();
-            console.log('✅ API response:', result);
-
-            // Update UI
-            const likeCountSpan = document.getElementById('likeCount');
-            let currentCount = parseInt(likeCountSpan.textContent.replace('K', '').replace('.', '')) || 0;
-            
-            if (isLiked) {
-                likeBtn.classList.remove('liked');
-                localStorage.removeItem(`liked_${currentVideoData.ve_id}`);
-                currentCount = Math.max(0, currentCount - 1);
-            } else {
+            // Update UI based on action
+            if (action === 'like') {
                 likeBtn.classList.add('liked');
                 localStorage.setItem(`liked_${currentVideoData.ve_id}`, 'true');
-                currentCount += 1;
+            } else {
+                likeBtn.classList.remove('liked');
+                localStorage.removeItem(`liked_${currentVideoData.ve_id}`);
             }
             
-            likeCountSpan.textContent = formatCount(currentCount);
-            console.log(`✅ ${action} successful`);
+            // Refresh like count from server to get accurate count
+            await refreshLikeCount();
             
         } catch (error) {
             console.error('Like error:', error);
@@ -5272,27 +5269,18 @@
 
     // Toggle bookmark using react-central logic
     async function toggleBookmark() {
-        console.log('🔖 toggleBookmark called');
-        
         const token = localStorage.getItem('authToken');
         if (!token) {
-            console.log('❌ No auth token');
             alert('Please log in to bookmark videos');
             return;
         }
 
         if (!currentVideoData || !currentVideoData.ve_id) {
-            console.log('❌ No video data:', currentVideoData);
             alert('Video information not available');
             return;
         }
 
-        console.log('📹 Video ID:', currentVideoData.ve_id);
-        
         const bookmarkBtn = document.getElementById('bookmarkBtn');
-        const isBookmarked = bookmarkBtn.classList.contains('bookmarked');
-        
-        console.log('🎯 Current bookmark state:', isBookmarked);
         
         try {
             const response = await fetch('/api/user/bookmark', {
@@ -5303,24 +5291,17 @@
                 },
                 body: JSON.stringify({ ve_id: currentVideoData.ve_id })
             });
-
-            console.log('📡 Response status:', response.status);
             
             if (!response.ok) {
-                const errorText = await response.text();
-                console.log('❌ Response error:', errorText);
                 throw new Error(`Failed to update bookmark: ${response.status}`);
             }
 
             const data = await response.json();
-            console.log('✅ API response:', data);
             
             if (data.action === 'added') {
                 bookmarkBtn.classList.add('bookmarked');
-                console.log('✅ Bookmark added');
             } else if (data.action === 'removed') {
                 bookmarkBtn.classList.remove('bookmarked');
-                console.log('✅ Bookmark removed');
             }
             
         } catch (error) {
@@ -5501,7 +5482,6 @@
                     <div class="profile-menu-item" onclick="goToMyBookmarks()">My Bookmarks</div>
                     <div class="profile-menu-item" onclick="logout()">Sign Out</div>
                 `;
-                console.log('✅ User logged in:', userData.nickname || userData.username);
             } catch (error) {
                 console.error('Error parsing user data:', error);
                 // 로그인 안된 상태로 처리
@@ -5519,7 +5499,6 @@
             <div class="profile-menu-item" onclick="goToLogin()">Sign In</div>
             <div class="profile-menu-item" onclick="goToSignup()">Sign Up</div>
         `;
-        console.log('ℹ️ User not logged in');
     }
     
     function goToLogin() {

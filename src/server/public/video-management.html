@@ -103,6 +103,78 @@
             font-family: 'Roboto', 'Arial', sans-serif;
         }
 
+        .header-center {
+            flex: 1;
+            max-width: 600px;
+            margin: 0 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-bar {
+            width: 100%;
+            height: 40px;
+            padding: 0 50px 0 20px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 16px;
+            background: var(--surface);
+            color: var(--text);
+            transition: all 0.2s ease;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(194, 41, 31, 0.1);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .search-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .mobile-search-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s ease;
+        }
+
+        .mobile-search-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .mobile-search-btn .material-icons {
+            font-size: 24px;
+        }
+
         .header-right {
             display: flex;
             align-items: center;
@@ -554,6 +626,18 @@
 
         /* Responsive */
         @media (max-width: 768px) {
+            .header {
+                padding: 0 15px;
+            }
+
+            .header-center {
+                display: none;
+            }
+
+            .mobile-search-btn {
+                display: block;
+            }
+
             .sidebar {
                 transform: translateX(-100%);
                 transition: transform 0.3s ease;
@@ -600,7 +684,20 @@
                 <span class="beta-badge">BETA</span>
             </a>
         </div>
+
+        <div class="header-center">
+            <div class="search-container">
+                <input type="text" class="search-bar" placeholder="Search" id="searchInput">
+                <button class="search-btn" onclick="performSearch()">
+                    <span class="material-icons">search</span>
+                </button>
+            </div>
+        </div>
+
         <div class="header-right">
+            <button class="mobile-search-btn" onclick="toggleMobileSearch()">
+                <span class="material-icons">search</span>
+            </button>
             <a href="react-central.html" class="btn btn-secondary">
                 <span class="material-icons">home</span>
                 Home
@@ -1004,6 +1101,21 @@
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('open');
+        }
+
+        // Search functions
+        function performSearch() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            if (searchTerm) {
+                window.location.href = `/react-central.html?search=${encodeURIComponent(searchTerm)}`;
+            }
+        }
+
+        function toggleMobileSearch() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.focus();
+            }
         }
 
         // Initialize

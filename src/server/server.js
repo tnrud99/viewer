@@ -1943,6 +1943,33 @@ app.get('/api/test-mongodb', async (req, res) => {
     }
 });
 
+// 크리에이터의 구독자 수 조회 API
+app.get('/api/user/:userId/subscribers-count', ensureMongoConnection, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        // 해당 크리에이터를 구독한 사용자 수 조회
+        const subscriberCount = await User.countDocuments({
+            subscriptions: userId
+        });
+        
+        console.log(`📊 Subscriber count for ${userId}:`, subscriberCount);
+        
+        res.json({
+            success: true,
+            userId: userId,
+            subscriberCount: subscriberCount
+        });
+        
+    } catch (error) {
+        console.error('❌ Get subscriber count error:', error);
+        res.status(500).json({ 
+            error: 'Failed to get subscriber count',
+            message: error.message 
+        });
+    }
+});
+
 // Migration endpoint to fix creator_info for existing videos
 app.post('/api/migrate/creator-info', ensureMongoConnection, async (req, res) => {
     try {
