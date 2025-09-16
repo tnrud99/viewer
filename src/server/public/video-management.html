@@ -260,10 +260,10 @@
             position: absolute;
             top: 50px;
             right: 0;
-            background: var(--bg-card);
+            background: #1a1a1a;
             border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            border: 1px solid var(--border);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             min-width: 180px;
             z-index: 1000;
         }
@@ -273,11 +273,11 @@
             cursor: pointer;
             transition: background 0.2s ease;
             font-size: 14px;
-            color: var(--text);
+            color: #ffffff;
         }
 
         .profile-menu-item:hover {
-            background: var(--bg-secondary);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .profile-menu-item:first-child {
@@ -289,10 +289,12 @@
         }
 
 
-        /* Main content with sidebar */
+        /* Main content */
         .container {
-            margin-left: 240px;
+            margin-left: 0;
             padding: 80px 24px 40px;
+            max-width: 1200px;
+            margin: 80px auto 40px auto;
         }
 
         .beta-badge {
@@ -707,9 +709,6 @@
                 padding: 15px 10px;
             }
 
-            .container {
-                padding: 80px 10px 20px;
-            }
 
             .profile-section {
                 padding: 16px;
@@ -971,7 +970,7 @@
     <!-- Header -->
     <header class="header">
         <div class="header-left">
-            <button class="menu-btn" onclick="toggleSidebar()">
+            <button class="menu-btn" onclick="window.location.href='react-central.html'">
                 <span class="material-icons">menu</span>
             </button>
             <a href="react-central.html" class="logo">
